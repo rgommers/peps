@@ -1,0 +1,355 @@
+PEP: 9999
+Title: A package dependency name mapping mechanism
+Author: Pradyun Gedam <pradyunsg@gmail.com>,
+        Ralf Gommers <ralf.gommers@gmail.com>,
+        Jaime Rodríguez-Guerra <jrodriguez@quansight.com>
+Discussions-To:
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Content-Type: text/x-rst
+Created: 17-Aug-2023
+Post-History: 17-Aug-2023,
+Resolution:
+
+
+Abstract
+========
+
+This PEP specifies a name mapping mechanism that allows packaging tools to map
+canonical PyPI and external dependency names to the names of packages in other
+package repositories.
+
+
+Motivation
+==========
+
+Packages on PyPI often require build-time and runtime dependencies that are not
+present on PyPI. PEP xxxx introduced metadata to express such dependencies. In
+order to make use of concrete external dependency metadata for a Python
+package, it is necessary to map given dependency names to names used by another
+package manager. The same is true for PyPI package names.
+
+Key motivators for this PEP are:
+
+- Enable tools to automatically map external dependencies to packages in other
+  packaging repositories/ecosystems,
+- Make it possible to include needed external dependencies *with the package
+  names used by the relevant system package manager on the user's system* in
+  error messages emitting by Python package installers and build frontends,
+  as well as allow the user to query for those names directly to obtain install
+  instructions.
+
+Packaging ecosystems like Linux distros, Conda, Homebrew, Spack, and Nix need
+full sets of dependencies for Python packages, and have tools like pyp2rpm_
+(Fedora), Grayskull_ (Conda), and dh_python_ (Debian) which attempt to
+automatically generate dependency metadata automatically from the metadata in
+upstream Python packages. External dependencies are currently handled manually,
+because there is no metadata for this in ``pyproject.toml`` or any other
+standard metadata file. Enabling automating this conversion is a key benefit of
+this PEP, making packaging Python easier and more reliable. In addition, the
+authors envision other types of tools making use of this information, e.g.,
+dependency analysis tools like Repology_, Dependabot_ and libraries.io_.
+
+
+Other key motivation:
+
+- Allow other packaging ecosystems to avoid repackaging pure Python wheels.
+  One key requirement for that is to be able to have a mapping between PyPI
+  package names and the corresponding names in the other package manager:
+  https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68
+  Non-pure packages have to be rebuilt, pure Python ones don't have to.
+  https://github.com/spack/spack/issues/28282#issuecomment-1562178367
+  https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103
+
+
+Rationale
+=========
+
+Prior art
+---------
+R: https://github.com/rstudio/r-system-requirements. The R system with central
+registry knows how to translate external dependency metadata to install
+commands for package managers like ``apt-get``. The "Rule Coverage" of its
+README shows how that improves the chance of success of building packages from
+CRAN from source. Across all CRAN packages, Ubuntu 18 improves from 78.1% to
+95.8%, CentOS 7 from 77.8% to 93.7% and openSUSE 15.0 from 78.2% to 89.7%. The
+chance of success depends on how well the registry is maintained, but the gain
+is significant - ~4x fewer packages fail to build on Ubuntu and CentOS in a
+Docker container.
+
+Fedora/RPM:
+https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/117?u=rgommers.
+The ``NameConvertor`` implementation in pyp2rpm_ is based on rules, with the
+base one being that the RPM name for a PyPI package is
+``f"python-{pypi_package_name}"``. This seems to work quite well; there are a
+few variants like Python version specific names, where the prefix contains the
+Python major and minor version numbers (e.g. ``python311-`` instead of
+``python-``).
+
+Conda-forge has a more explicit name mapping, because the base names are the
+same in conda-forge as on PyPI (e.g., ``numpy`` maps to ``numpy``), but there
+are many exceptions because of both name collisions and renames (e.g., the PyPI
+name for PyTorch is ``torch`` while in conda-forge it's ``pytorch``). The name
+mappings are maintained in JSON and YAML files here:
+https://github.com/regro/cf-graph-countyfair/tree/master/mappings/pypi
+
+
+Maintenance costs of name mappings
+----------------------------------
+
+The maintenance cost of name mappings from PyPI to a large number of system
+package managers is potentially high. We choose to define the registry in such
+a way that these mappings can be maintained as part of the system package
+manager or distro/OS. Hence this system is opt-in for a system package manager,
+and the associated maintenance costs are distributed. Some package managers
+have such a name mapping already, because it's required for tools like pyp2rpm_
+and Grayskull_ to work. In those cases, the additional maintenance costs of
+connecting those mappings to a central registry are likely limited.
+
+
+Generating system package manager-specific install commands
+-----------------------------------------------------------
+
+Python package authors with external dependencies usually have installation
+instructions for those external dependencies in their documentation. These
+instructions are difficult to write and keep up-to-date, and are usually only
+covering one or at most a handful of platforms. As an example, here are SciPy's
+instructions for its external build dependencies (C/C++/Fortran compilers,
+OpenBLAS, pkg-config):
+
+- Debian/Ubuntu: ``sudo apt install -y gcc g++ gfortran libopenblas-dev liblapack-dev pkg-config python3-pip python3-dev``
+- Fedora: ``sudo dnf install gcc-gfortran python3-devel openblas-devel lapack-devel pkgconfig``
+- CentOS/RHEL: ``sudo yum install gcc-gfortran python3-devel openblas-devel lapack-devel pkgconfig``
+- Arch Linux: ``sudo pacman -S gcc-fortran openblas pkgconf``
+- Homebrew on macOS: ``brew install gfortran openblas pkg-config``
+
+The package names vary a lot, and there are differences like some distros
+splitting off headers and other build-time dependencies in a separate
+``-dev``/``-devel`` package while others do not. With the registry in this PEP,
+this could be made both more comprehensive and easier to maintain though a tool
+command with semantics of *"show the system package manager install command for
+all external dependencies"*. This may be done as a standalone tool, or as a new
+command in any Python development workflow tool (e.g., Pip, Poetry, Hatch, PDM).
+
+
+Registry design
+---------------
+
+- One central Python package for the registry tool
+- A plugin design, where system package managers can register their name mapping
+- Name mapping should be in a structured, human-readable file format (TBD:
+  JSON, YAML, or ...)
+- A way for the system to specify a default (e.g., the Python install on Ubuntu
+  could register ``apt`` as the default system package manager with the
+  registry tool. It may also be left unspecified.
+- A way for the user to specify the default and/or current system package
+  manager. E.g., a user on Ubuntu may want either ``apt``, ``conda``, ``brew``
+  or ``spack`` as their package manager of choice to provide external
+  dependencies.
+
+
+Specification
+=============
+
+
+
+Details
+-------
+
+Examples
+--------
+
+The following examples illustrate how the name mapping mechanism may be used.
+Note that the ``py-show`` command is hypothetical; this could be a ``pip``
+command or implemented in a new tool with a different name.
+
+Say we have a Python package named ``my-cpp-pkg`` with a single extension
+module, implemented in C++ and using Boost and ``pybind11``, plus
+``meson-python`` as the build backend:
+
+.. code:: toml
+
+    [build-system]
+    build-backend = 'mesonpy'
+    requires = [
+      "meson-python>=0.13.1",
+      "pybind11>=2.10.4",
+    ]
+
+    [external]
+    build-requires = [
+      "virtual:compiler/cpp",
+      "pkg:generic/boost",
+    ]
+
+With complete name mappings for ``apt`` on Ubuntu, this may then show the
+following:
+
+.. code:: bash
+
+    $ # show all PyPI dependencies
+    $ py-show --pypi
+    meson-python
+    pybind11
+
+    $ # show all external dependencies
+    $ py-show --external
+    virtual:compiler/cpp
+    pkg:generic/boost
+
+    $ # show how to install external dependencies
+    $ py-show --external --system-install-cmd
+    sudo apt install g++ libboost-all-dev
+
+    $ # show install command for both PyPI and external dependencies
+    $ # this could include the Python dev headers too if those are missing
+    $ py-show --all --system-install-cmd
+    sudo apt install python3-dev g++ libboost-all-dev python3-mesonpy python3-pybind11 pybind11-dev
+
+We have not yet run those install commands, so the external dependency may be
+missing. If we get a build failure, the output may look like:
+
+.. code::
+
+    $ pip install .
+    ...
+    × Encountered error while generating package metadata.
+    ╰─> See above for output.
+
+    note: This is an issue with the package mentioned above, not pip.
+
+    This package has the following external dependencies, if those are missing
+    on your system they are likely to be the cause of this build failure:
+
+      virtual:compiler/cpp
+      pkg:generic/boost
+
+If Pip has implemented support for querying the name mapping registry, the end
+of that message could improve to:
+
+.. code:: bash
+
+    The following external dependencies are needed to install the package
+    mentioned above, and are not installed with `apt`:
+
+      g++
+      libboost-all-dev
+
+If the user wants to use Conda packages and the ``mamba`` package manager to
+install external dependencies, they may specify that in a
+``~/.pypi-name-mappings`` file:
+
+.. code::
+
+    system-package-manager: mamba
+
+This will then change the output of ``py-show``:
+
+.. code:: bash
+
+    $ py-show --all --system-install-cmd
+    mamba install cxx-compiler boost-cpp
+
+In order to use the name mappings for the recipe generator of our package, we
+can now run Grayskull_:
+
+.. code::
+
+    $ grayskull pypi my-cpp-pkg
+    #### Initializing recipe for my-cpp-pkg (pypi) ####
+
+    Recovering metadata from pypi...
+    Starting the download of the sdist package my-cpp-pkg
+    my-cpp-pkg 100% Time:  0:00:10   5.3 MiB/s|###########|
+    Checking for pyproject.toml
+    ...
+
+    Build requirements:
+      - python                                 # [build_platform != target_platform]
+      - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+      - meson-python >= 0.13.1                 # [build_platform != target_platform]
+      - pybind11 >= 2.10.4                     # [build_platform != target_platform]
+      - ninja                                  # [build_platform != target_platform]
+      - boost-cpp                              # [build_platform != target_platform]
+      - {{ compiler('cxx') }}
+    Host requirements:
+      - python
+      - meson-python >=0.13.1
+      - pybind11 >=2.10.4
+      - ninja
+      - boost-cpp
+    Run requirements:
+      - python
+
+    #### Recipe generated on /path/to/recipe/dir for my-cpp-pkg ####
+
+
+
+Backwards Compatibility
+=======================
+
+There is no impact on backwards compatibility.
+
+
+Security Implications
+=====================
+
+
+How to Teach This
+=================
+
+
+Reference Implementation
+========================
+
+TODO: link to proof-of-concept implementation for Grayskull.
+
+
+Rejected Ideas
+==============
+
+
+Open Issues
+===========
+
+References
+==========
+
+
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
+
+
+.. _PyPI: https://pypi.org
+.. _core metadata: https://packaging.python.org/specifications/core-metadata/
+.. _setuptools: https://setuptools.readthedocs.io/
+.. _setuptools metadata: https://setuptools.readthedocs.io/en/latest/setuptools.html#metadata
+.. _SPDX: https://spdx.dev/
+.. _PURL: https://github.com/package-url/purl-spec/
+.. _vers: https://github.com/package-url/purl-spec/blob/version-range-spec/VERSION-RANGE-SPEC.rst
+.. _vers implementation for PURL: https://github.com/package-url/purl-spec/pull/139
+.. _pyp2rpm: https://github.com/fedora-python/pyp2rpm
+.. _Grayskull: https://github.com/conda/grayskull
+.. _dh_python: https://www.debian.org/doc/packaging-manuals/python-policy/index.html#dh-python
+.. _Repology: https://repology.org/
+.. _Dependabot: https://github.com/dependabot
+.. _libraries.io: https://libraries.io/
+.. _crossenv: https://github.com/benfogle/crossenv
+.. _Python Packaging User Guide: https://packaging.python.org
+.. _pyOpenSci Python Open Source Package Development Guide: https://www.pyopensci.org/python-package-guide/
+.. _Scikit-HEP packaging guide: https://scikit-hep.org/developer/packaging
+
+
+..
+   Local Variables:
+   mode: indented-text
+   indent-tabs-mode: nil
+   sentence-end-double-space: t
+   fill-column: 70
+   coding: utf-8
+   End:
