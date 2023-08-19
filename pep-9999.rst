@@ -94,6 +94,11 @@ name for PyTorch is ``torch`` while in conda-forge it's ``pytorch``). The name
 mappings are maintained in JSON and YAML files here:
 https://github.com/regro/cf-graph-countyfair/tree/master/mappings/pypi
 
+TODO: add the following tools:
+
+- `bindep <https://pypi.org/project/bindep/>`__
+- `pkg-map <https://docs.openstack.org/diskimage-builder/latest/elements/pkg-map/README.html>`__
+
 
 Maintenance costs of name mappings
 ----------------------------------
