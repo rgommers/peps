@@ -254,7 +254,7 @@ This will then change the output of ``py-show``:
 .. code:: bash
 
     $ py-show --all --system-install-cmd
-    mamba install cxx-compiler boost-cpp
+    mamba install cxx-compiler libboost-devel
 
 In order to use the name mappings for the recipe generator of our package, we
 can now run Grayskull_:
@@ -276,14 +276,14 @@ can now run Grayskull_:
       - meson-python >= 0.13.1                 # [build_platform != target_platform]
       - pybind11 >= 2.10.4                     # [build_platform != target_platform]
       - ninja                                  # [build_platform != target_platform]
-      - boost-cpp                              # [build_platform != target_platform]
+      - libboost-devel                         # [build_platform != target_platform]
       - {{ compiler('cxx') }}
     Host requirements:
       - python
       - meson-python >=0.13.1
       - pybind11 >=2.10.4
       - ninja
-      - boost-cpp
+      - libboost-devel
     Run requirements:
       - python
 
