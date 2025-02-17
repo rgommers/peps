@@ -388,9 +388,7 @@ foreseeable issues that will arise, though:
   tool (e.g. system python users).
 
 If packagers suddenly drop self-contained wheels before the mapping can be well-established,
-there will likely be a period of negative user experience.
-
-TODO: can we set a target adoption level before we think it's safe to switch?
+there will likely be a period of negative user experience. Packages should individually decide for themselves when it is "safe" to stop providing standalone wheels. One metric that might serve this purpose would be fractional download counts. For example, how many of the downloads of the latest version of a project are the self-contained wheels vs. the shared-library variety? This is likely going to be different on each platform.
 
 Reference Implementation
 ========================
@@ -399,7 +397,7 @@ A reference implementation should include three components:
 
 1. A central registry that captures at a minimum PURL and description. This registry should 
    NOT contain specifics of package ecosystem mappings.
-2. A standard specification for a collection of mappings (TODO: JSONSchema?)
+2. A standard specification for a collection of mappings. JSONSchema is widely used for schema in many text editors, and would be a natural choice for expression of the standard specification.
 3. An implementation of (2), providing mappings from the contents of the central 
    registry to the ecosystem-specific package names.
 
