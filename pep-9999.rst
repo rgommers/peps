@@ -86,7 +86,7 @@ base one being that the RPM name for a PyPI package is
 ``f"python-{pypi_package_name}"``. This seems to work quite well; there are a
 few variants like Python version specific names, where the prefix contains the
 Python major and minor version numbers (e.g. ``python311-`` instead of
-``python-``). 
+``python-``).
 
 Gentoo follows a similar approach to naming Python packages, using the ``python-dev/``
 namespace and some `well-specified rules <https://projects.gentoo.org/python/guide/package-maintenance.html>`__.
@@ -98,7 +98,7 @@ name for PyTorch is ``torch`` while in conda-forge it's ``pytorch``). There are
 several name mappings efforts maintained by different teams. Conda-forge's infrastructure
 generates one in `regro/cf-graph-countyfair <https://github.com/regro/cf-graph-countyfair/tree/master/mappings/pypi>`__.
 Grayskull maintains `its own curated mapping <https://github.com/conda/grayskull/blob/main/grayskull/strategy/config.yaml>`__.
-Prefix.dev created the `parselmouth mappings <https://github.com/prefix-dev/parselmouth>`__ 
+Prefix.dev created the `parselmouth mappings <https://github.com/prefix-dev/parselmouth>`__
 to support conda and PyPI integrations in their tooling. A more complete overview of
 their approaches, strengths and weaknesses can be found in
 `conda/grayskull#564 <https://github.com/conda/grayskull/issues/564>`__.
@@ -109,12 +109,12 @@ some mapping efforts. All of them focus on Linux distributions, exclusively.
 accompanies ``diskimage-builder`` and provides a file format where the user defines
 arbitrary variable names and their corresponding name in the target distro
 (Red Hat, Debian, OpenSUSE, etc). See `example for PyYAML <https://github.com/stbenjam/diskimage-builder/blob/5bc5f8aff3b40b1918ce72660f1dba38c3c4f27a/diskimage_builder/elements/svc-map/pkg-map#L4>`__.
-`bindep <https://opendev.org/opendev/bindep>`__ defines a file ``bindep.txt`` 
+`bindep <https://opendev.org/opendev/bindep>`__ defines a file ``bindep.txt``
 (see `example <https://opendev.org/opendev/bindep/src/branch/master/bindep/tests/bindep.txt>`__)
 where users can write down dependencies that are not pip-installable. The format is
 line-based, with each line containing a dependency as found in the Debian ecosystem.
 For other distributions, it offers a "filters" syntax between square brackets where users
-can indicate other target platforms, optional dependencies and extras. 
+can indicate other target platforms, optional dependencies and extras.
 
 The need for mappings is also found in other ecosystems like `SageMath <https://github.com/sagemath/sage/issues/36356>`__,
 but also by end-users themselves who want to install PyPI packages with their system
