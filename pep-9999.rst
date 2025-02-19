@@ -2,7 +2,7 @@ PEP: 9999
 Title: A package dependency name mapping mechanism
 Author: Pradyun Gedam <pradyunsg@gmail.com>,
         Ralf Gommers <ralf.gommers@gmail.com>,
-        Jaime Rodríguez-Guerra <jrodriguez@quansight.com>
+        Jaime Rodríguez-Guerra <jrodriguez@quansight.com>,
         Michael Sarahan <msarahan@gmail.com>
 Discussions-To:
 Status: Draft
@@ -301,6 +301,7 @@ There is no impact on backwards compatibility.
 Security Implications
 =====================
 
+TBD.
 
 How to Teach This
 =================
@@ -352,9 +353,9 @@ Package ecosystem maintainers usage
 -----------------------------------
 
 Any packages that express a PURL dependency that does not have a mapping in a given package
-ecosystem will mean a failed installation. It is thus critically important that each package
-ecosystem maintain their mappings. Key to this will be automation. Some ideas for automation
-are:
+ecosystem might not be able to provide tailored error messages and other UX affordances for end users.
+It is thus recommended that each package ecosystem maintain their mappings. Key to this will
+be automation. Some ideas for automation are:
 
 1. Alert mapping maintainers whenever a new PURL is added to the registry (probably noisy).
 2. Provide tools that allow maintainers to diff their mappings to the registry contents to
@@ -372,23 +373,27 @@ Central PURL registry maintainers
 
 Central PURL registry maintainers curate the collection of PURLs. These contributors
 need to be able to refer to clearly defined rules for when a new PURL can be defined. It is
-undesirable to be loose with PURL definition, because each definition implies maintenance in
+undesirable to be loose with PURL definitions, because each definition implies maintenance in
 the mappings in many other places.
 
 
 End user package consumers
 --------------------------
 
-In an ideal case, these package install commands can be done transparently, and the user 
-experience is the same as the self-contained binary wheels of today. There are several
-foreseeable issues that will arise, though:
+There will be no change in user experience by default. End users do not need to know about
+this mechanism unless they opt in, which they may want to do to, for example, reduce their
+bandwidth and disk space usage.
+
+If they do opt-in, in an ideal case these package install commands can be done transparently,
+and the user experience remains unchanged. There are several foreseeable issues that will arise,
+though:
 
 * A mapping does not exist for the user's desired package ecosystem.
 * A user does not have permissions to run the install commands provided by our 
-  tool (e.g. system python users).
+  tool (e.g. system Python users).
 
-If packagers suddenly drop self-contained wheels before the mapping can be well-established,
-there will likely be a period of negative user experience. Packages should individually decide for themselves when it is "safe" to stop providing standalone wheels. One metric that might serve this purpose would be fractional download counts. For example, how many of the downloads of the latest version of a project are the self-contained wheels vs. the shared-library variety? This is likely going to be different on each platform.
+These issues might impact the user experience with untailored error messages for the chosen
+ecosystem, permission errors reports, and so on.
 
 Reference Implementation
 ========================
@@ -397,11 +402,13 @@ A reference implementation should include three components:
 
 1. A central registry that captures at a minimum PURL and description. This registry should 
    NOT contain specifics of package ecosystem mappings.
-2. A standard specification for a collection of mappings. JSONSchema is widely used for schema in many text editors, and would be a natural choice for expression of the standard specification.
+2. A standard specification for a collection of mappings. JSONSchema is widely used for schema
+   in many text editors, and would be a natural choice for expression of the standard specification.
 3. An implementation of (2), providing mappings from the contents of the central 
    registry to the ecosystem-specific package names.
 
-A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
+A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for
+Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
 
 
 Rejected Ideas
