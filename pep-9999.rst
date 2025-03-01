@@ -28,8 +28,8 @@ Motivation
 Packages on PyPI often require build-time and runtime dependencies that are not
 present on PyPI. :doc:`PEP 725 <./pep-0725.rst>`` introduced metadata to express
 such dependencies. In order to make use of concrete external dependency metadata for
-a Python package, it is necessary to map given dependency identifiers to names used
-by another package manager. The same is true for PyPI package names.
+a Python package, it is necessary to map given dependency identifiers to the names
+used in other ecosystems. The same is true for PyPI package names.
 
 Key motivators for this PEP are:
 
@@ -37,7 +37,7 @@ Key motivators for this PEP are:
   packaging repositories/ecosystems,
 - Make it possible to include needed external dependencies *with the package
   names used by the relevant system package manager on the user's system* in
-  error messages emitting by Python package installers and build frontends,
+  error messages emitted by Python package installers and build frontends,
   as well as allow the user to query for those names directly to obtain install
   instructions.
 
@@ -157,7 +157,7 @@ splitting off headers and other build-time dependencies in a separate
 this could be made both more comprehensive and easier to maintain though a tool
 command with semantics of *"show the system package manager install command for
 all external dependencies"*. This may be done as a standalone tool, or as a new
-command in any Python development workflow tool (e.g., Pip, Poetry, Hatch, PDM).
+subcommand in any Python development workflow tool (e.g., Pip, Poetry, Hatch, PDM).
 
 
 Registry design
@@ -179,10 +179,12 @@ Registry design
 Specification
 =============
 
-
+TODO.
 
 Details
 -------
+
+TODO.
 
 Examples
 --------
@@ -394,8 +396,8 @@ Central PURL registry maintainers
 
 Central PURL registry maintainers curate the collection of PURLs. These contributors
 need to be able to refer to clearly defined rules for when a new PURL can be defined. It is
-undesirable to be loose with PURL definitions, because each definition implies maintenance in
-the mappings in many other places.
+undesirable to be loose with canonical PURL definitions, because each definition implies
+maintenance in the mappings in many other places.
 
 
 End user package consumers
@@ -423,10 +425,17 @@ A reference implementation should include three components:
 
 1. A central registry that captures at a minimum PURL and description. This registry should
    NOT contain specifics of package ecosystem mappings.
-2. A standard specification for a collection of mappings. JSONSchema is widely used for schema
+2. A standard specification for a collection of mappings. JSON Schema is widely used for schema
    in many text editors, and would be a natural choice for expression of the standard specification.
 3. An implementation of (2), providing mappings from the contents of the central
    registry to the ecosystem-specific package names.
+
+For (1), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json. 
+An example registry can be found at https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json.
+For (2), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json.
+For (3), a collection of example mappings for a sample of packages can be found at https://github.com/jaimergp/external-metadata-mappings/tree/main/data.
+
+The JSON Schemas are created with this Pydantic model (https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/schema.py).
 
 A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for
 Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
