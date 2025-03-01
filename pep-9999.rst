@@ -430,7 +430,7 @@ A reference implementation should include three components:
 3. An implementation of (2), providing mappings from the contents of the central
    registry to the ecosystem-specific package names.
 
-For (1), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json. 
+For (1), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json.
 An example registry can be found at https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json.
 For (2), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json.
 For (3), a collection of example mappings for a sample of packages can be found at https://github.com/jaimergp/external-metadata-mappings/tree/main/data.
