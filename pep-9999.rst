@@ -179,15 +179,277 @@ Registry design
 Specification
 =============
 
-TODO.
+Two schemas are proposed: one for the central registry, and one for ecosystem-specific mappings.
+
+The central registry defines which identifiers are recognized as canonical. Each entry MUST
+provide a valid PURL in the field ``id``, with an optional free form ``description`` text.
+Additionally some entries MAY refer to another entry via the ``provides`` field, which takes a
+list of strings already defined as ``id`` in the registry. This is useful for aliases
+(e.g. ``pkg:generic/arrow`` and ``pkg:github/apache/arrow``), and concrete implementations of
+a ``virtual:`` entry (e.g. ``pkg:generic/gcc`` would provide ``virtual:compiler/c``).
+Entries without ``provides`` content or, if populated, only with ``virtual:`` identifiers,
+are considered canonical.
+
+The mappings specify which ecosystem-specific identifiers provide the canonical entries
+available in the central registry. Each mapping entry consists of an ``id`` field with
+the canonical identifier, plus an optional free form ``description`` text. The field ``specs``
+MUST contain a string, a list of a strings, or a dictionary that maps ``build``, ``host`` and
+``run`` categories to a list of strings. These strings MUST be ecosystem-specific package
+identifiers. The only null value allowed is the empty list, which is understood as the
+ecosystem not having packages to provide such dependency.
+
+The mappings may also specify which package managers are available in the ecosystem under the
+key ``package_managers``. This field MUST take a dictionary with two fields: ``name`` (string)
+and ``command`` (list of strings, as expected by ``subprocess.run`` commands). The string
+``{}`` is taken as a placeholder for the package names in the command. If not provided,
+package names will be concatenated at the end of the command.
 
 Details
 -------
 
-TODO.
+Two JSON Schema documents are provided to fully standardize the registry and mappings.
+
+Central registry schema
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The central registry is specified by the following `JSON schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json>`__:
+
+``$schema``
+···········
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - $Schema
+    * - Type
+      - ``string``
+    * - Description
+      - URL of the definition list schema in use for the document.
+    * - Required
+      - **False**
+
+``schema_version``
+··················
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Schema Version
+    * - Type
+      - ``integer``
+    * - Required
+      - **False**
+
+``definitions``
+···············
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Definitions
+    * - Type
+      - ``array``
+    * - Description
+      - List of PURL definitions currently recognized.
+    * - Required
+      - **True**
+
+Each entry in this list is defined as:
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - ``id``
+      - ``description``
+      - ``provides``
+      - ``urls``
+    * - Type
+      - ``PURLField`` (``string`` matching ``^(pkg:|virtual:).*``)
+      - ``string``
+      - ``PURLField | list[PURLField]``
+      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
+    * - Description
+      - PURL-like identifier
+      - Free-form field to add some details about the package. Allows Markdown.
+      - List of identifiers this entry connects to.
+        Useful to annotate aliases or virtual package implementations.
+        If no `provides` info is added, the entry is considered canonical.
+      - Hyperlinks to web locations that provide more information about the definition.
+    * - Required
+      - **True**
+      - False
+      - False
+      - False
+
+Mappings schema
+^^^^^^^^^^^^^^^
+
+The mappings are specified by the following `JSON Schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json>`__:
+
+``$schema``
+···········
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - $Schema
+    * - Type
+      - ``string``
+    * - Description
+      - URL of the mappings schema in use for the document.
+    * - Required
+      - **False**
+
+``schema_version``
+··················
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Schema Version
+    * - Type
+      - ``integer``
+    * - Required
+      - **False**
+
+``name``
+········
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Name
+    * - Type
+      - ``string``
+    * - Description
+      - Name of the schema
+    * - Required
+      - **True**
+
+``description``
+···············
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Description
+    * - Type
+      - ``???``
+    * - Description
+      - Free-form field to add information this mapping. Allows
+        Markdown.
+    * - Required
+      - **False**
+
+``mappings``
+············
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Mappings
+    * - Type
+      - ``array``
+    * - Description
+      - List of PURL-to-specs mappings.
+    * - Required
+      - **True**
+
+Each entry in this list is defined as:
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - ``id``
+      - ``description``
+      - ``urls``
+      - ``specs``
+      - ``specs_from``
+    * - Type
+      - ``PURLField`` (``string`` matching ``^(pkg:|virtual:).*``)
+      - ``string``
+      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
+      - ``string | list[string] | dict[Literal['build', 'host', 'run'], string | list[string]]``
+      - ``PURLField``
+    * - Description
+      - PURL-like identifier, as provided in the central registry
+      - Free-form field to add some details about the package. Allows Markdown.
+      - Hyperlinks to web locations that provide more information about the definition.
+      - Ecosystem-specific identifiers for this package. The full form is a dictionary
+        that maps the categories ``build``, ``host`` and ``run`` to their corresponding
+        package identifiers. As a shorthand, a single string or a list of strings can be
+        provided, in which case will be used to populate the three categories identically.
+    * - Required
+      - **True**
+      - False
+      - False
+      - Either ``specs`` or ``specs_from`` MUST be present.
+      - Either ``specs`` or ``specs_from`` MUST be present.
+
+``package_managers``
+····················
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Package Managers
+    * - Type
+      - ``array``
+    * - Description
+      - List of tools that can be used to install packages in this
+        ecosystem.
+    * - Required
+      - **True**
+
+Each entry in this list is defined as:
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - ``name``
+      - ``install_command``
+    * - Type
+      - ``string``
+      - ``list[string]``
+    * - Description
+      - Short identifier for this package manager (usually the command name)
+      - Command used to install the given packages. ``{}`` is a special placeholder
+        for the package names in ``specs``. If not provided, they are appended.
+    * - Required
+      - **True**
+      - **True**
+
 
 Examples
 --------
+
+This prototype repository provides examples of how these schemas would look like in real cases:
+
+- `Central registry <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json>`__.
+- Mappings:
+  - `Arch-linux <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/arch-linux.mapping.json>`__.
+  - `Chocolatey <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/chocolatey.mapping.json>`__.
+  - `Conda-forge <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/conda-forge.mapping.json>`__.
+  - `Fedora <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/fedora.mapping.json>`__.
+  - `Homebrew <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/homebrew.mapping.json>`__.
+  - `Scoop <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/scoop.mapping.json>`__.
+  - `Ubuntu <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/ubuntu.mapping.json>`__.
+  - `Winget <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/winget.mapping.json>`__.
+
+Practical cases
+^^^^^^^^^^^^^^^
 
 The following examples illustrate how the name mapping mechanism may be used.
 Note that the ``py-show`` command is hypothetical; this could be a ``pip``
