@@ -26,7 +26,7 @@ Motivation
 ==========
 
 Packages on PyPI often require build-time and runtime dependencies that are not
-present on PyPI. :doc:`PEP 725 <./pep-0725.rst>`` introduced metadata to express
+present on PyPI. :doc:`pep-0725` introduced metadata to express
 such dependencies. In order to make use of concrete external dependency metadata for
 a Python package, it is necessary to map given dependency identifiers to the names
 used in other ecosystems. The same is true for PyPI package names.
@@ -215,7 +215,7 @@ Central registry schema
 The central registry is specified by the following `JSON schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json>`__:
 
 ``$schema``
-···········
+~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -227,10 +227,10 @@ The central registry is specified by the following `JSON schema <https://github.
     * - Description
       - URL of the definition list schema in use for the document.
     * - Required
-      - **False**
+      - False
 
 ``schema_version``
-··················
+~~~~~~~~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -240,10 +240,10 @@ The central registry is specified by the following `JSON schema <https://github.
     * - Type
       - ``integer``
     * - Required
-      - **False**
+      - False
 
 ``definitions``
-···············
+~~~~~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -255,35 +255,37 @@ The central registry is specified by the following `JSON schema <https://github.
     * - Description
       - List of PURL definitions currently recognized.
     * - Required
-      - **True**
+      - True
 
 Each entry in this list is defined as:
 
 .. list-table::
-    :widths: 25 75
+    :header-rows: 1
+    :widths: 20 25 40 15
 
-    * - Title
-      - ``id``
-      - ``description``
-      - ``provides``
-      - ``urls``
-    * - Type
+    * - Field
+      - Type
+      - Description
+      - Required
+    * - ``id``
       - ``PURLField`` (``string`` matching ``^(pkg:|virtual:).*``)
-      - ``string``
-      - ``PURLField | list[PURLField]``
-      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
-    * - Description
       - PURL-like identifier
+      - True
+    * - ``description``
+      - ``string``
       - Free-form field to add some details about the package. Allows Markdown.
+      - False
+    * - ``provides``
+      - ``PURLField | list[PURLField]``
       - List of identifiers this entry connects to.
         Useful to annotate aliases or virtual package implementations.
         If no `provides` info is added, the entry is considered canonical.
+      - False
+    * - ``urls``
+      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
       - Hyperlinks to web locations that provide more information about the definition.
-    * - Required
-      - **True**
       - False
-      - False
-      - False
+
 
 Mappings schema
 ^^^^^^^^^^^^^^^
@@ -291,7 +293,7 @@ Mappings schema
 The mappings are specified by the following `JSON Schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json>`__:
 
 ``$schema``
-···········
+~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -303,10 +305,10 @@ The mappings are specified by the following `JSON Schema <https://github.com/jai
     * - Description
       - URL of the mappings schema in use for the document.
     * - Required
-      - **False**
+      - False
 
 ``schema_version``
-··················
+~~~~~~~~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -316,10 +318,10 @@ The mappings are specified by the following `JSON Schema <https://github.com/jai
     * - Type
       - ``integer``
     * - Required
-      - **False**
+      - False
 
 ``name``
-········
+~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -331,10 +333,10 @@ The mappings are specified by the following `JSON Schema <https://github.com/jai
     * - Description
       - Name of the schema
     * - Required
-      - **True**
+      - True
 
 ``description``
-···············
+~~~~~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -347,10 +349,10 @@ The mappings are specified by the following `JSON Schema <https://github.com/jai
       - Free-form field to add information this mapping. Allows
         Markdown.
     * - Required
-      - **False**
+      - False
 
 ``mappings``
-············
+~~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -362,42 +364,44 @@ The mappings are specified by the following `JSON Schema <https://github.com/jai
     * - Description
       - List of PURL-to-specs mappings.
     * - Required
-      - **True**
+      - True
 
 Each entry in this list is defined as:
 
 .. list-table::
-    :widths: 25 75
+    :header-rows: 1
+    :widths: 20 25 40 15
 
-    * - Title
-      - ``id``
-      - ``description``
-      - ``urls``
-      - ``specs``
-      - ``specs_from``
-    * - Type
+    * - Field
+      - Type
+      - Description
+      - Required
+    * - ``id``
       - ``PURLField`` (``string`` matching ``^(pkg:|virtual:).*``)
-      - ``string``
-      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
-      - ``string | list[string] | dict[Literal['build', 'host', 'run'], string | list[string]]``
-      - ``PURLField``
-    * - Description
       - PURL-like identifier, as provided in the central registry
+      - True
+    * - ``description``
+      - ``string``
       - Free-form field to add some details about the package. Allows Markdown.
+      - False
+    * - ``urls``
+      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
       - Hyperlinks to web locations that provide more information about the definition.
+      - False
+    * - ``specs``
+      - ``string | list[string] | dict[Literal['build', 'host', 'run'], string | list[string]]``
       - Ecosystem-specific identifiers for this package. The full form is a dictionary
         that maps the categories ``build``, ``host`` and ``run`` to their corresponding
         package identifiers. As a shorthand, a single string or a list of strings can be
         provided, in which case will be used to populate the three categories identically.
-    * - Required
-      - **True**
-      - False
-      - False
       - Either ``specs`` or ``specs_from`` MUST be present.
+    * - ``specs_from``
+      - ``PURLField``
+      - Take specs from another mapping entry.
       - Either ``specs`` or ``specs_from`` MUST be present.
 
 ``package_managers``
-····················
+~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
     :widths: 25 75
@@ -410,26 +414,27 @@ Each entry in this list is defined as:
       - List of tools that can be used to install packages in this
         ecosystem.
     * - Required
-      - **True**
+      - True
 
 Each entry in this list is defined as:
 
 .. list-table::
-    :widths: 25 75
+    :header-rows: 1
+    :widths: 20 25 40 15
 
-    * - Title
-      - ``name``
-      - ``install_command``
-    * - Type
+    * - Field
+      - Type
+      - Description
+      - Required
+    * - ``name``
       - ``string``
-      - ``list[string]``
-    * - Description
       - Short identifier for this package manager (usually the command name)
+      - True
+    * - ``install_command``
+      - ``list[string]``
       - Command used to install the given packages. ``{}`` is a special placeholder
         for the package names in ``specs``. If not provided, they are appended.
-    * - Required
-      - **True**
-      - **True**
+      - True
 
 
 Examples
@@ -624,15 +629,15 @@ An overall workflow diagram might look like this:
 .. mermaid::
 
    flowchart TD
-      A[Python package author with new external dependency] --> |Looks in| B(PURL/description collection)
-      B --> | Find PURL OK | E(Add PURL to pyproject.toml)
-      A --> | Looks in | C(Ecosystem mapping file)
-      C --> | Finds familiar ecosystem package name | D(Inverse map ecosystem package name to PURL)
-      D --> | Mapping exists | E
-      B --> | PURL not found | F(Submit PURL proposal to PURL/description collection)
-      F --> | Accepted | G(Mapping maintainers notified of missing PURL mappings)
-      D --> | Mapping missing. User looks in PURL collection. | B
-      B --> | Was mapping missing? | H(User may contribute entry to mapping)
+     A[Python package author with new external dependency] --> |Looks in| B(PURL/description collection)
+     B --> | Find PURL OK | E(Add PURL to pyproject.toml)
+     A --> | Looks in | C(Ecosystem mapping file)
+     C --> | Finds familiar ecosystem package name | D(Inverse map ecosystem package name to PURL)
+     D --> | Mapping exists | E
+     B --> | PURL not found | F(Submit PURL proposal to PURL/description collection)
+     F --> | Accepted | G(Mapping maintainers notified of missing PURL mappings)
+     D --> | Mapping missing. User looks in PURL collection. | B
+     B --> | Was mapping missing? | H(User may contribute entry to mapping)
 
 Package ecosystem maintainers usage
 -----------------------------------
