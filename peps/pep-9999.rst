@@ -8,7 +8,6 @@ Discussions-To:
 Status: Draft
 Type: Standards Track
 Topic: Packaging
-Content-Type: text/x-rst
 Created: 17-Aug-2023
 Post-History: 17-Aug-2023,
 Resolution:
