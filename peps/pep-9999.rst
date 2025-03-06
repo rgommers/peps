@@ -784,6 +784,9 @@ For (3), a collection of example mappings for a sample of packages can be found 
 
 The JSON Schemas are created with this Pydantic model (https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/schema.py).
 
+An example Python API, ``external-metadata-mappings``, to consume the different JSON documents
+can be found at https://github.com/jaimergp/external-metadata-mappings.
+
 A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for
 Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
 
