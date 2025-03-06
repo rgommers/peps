@@ -30,14 +30,14 @@ this PEP are to:
 
 - Enable tools to automatically map external dependencies to packages in other
   packaging repositories,
-- Make it possible to include needed dependencies in error messages emitting by
+- Make it possible to include needed dependencies in error messages emitted by
   Python package installers and build frontends,
 - Provide a canonical place for package authors to record this dependency
   information.
 
-Packaging ecosystems like Linux distros, Conda, Homebrew, Spack, and Nix need
+Packaging ecosystems like Linux distros, conda, Homebrew, Spack, and Nix need
 full sets of dependencies for Python packages, and have tools like pyp2rpm_
-(Fedora), Grayskull_ (Conda), and dh_python_ (Debian) which attempt to
+(Fedora), Grayskull_ (conda), and dh_python_ (Debian) which attempt to
 automatically generate dependency metadata from the metadata in
 upstream Python packages. External dependencies are currently handled manually,
 because there is no metadata for this in ``pyproject.toml`` or any other
@@ -97,7 +97,7 @@ details of their implementation varies.
 Cross compilation
 -----------------
 
-Cross compilation is not yet (as of August 2023) well-supported by stdlib
+Cross compilation is not yet (as of March 2025) well-supported by stdlib
 modules and ``pyproject.toml`` metadata. It is however important when
 translating external dependencies to those of other packaging systems (with
 tools like ``pyp2rpm``). Introducing support for cross compilation immediately
@@ -110,15 +110,15 @@ Terminology
 This PEP uses the following terminology:
 
 - *build machine*: the machine on which the package build process is being
-  executed
+  executed.
 - *host machine*: the machine on which the produced artifact will be installed
-  and run
+  and run.
 - *build dependency*: dependency for building the package that needs to be
   present at build time and itself was built for the build machine's OS and
-  architecture
+  architecture.
 - *host dependency*: dependency for building the package that needs to be
   present at build time and itself was built for the host machine's OS and
-  architecture
+  architecture.
 
 Note that this terminology is not consistent across build and packaging tools,
 so care must be taken when comparing build/host dependencies in
@@ -126,8 +126,10 @@ so care must be taken when comparing build/host dependencies in
 
 Note that "target machine" or "target dependency" is not used in this PEP. That
 is typically only relevant for cross-compiling compilers or other such advanced
-scenarios [#gcc-cross-terminology]_, [#meson-cross]_ - this is out of scope for
+scenarios [#gcc-cross-terminology]_, [#meson-cross]_ -- this is out of scope for
 this PEP.
+
+.. JRG: For completeness, I would also clarify what a *runtime* dependency is.
 
 Finally, note that while "dependency" is the term most widely used for packages
 needed at build time, the existing key in ``pyproject.toml`` for PyPI
@@ -140,6 +142,8 @@ Build and host dependencies
 Clear separation of metadata associated with the definition of build and target
 platforms, rather than assuming that build and target platform will always be
 the same, is important [#pypackaging-native-cross]_.
+
+.. JRG: Above we are using target platform. Should it be host platform?
 
 Build dependencies are typically run during the build process - they may be
 compilers, code generators, or other such tools. In case the use of a build
@@ -157,6 +161,8 @@ for linking against. This is not a rule though -- it may be possible or
 necessary to run a host dependency under an emulator, or through a custom tool
 like crossenv_. When host dependencies imply a runtime dependency, that runtime
 dependency also does not have to be declared, just like for build dependencies.
+
+.. JRG: Why? are host deps it added implicitly as runtime ones?
 
 When host dependencies are declared and a tool is not cross-compilation aware
 and has to do something with external dependencies, the tool MAY merge the
@@ -206,15 +212,50 @@ There is no ready-made support for virtual packages in PURL or another
 standard. There are a relatively limited number of such dependencies though,
 and adoption a scheme similar to PURL but with the ``virtual:`` rather than
 ``pkg:`` scheme seems like it will be understandable and map well to Linux
-distros with virtual packages and the likes of Conda and Spack.
+distros with virtual packages and the likes of conda and Spack.
 
 The two known virtual package types are ``compiler`` and ``interface``.
+
+Note: Adding a new ``abstract/`` type to PURL has been
+`proposed <https://github.com/package-url/purl-spec/issues/222>`__ in the
+meantime. If that goes through, ``virtual:`` PURLs can be converted to
+``pkg:abstract/`` PURLs and understood as equivalent.
 
 Versioning
 ''''''''''
 
+PURLs support fixed versions via the ``@`` component of the URL. For example,
+``numpy==2.0`` can be expressed as ``pkg:pypi/numpy@2.0``.
+
 Support in PURL for version expressions and ranges beyond a fixed version is
-still pending, see the Open Issues section.
+available via the ``vers`` scheme. Users are supposed to couple a ``pkg:``
+URL with a ``vers`` URL. For example, to express ``numpy>=2.0``, the PURL
+equivalent would be ``pkg:pypi/numpy`` plus ``vers:pypi/>=2.0``. This
+can be expressed as a two-item list: ``["pkg:pypi/numpy",
+"vers:pypi/>=2.0"]``. 
+
+However, this is not very ergonomic. We propose a PURL-compatible syntax that
+extends the ``@`` component to support version ranges directly:
+
+- The scheme for this PURL derivative is ``req`` (for requirement). 
+- When no operator is present, the field is understood as a fixed version.
+- The version range syntax must be compatible with PEP 440. As a result, it is
+  equivalent to ``vers:pypi/`` PURLs.
+- ``req:`` URLs can also admit ``interface`` and ``compiler`` types from
+  ``virtual:`` PURLs, directly.
+- As a direct consequence of the above definitions, ``req`` URLs can be converted
+  unambiguously to a ``pkg:`` + ``vers:`` tuple.
+
+Some examples:
+
+- ``req:pypi/numpy@2.0``: ``numpy`` pinned at exactly version 2.0.
+- ``req:pypi/numpy@>=2.0``: ``numpy`` with version greater or equal than 2.0.
+- ``req:interface/lapack@>=3.7.1``: any package implementing the LAPACK interface
+  for version greater or equal than ``3.7.1``.
+
+Note: Our ``req:`` derivative is not part of the PURL spec because it introduces
+ambiguities in other ecosystems. PEP 440 style version ranges do not suffer from
+this problem and hence why we can overload the ``@`` component without ambiguities.
 
 Dependency specifiers
 '''''''''''''''''''''
@@ -226,7 +267,7 @@ this is pragmatic: dependency specifiers are already used for other metadata in
 ``pyproject.toml``, any tooling that is used with ``pyproject.toml`` is likely
 to already have a robust implementation to parse it. And we do not expect to
 need the extra possibilities that PURL qualifiers provide (e.g. to specify a
-Conan or Conda channel, or a RubyGems platform).
+Conan or conda channel, or a RubyGems platform).
 
 Usage of core metadata fields
 -----------------------------
@@ -245,7 +286,7 @@ Differences between sdist and wheel metadata
 ''''''''''''''''''''''''''''''''''''''''''''
 
 A wheel may vendor its external dependencies. This happens in particular when
-distributing wheels on PyPI or other Python package indexes - and tools like
+distributing wheels on PyPI or other Python package indexes -- and tools like
 auditwheel_, delvewheel_ and delocate_ automate this process. As a result, a
 ``Requires-External`` entry in an sdist may disappear from a wheel built from
 that sdist. It is also possible that a ``Requires-External`` entry remains in a
@@ -366,7 +407,7 @@ SciPy 1.10:
     ]
     host-requires = [
       "virtual:interface/blas",
-      "virtual:interface/lapack",  # >=3.7.1 (can't express version ranges with PURL yet)
+      "req:interface/lapack@>=3.7.1"
     ]
 
     [external.optional-host-requires]
@@ -512,9 +553,13 @@ Open Issues
 Version specifiers for PURLs
 ----------------------------
 
-Support in PURL for version expressions and ranges is still pending. The pull
-request at `vers implementation for PURL`_ seems close to being merged, at
-which point this PEP could adopt it.
+Support in PURL for version expressions and ranges is now available via the
+discussed ``vers:`` scheme. However, the ergonomics of having to use two URLs
+is undesirable. Thus why we propose a joint ``req:`` scheme.
+
+`Ongoing discussions <https://github.com/package-url/purl-spec/issues/386#issuecomment-2633852500>`__
+with the PURL specification team are happening to assess the feasibility of
+including this idea in the official standard.
 
 Syntax for virtual dependencies
 -------------------------------
@@ -585,3 +630,4 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _auditwheel: https://github.com/pypa/auditwheel
 .. _delocate: https://github.com/matthew-brett/delocate
 .. _delvewheel: https://github.com/adang1345/delvewheel
+.. _verspurl: https://github.com/package-url/purl-spec/issues/386
