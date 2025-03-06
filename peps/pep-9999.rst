@@ -178,7 +178,12 @@ Registry design
 Specification
 =============
 
-Two schemas are proposed: one for the central registry, and one for ecosystem-specific mappings.
+Three schemas are proposed: 
+
+1. A central registry of PURLs.
+2. A list of known ecosystems and their package manager names.
+3. The ecosystem-specific mappings of PURLs to package specifiers,
+   plus details of their package managers.
 
 The central registry defines which identifiers are recognized as canonical. Each entry MUST
 provide a valid PURL in the field ``id``, with an optional free form ``description`` text.
@@ -188,6 +193,12 @@ list of strings already defined as ``id`` in the registry. This is useful for al
 a ``virtual:`` entry (e.g. ``pkg:generic/gcc`` would provide ``virtual:compiler/c``).
 Entries without ``provides`` content or, if populated, only with ``virtual:`` identifiers,
 are considered canonical.
+
+The list of known ecosystems assigns an identifier to each ecosystem and reports the
+canonical location for its mapping. The known package managers are also provided here
+so tools can map package manager names back to ecosystems without querying each mapping.
+
+.. JRG: Not sure if tying the package manager list to the known ecosystems list is worth it.
 
 The mappings specify which ecosystem-specific identifiers provide the canonical entries
 available in the central registry. Each mapping entry consists of an ``id`` field with
@@ -211,7 +222,8 @@ Two JSON Schema documents are provided to fully standardize the registry and map
 Central registry schema
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The central registry is specified by the following `JSON schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json>`__:
+The central registry is specified by the following
+`JSON schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json>`__:
 
 ``$schema``
 ~~~~~~~~~~~
@@ -285,11 +297,80 @@ Each entry in this list is defined as:
       - Hyperlinks to web locations that provide more information about the definition.
       - False
 
+Known ecosystems schema
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The known ecosystems list is specified by the following
+`JSON Schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/known-ecosystems.schema.json>`__:
+
+``$schema``
+~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - $Schema
+    * - Type
+      - ``string``
+    * - Description
+      - URL of the mappings schema in use for the document.
+    * - Required
+      - False
+
+``schema_version``
+~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Schema Version
+    * - Type
+      - ``integer``
+    * - Required
+      - False
+
+``ecosystems``
+~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Ecosystems
+    * - Type
+      - ``dict``
+    * - Description
+      - Ecosystems names and their corresponding details.
+    * - Required
+      - True
+
+This dictionary maps non-empty string keys referring to the ecosystem identifiers
+to a sub-dictionary defined as:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 25 40 15
+
+    * - Field
+      - URL
+      - Description
+      - Required
+    * - ``schema``
+      - ``AnyURL``
+      - URL to the mapping for this ecosystem
+      - True
+    * - ``package_managers``
+      - ``list[string]``
+      - List of package manager names known in this ecosystem
+      - True
 
 Mappings schema
 ^^^^^^^^^^^^^^^
 
-The mappings are specified by the following `JSON Schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json>`__:
+The mappings are specified by the following
+`JSON Schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json>`__:
 
 ``$schema``
 ~~~~~~~~~~~
@@ -343,7 +424,7 @@ The mappings are specified by the following `JSON Schema <https://github.com/jai
     * - Title
       - Description
     * - Type
-      - ``???``
+      - ``string | None``
     * - Description
       - Free-form field to add information this mapping. Allows
         Markdown.
