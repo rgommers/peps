@@ -225,7 +225,7 @@ Versioning
 ''''''''''
 
 PURLs support fixed versions via the ``@`` component of the URL. For example,
-``numpy==2.0`` can be expressed as ``pkg:pypi/numpy@2.0``.
+``numpy===2.0`` can be expressed as ``pkg:pypi/numpy@2.0``.
 
 Support in PURL for version expressions and ranges beyond a fixed version is
 available via the ``vers`` scheme. Users are supposed to couple a ``pkg:``
