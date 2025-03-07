@@ -409,7 +409,7 @@ SciPy 1.10:
     ]
     host-requires = [
       "virtual:interface/blas",
-      "dep:interface/lapack@>=3.7.1"
+      "dep:interface/lapack@>=3.7.1",
     ]
 
     [external.optional-host-requires]
