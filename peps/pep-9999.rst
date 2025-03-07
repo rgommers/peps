@@ -133,6 +133,7 @@ have such a name mapping already, because it's required for tools like pyp2rpm_
 and Grayskull_ to work. In those cases, the additional maintenance costs of
 connecting those mappings to a central registry are likely limited.
 
+.. JRG: In this section I'd prefer to speak of ecosystems instead of package managers
 
 Generating system package manager-specific install commands
 -----------------------------------------------------------
@@ -162,24 +163,32 @@ subcommand in any Python development workflow tool (e.g., Pip, Poetry, Hatch, PD
 Registry design
 ---------------
 
-- One central Python package for the registry tool.
-- A plugin design, where system package managers can register their name mapping
-- Name mapping should be in a structured, human-readable file format. As long as
-  it can be validated with the corresponding JSON Schemas, they could be delivered
-  as JSON, YAML, TOML and others. Authors recommend JSON or YAML.
+The mapping infrastructure should include the following components and properties:
+
+- A central registry for known generic and virtual PURLs.
+- A list of known ecosystems and package managers, where ecosystem maintainers
+  can register their name mapping(s).
+- A standardized schemsa that defines how mappings should be structured.
+- The above documents should be written in a structured, human-readable file format.
+  As long as it can be validated with the corresponding JSON Schemas, they could be
+  delivered as JSON, YAML, TOML and/or others. Authors recommend JSON or YAML.
+- One central Python package for the central registry, list of ecosystems and known
+  mappings.
+
+On the client side, there should be:
+
 - A way for the system to specify a default (e.g., the Python install on Ubuntu
   could register ``apt`` as the default system package manager with the
   registry tool). It may also be left unspecified.
-- A way for the user to specify the default and/or current system package
-  manager. E.g., a user on Ubuntu may want either ``apt``, ``conda``, ``brew``
-  or ``spack`` as their package manager of choice to provide external
-  dependencies.
+- A way for the user to specify the default and/or current system package manager.
+  E.g., a user on Ubuntu may want either ``apt``, ``conda``, ``brew``  or ``spack``
+  as their package manager of choice to provide external dependencies.
 
 
 Specification
 =============
 
-Three schemas are proposed: 
+Three schemas are proposed:
 
 1. A central registry of PURLs.
 2. A list of known ecosystems and their package manager names.
