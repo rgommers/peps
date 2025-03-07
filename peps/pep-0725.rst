@@ -243,14 +243,14 @@ available via the ``vers`` scheme. Users are supposed to couple a ``pkg:``
 URL with a ``vers`` URL. For example, to express ``numpy>=2.0``, the PURL
 equivalent would be ``pkg:pypi/numpy`` plus ``vers:pypi/>=2.0``. This
 can be expressed as a two-item list: ``["pkg:pypi/numpy",
-"vers:pypi/>=2.0"]``. 
+"vers:pypi/>=2.0"]``.
 
 However, this is not very ergonomic. We propose a PURL-compatible syntax that
 extends the ``@`` component to support version ranges directly:
 
 .. JRG: I suggested `dep:` (dependency) but it could also be `req:` (requirement)
 
-- The scheme for this PURL derivative is ``dep:`` (for dependency). 
+- The scheme for this PURL derivative is ``dep:`` (for dependency).
 - When no operator is present, the field is understood as a fixed version.
 - The version range syntax must be compatible with PEP 440. As a result, it is
   equivalent to ``vers:pypi/`` PURLs.
