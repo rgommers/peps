@@ -237,23 +237,25 @@ can be expressed as a two-item list: ``["pkg:pypi/numpy",
 However, this is not very ergonomic. We propose a PURL-compatible syntax that
 extends the ``@`` component to support version ranges directly:
 
-- The scheme for this PURL derivative is ``req`` (for requirement). 
+.. JRG: I suggested `dep:` (dependency) but it could also be `req:` (requirement)
+
+- The scheme for this PURL derivative is ``dep:`` (for dependency). 
 - When no operator is present, the field is understood as a fixed version.
 - The version range syntax must be compatible with PEP 440. As a result, it is
   equivalent to ``vers:pypi/`` PURLs.
-- ``req:`` URLs can also admit ``interface`` and ``compiler`` types from
+- ``dep:`` URLs can also admit ``interface`` and ``compiler`` types from
   ``virtual:`` PURLs, directly.
-- As a direct consequence of the above definitions, ``req`` URLs can be converted
+- As a direct consequence of the above definitions, ``dep`` URLs can be converted
   unambiguously to a ``pkg:`` + ``vers:`` tuple.
 
 Some examples:
 
-- ``req:pypi/numpy@2.0``: ``numpy`` pinned at exactly version 2.0.
-- ``req:pypi/numpy@>=2.0``: ``numpy`` with version greater or equal than 2.0.
-- ``req:interface/lapack@>=3.7.1``: any package implementing the LAPACK interface
+- ``dep:pypi/numpy@2.0``: ``numpy`` pinned at exactly version 2.0.
+- ``dep:pypi/numpy@>=2.0``: ``numpy`` with version greater or equal than 2.0.
+- ``dep:interface/lapack@>=3.7.1``: any package implementing the LAPACK interface
   for version greater or equal than ``3.7.1``.
 
-Note: Our ``req:`` derivative is not part of the PURL spec because it introduces
+Note: Our ``dep:`` derivative is not part of the PURL spec because it introduces
 ambiguities in other ecosystems. PEP 440 style version ranges do not suffer from
 this problem and hence why we can overload the ``@`` component without ambiguities.
 
@@ -407,7 +409,7 @@ SciPy 1.10:
     ]
     host-requires = [
       "virtual:interface/blas",
-      "req:interface/lapack@>=3.7.1"
+      "dep:interface/lapack@>=3.7.1"
     ]
 
     [external.optional-host-requires]
@@ -555,7 +557,7 @@ Version specifiers for PURLs
 
 Support in PURL for version expressions and ranges is now available via the
 discussed ``vers:`` scheme. However, the ergonomics of having to use two URLs
-is undesirable. Thus why we propose a joint ``req:`` scheme.
+is undesirable. Thus why we propose a joint ``dep:`` scheme.
 
 `Ongoing discussions <https://github.com/package-url/purl-spec/issues/386#issuecomment-2633852500>`__
 with the PURL specification team are happening to assess the feasibility of
