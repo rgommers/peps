@@ -89,8 +89,8 @@ few variants like Python version specific names, where the prefix contains the
 Python major and minor version numbers (e.g. ``python311-`` instead of
 ``python-``).
 
-Gentoo follows a similar approach to naming Python packages, using the ``python-dev/``
-namespace and some `well-specified rules <https://projects.gentoo.org/python/guide/package-maintenance.html>`__.
+Gentoo follows a similar approach to naming Python packages, using the ``dev-python/``
+category and some `well-specified rules <https://projects.gentoo.org/python/guide/package-maintenance.html>`__.
 
 Conda-forge has a more explicit name mapping, because the base names are the
 same in conda-forge as on PyPI (e.g., ``numpy`` maps to ``numpy``), but there
