@@ -130,6 +130,8 @@ This PEP uses the following terminology:
 - *host dependency*: dependency for building the package that needs to be
   present at build time and itself was built for the host machine's OS and
   architecture.
+- *runtime dependency*: a library or other software component needed when 
+  the Python package is used after it's installed.
 
 Note that this terminology is not consistent across build and packaging tools,
 so care must be taken when comparing build/host dependencies in
@@ -139,9 +141,7 @@ Note that "target machine" or "target dependency" is not used in this PEP. That
 is typically only relevant for cross-compiling compilers or other such advanced
 scenarios [#gcc-cross-terminology]_, [#meson-cross]_ -- this is out of scope for
 this PEP.
-
-.. JRG: For completeness, I would also clarify what a *runtime* dependency is.
-
+  
 Finally, note that while "dependency" is the term most widely used for packages
 needed at build time, the existing key in ``pyproject.toml`` for PyPI
 build-time dependencies is ``build-requires``. Hence this PEP uses the keys
