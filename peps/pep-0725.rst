@@ -171,8 +171,6 @@ necessary to run a host dependency under an emulator, or through a custom tool
 like crossenv_. When host dependencies imply a runtime dependency, that runtime
 dependency also does not have to be declared, just like for build dependencies.
 
-.. JRG: Why? are host deps it added implicitly as runtime ones?
-
 When host dependencies are declared and a tool is not cross-compilation aware
 and has to do something with external dependencies, the tool MAY merge the
 ``host-requires`` list into ``build-requires``. This may for example happen if
