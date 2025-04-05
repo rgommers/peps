@@ -204,10 +204,6 @@ As an example, a ``dep:`` URL for the ``requests`` package on PyPI would be::
     dep:pypi/requests
     # equivalent to pkg:pypi/requests
 
-- If the version field contains operators, this field is moved to the ``vers``
-  qualifier. The field value must be prepended with the ``vers:`` scheme and
-  the same type used in the URL.
-
 Adopting PURL-compatible strings to specify external dependencies in ``pyproject.toml`` solves a
 number of problems at once - and there are already implementations of the
 specification in Python and multiple languages. PURL is also already supported
@@ -312,11 +308,14 @@ inclusion in the core metadata by following these rules:
 - If the *type* is ``compiler`` or ``interface``, it MUST be transformed
   into an ``abstract/(compiler|interface)`` type.
 - If present, the *version* field MUST follow these rules:
+
   - If the value contains no operators, it MUST be kept as is.
+
   - Otherwise, the version field MUST be removed and its value moved into
     a ``vers`` qualifier. The *type* of the PURL MUST be prepended to the
     value, followed by a forward slash. If the *type* does not have a
     matching ``vers`` type, ``pypi`` MUST be used.
+
 - The PURL percent-encoding rules MUST be applied.
 
 Some examples:
