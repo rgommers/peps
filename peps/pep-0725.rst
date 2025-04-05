@@ -151,10 +151,8 @@ Build and host dependencies
 '''''''''''''''''''''''''''
 
 Clear separation of metadata associated with the definition of build and target
-platforms, rather than assuming that build and target platform will always be
+platforms, rather than assuming that build and host platform will always be
 the same, is important [#pypackaging-native-cross]_.
-
-.. JRG: Above we are using target platform. Should it be host platform?
 
 Build dependencies are typically run during the build process - they may be
 compilers, code generators, or other such tools. In case the use of a build
