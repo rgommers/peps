@@ -130,7 +130,7 @@ This PEP uses the following terminology:
 - *host dependency*: dependency for building the package that needs to be
   present at build time and itself was built for the host machine's OS and
   architecture.
-- *runtime dependency*: a library or other software component needed when 
+- *runtime dependency*: a library or other software component needed when
   the Python package is used after it's installed.
 
 Note that this terminology is not consistent across build and packaging tools,
@@ -141,7 +141,7 @@ Note that "target machine" or "target dependency" is not used in this PEP. That
 is typically only relevant for cross-compiling compilers or other such advanced
 scenarios [#gcc-cross-terminology]_, [#meson-cross]_ -- this is out of scope for
 this PEP.
-  
+
 Finally, note that while "dependency" is the term most widely used for packages
 needed at build time, the existing key in ``pyproject.toml`` for PyPI
 build-time dependencies is ``build-requires``. Hence this PEP uses the keys
@@ -182,22 +182,33 @@ cause of a build failure when a package fails to build from an sdist.
 Specifying external dependencies
 --------------------------------
 
-Concrete package specification through PURL
-'''''''''''''''''''''''''''''''''''''''''''
+Concrete package specification
+''''''''''''''''''''''''''''''
 
-The two types of concrete packages are supported by PURL_ (Package URL), which
-implements a scheme for identifying packages that is meant to be portable
+PURLs implement a scheme for identifying packages that is meant to be portable
 across packaging ecosystems. Its design is::
 
     scheme:type/namespace/name@version?qualifiers#subpath
 
 The ``scheme`` component is a fixed string, ``pkg``, and of the other
-components only ``type`` and ``name`` are required. As an example, a package
-URL for the ``requests`` package on PyPI would be::
+components only ``type`` and ``name`` are required.
 
-    pkg:pypi/requests
+Since external dependencies are likely to be typed by hand, we propose a PURL
+derivate that, in the name of ergonomics and user-friendliness, introduce a
+number of changes, discussed in the following sections. In this derivative,
+we replace the ``pkg`` scheme with ``dep``. Hence, we will refer to them as
+``dep:`` URLs.
 
-Adopting PURL to specify external dependencies in ``pyproject.toml`` solves a
+As an example, a ``dep:`` URL for the ``requests`` package on PyPI would be::
+
+    dep:pypi/requests
+    # equivalent to pkg:pypi/requests
+
+- If the version field contains operators, this field is moved to the ``vers``
+  qualifier. The field value must be prepended with the ``vers:`` scheme and
+  the same type used in the URL.
+
+Adopting PURL-compatible strings to specify external dependencies in ``pyproject.toml`` solves a
 number of problems at once - and there are already implementations of the
 specification in Python and multiple languages. PURL is also already supported
 by dependency-related tooling like SPDX (see
@@ -207,28 +218,35 @@ and the `Sonatype OSS Index <https://ossindex.sonatype.org/doc/coordinates>`__;
 not having to wait years before support in such tooling arrives is valuable.
 
 For concrete packages without a canonical package manager to refer to, either
-``pkg:generic/pkg-name`` can be used, or a direct reference to the VCS system
+``dep:generic/dep-name`` can be used, or a direct reference to the VCS system
 that the package is maintained in (e.g.,
-``pkg:github/user-or-org-name/pkg-name``). Which of these is more appropriate
-is situation-dependent. This PEP recommends using ``pkg:generic`` when the
-package name is unambiguous and well-known (e.g., ``pkg:generic/git`` or
-``pkg:generic/openblas``), and using the VCS as the PURL type otherwise.
+``dep:github/user-or-org-name/dep-name``). Which of these is more appropriate
+is situation-dependent. This PEP recommends using ``dep:generic`` when the
+package name is unambiguous and well-known (e.g., ``dep:generic/git`` or
+``dep:generic/openblas``), and using the VCS as the PURL type otherwise.
 
 Virtual package specification
 '''''''''''''''''''''''''''''
 
-There is no ready-made support for virtual packages in PURL or another
-standard. There are a relatively limited number of such dependencies though,
-and adopting a scheme similar to PURL but with the ``virtual:`` rather than
-``pkg:`` scheme seems like it will be understandable and map well to Linux
+PURL does not offer support for virtual or abstract dependency specification yet.
+A `proposal to add an abstract type <https://github.com/package-url/purl-spec/issues/222>`__
+is being discussed for revision 1.1.
+
+In the meantime, we propose adding two new types to our ``dep:`` derivative:
+
+- ``interface``: for components such as BLAS or MPI.
+- ``compiler``: for compiled languages like C or Rust.
+
+Since there are a relatively limited number of such dependencies,
+it seems like it will be understandable and map well to Linux
 distros with virtual packages and to the likes of conda and Spack.
 
-The two known virtual package types are ``compiler`` and ``interface``.
+Once PURL 1.1 is published and the ``abstract`` type is implemented,
+``dep:interface`` and ``dep:compiler`` URLs can be converted to PURLs by
+prepending the type ``abstract``.
 
-Note: Adding a new ``abstract/`` type to PURL has been
-`proposed <https://github.com/package-url/purl-spec/issues/222>`__ in the
-meantime. If that goes through, ``virtual:`` PURLs can be converted to
-``pkg:abstract/`` PURLs and understood as equivalent.
+.. JRG: A long shot for now. Assuming abstract PURLs would be formatted
+.. like ``pkg:abstract/{compiler,interface}/...``.
 
 Versioning
 ''''''''''
@@ -241,21 +259,19 @@ available via the ``vers`` scheme. Users are supposed to couple a ``pkg:``
 URL with a ``vers`` URL. For example, to express ``numpy>=2.0``, the PURL
 equivalent would be ``pkg:pypi/numpy`` plus ``vers:pypi/>=2.0``. This
 can be expressed as a two-item list: ``["pkg:pypi/numpy",
-"vers:pypi/>=2.0"]``.
+"vers:pypi/>=2.0"]``. Additionally, a new proposal to add the ``vers``
+URL in a PURL qualifier is being `discussed <https://github.com/package-url/purl-spec/pull/433>`__,
+but the current direction requires percent-encoding and the repetition of some components for
+disambiguation.
 
-However, this is not very ergonomic. We propose a PURL-compatible syntax that
-extends the ``@`` component to support version ranges directly:
+Since this is not very ergonomic, the version field in ``dep:`` URLs accepts
+version range specifiers too, with these rules:
 
-.. JRG: I suggested 'dep:' (dependency) but it could also be 'req:' (requirement)
-
-- The scheme for this PURL derivative is ``dep:`` (for dependency).
-- When no operator is present, the field is understood as a fixed version.
-- The version range syntax must be compatible with PEP 440. As a result, it is
-  equivalent to ``vers:pypi/`` PURLs.
-- ``dep:`` URLs can also admit ``interface`` and ``compiler`` types from
-  ``virtual:`` PURLs, directly.
-- As a direct consequence of the above definitions, ``dep`` URLs can be converted
-  unambiguously to a ``pkg:`` + ``vers:`` tuple.
+- The ``vers:`` scheme is omitted.
+- The *type* is omitted and assumed to match the PURL *type*. If there's no match,
+  the type is assumed to be ``pypi``.
+- When no operator is present, the field is understood as a version literal.
+- Otherwise, it is considered a version range specifier.
 
 Some examples:
 
@@ -263,10 +279,6 @@ Some examples:
 - ``dep:pypi/numpy@>=2.0``: ``numpy`` with version greater or equal than 2.0.
 - ``dep:interface/lapack@>=3.7.1``: any package implementing the LAPACK interface
   for version greater or equal than ``3.7.1``.
-
-Note: Our ``dep:`` derivative is not part of the PURL spec because it introduces
-ambiguities in other ecosystems. PEP 440 style version ranges do not suffer from
-this problem and hence why we can overload the ``@`` component without ambiguities.
 
 Dependency specifiers
 '''''''''''''''''''''
@@ -292,6 +304,32 @@ and ``host-requires`` content also does not need to be reflected in core
 metadata fields. The ``optional-dependencies`` content from ``[external]``
 would need to either reuse ``Provides-Extra`` or require a new
 ``Provides-External-Extra`` field. Neither seems desirable.
+
+The ``dep:`` URLs MUST be converted to PURL identifiers prior to their
+inclusion in the core metadata by following these rules:
+
+- The ``dep`` *scheme* MUST be replaced with ``pkg``.
+- If the *type* is ``compiler`` or ``interface``, it MUST be transformed
+  into an ``abstract/(compiler|interface)`` type.
+- If present, the *version* field MUST follow these rules:
+  - If the value contains no operators, it MUST be kept as is.
+  - Otherwise, the version field MUST be removed and its value moved into
+    a ``vers`` qualifier. The *type* of the PURL MUST be prepended to the
+    value, followed by a forward slash. If the *type* does not have a
+    matching ``vers`` type, ``pypi`` MUST be used.
+- The PURL percent-encoding rules MUST be applied.
+
+Some examples:
+
+- ``dep:pypi/requests`` becomes ``pkg:pypi/requests``.
+- ``dep:generic/gcc@14`` becomes ``pkg:generic/gcc@14``.
+- ``dep:pypi/django@>=5`` becomes
+  ``pkg:pypi/django?vers=vers%3Apypi%2F%3E%3D5``.
+- ``dep:generic/libarrow@>=19`` becomes
+  ``pkg:generic/libarrow?vers=vers%3Apypi%2F%3E%3D19``.
+- ``dep:compiler/c`` becomes ``pkg:abstract/compiler/c``.
+- ``dep:interface/blas>=3,<4`` becomes
+  ``pkg:abstract/interface/blas?vers=vers%3Apypi%2F%3E%3D3%2C%3C4``.
 
 Differences between sdist and wheel metadata
 ''''''''''''''''''''''''''''''''''''''''''''
@@ -326,7 +364,7 @@ maintain, and should not be reflected in the ``[external]`` table. It is not
 possible to specify this in a reasonable way that works across distros, hence
 only the canonical name should be used in ``[external]``.
 
-The intended meaning of using a PURL or virtual dependency is "the full package
+The intended meaning of using a ``dep:`` string is "the full package
 with the name specified". It will depend on the context in which the metadata
 is used whether the split is relevant. For example, if ``libffi`` is a host
 dependency and a tool wants to prepare an environment for building a wheel,
@@ -371,54 +409,54 @@ to be present on the system already.
 ``build-requires``/``optional-build-requires``
 ''''''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of PURL_ strings (``build-requires``) and a table
-  with values of arrays of PURL_ strings (``optional-build-requires``)
+- Format: Array of ``dep:`` strings (``build-requires``) and a table
+  with values of arrays of ``dep:`` strings (``optional-build-requires``)
 - `Core metadata`_: N/A
 
 The (optional) external build requirements needed to build the project.
 
 For ``build-requires``, it is a key whose value is an array of strings. Each
 string represents a build requirement of the project and MUST be formatted as
-either a valid PURL_ string or a ``virtual:`` string.
+a valid ``dep:`` string.
 
 For ``optional-build-requires``, it is a table where each key specifies an
 extra set of build requirements and whose value is an array of strings. The
-strings of the arrays MUST be valid PURL_ strings.
+strings of the arrays MUST be valid ``dep:`` strings.
 
 ``host-requires``/``optional-host-requires``
 ''''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of PURL_ strings (``host-requires``) and a table
-  with values of arrays of PURL_ strings (``optional-host-requires``)
+- Format: Array of ``dep:`` strings (``host-requires``) and a table
+  with values of arrays of ``dep:`` strings (``optional-host-requires``)
 - `Core metadata`_: N/A
 
 The (optional) external host requirements needed to build the project.
 
 For ``host-requires``, it is a key whose value is an array of strings. Each
 string represents a host requirement of the project and MUST be formatted as
-either a valid PURL_ string or a ``virtual:`` string.
+a valid ``dep:`` string.
 
 For ``optional-host-requires``, it is a table where each key specifies an
 extra set of host requirements and whose value is an array of strings. The
-strings of the arrays MUST be valid PURL_ strings.
+strings of the arrays MUST be valid ``dep:`` strings.
 
 ``dependencies``/``optional-dependencies``
 ''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of PURL_ strings (``dependencies``) and a table
-  with values of arrays of PURL_ strings (``optional-dependencies``)
+- Format: Array of ``dep:`` strings (``dependencies``) and a table
+  with values of arrays of ``dep:`` strings (``optional-dependencies``)
 - `Core metadata`_: ``Requires-External``, N/A
 
 The (optional) runtime dependencies of the project.
 
 For ``dependencies``, it is a key whose value is an array of strings. Each
 string represents a dependency of the project and MUST be formatted as either a
-valid PURL_ string or a ``virtual:`` string. Each string maps directly to a
-``Requires-External`` entry in the `core metadata`_.
+valid ``dep:`` string. Each string maps directly to a ``Requires-External``
+entry in the `core metadata`_.
 
 For ``optional-dependencies``, it is a table where each key specifies an extra
 and whose value is an array of strings. The strings of the arrays MUST be valid
-PURL_ strings. Optional dependencies do not map to a core metadata field.
+``dep:`` strings. Optional dependencies do not map to a core metadata field.
 
 Examples
 --------
@@ -432,13 +470,13 @@ cryptography 39.0:
 
     [external]
     build-requires = [
-      "virtual:compiler/c",
-      "virtual:compiler/rust",
-      "pkg:generic/pkg-config",
+      "dep:compiler/c",
+      "dep:compiler/rust",
+      "dep:generic/pkg-config",
     ]
     host-requires = [
-      "pkg:generic/openssl",
-      "pkg:generic/libffi",
+      "dep:generic/openssl",
+      "dep:generic/libffi",
     ]
 
 SciPy 1.10:
@@ -447,14 +485,14 @@ SciPy 1.10:
 
     [external]
     build-requires = [
-      "virtual:compiler/c",
-      "virtual:compiler/cpp",
-      "virtual:compiler/fortran",
-      "pkg:generic/ninja",
-      "pkg:generic/pkg-config",
+      "dep:compiler/c",
+      "dep:compiler/cpp",
+      "dep:compiler/fortran",
+      "dep:generic/ninja",
+      "dep:generic/pkg-config",
     ]
     host-requires = [
-      "virtual:interface/blas",
+      "dep:interface/blas",
       "dep:interface/lapack@>=3.7.1",
     ]
 
@@ -464,24 +502,24 @@ Pillow 10.1.0:
 
     [external]
     build-requires = [
-      "virtual:compiler/c",
+      "dep:compiler/c",
     ]
     host-requires = [
-      "pkg:generic/libjpeg",
-      "pkg:generic/zlib",
+      "dep:generic/libjpeg",
+      "dep:generic/zlib",
     ]
 
     [external.optional-host-requires]
     extra = [
-      "pkg:generic/lcms2",
-      "pkg:generic/freetype",
-      "pkg:generic/libimagequant",
-      "pkg:generic/libraqm",
-      "pkg:generic/libtiff",
-      "pkg:generic/libxcb",
-      "pkg:generic/libwebp",
-      "pkg:generic/openjpeg",  # add >=2.0 once we have version specifiers
-      "pkg:generic/tk",
+      "dep:generic/lcms2",
+      "dep:generic/freetype",
+      "dep:generic/libimagequant",
+      "dep:generic/libraqm",
+      "dep:generic/libtiff",
+      "dep:generic/libxcb",
+      "dep:generic/libwebp",
+      "dep:generic/openjpeg@>=2.0",
+      "dep:generic/tk",
     ]
 
 
@@ -494,13 +532,13 @@ NAVis 1.4.0:
 
     [external]
     build-requires = [
-      "pkg:generic/XCB; platform_system=='Linux'",
+      "dep:generic/XCB; platform_system=='Linux'",
     ]
 
     [external.optional-dependencies]
     nat = [
-      "pkg:cran/nat",
-      "pkg:cran/nat.nblast",
+      "dep:cran/nat",
+      "dep:cran/nat.nblast",
     ]
 
 Spyder 6.0:
@@ -509,9 +547,9 @@ Spyder 6.0:
 
     [external]
     dependencies = [
-      "pkg:cargo/ripgrep",
-      "pkg:cargo/tree-sitter-cli",
-      "pkg:golang/github.com/junegunn/fzf",
+      "dep:cargo/ripgrep",
+      "dep:cargo/tree-sitter-cli",
+      "dep:golang/github.com/junegunn/fzf",
     ]
 
 jupyterlab-git 0.41.0:
@@ -520,12 +558,12 @@ jupyterlab-git 0.41.0:
 
     [external]
     dependencies = [
-      "pkg:generic/git",
+      "dep:generic/git",
     ]
 
     [external.optional-build-requires]
     dev = [
-      "pkg:generic/nodejs",
+      "dep:generic/nodejs",
     ]
 
 PyEnchant 3.2.2:
@@ -537,7 +575,7 @@ PyEnchant 3.2.2:
       # libenchant is needed on all platforms but only vendored into wheels on
       # Windows, so on Windows the build backend should remove this external
       # dependency from wheel metadata.
-      "pkg:github/AbiWord/enchant",
+      "dep:github/AbiWord/enchant",
     ]
 
 
@@ -629,10 +667,6 @@ Support in PURL for version expressions and ranges is now available via the
 discussed ``vers:`` scheme. However, the ergonomics of having to use two URLs
 is undesirable. Thus why we propose a joint ``dep:`` scheme.
 
-`Ongoing discussions <https://github.com/package-url/purl-spec/issues/386#issuecomment-2633852500>`__
-with the PURL specification team are happening to assess the feasibility of
-including this idea in the official standard.
-
 Versioning of virtual dependencies
 ----------------------------------
 
@@ -674,7 +708,7 @@ Syntax for virtual dependencies
 -------------------------------
 
 The current syntax this PEP uses for virtual dependencies is
-``virtual:type/name``, which is analogous to but not part of the PURL spec.
+``dep:(compiler|interface)/name``, which is analogous to but not part of the PURL spec.
 This open issue discusses supporting virtual dependencies within PURL:
 `purl-spec#222 <https://github.com/package-url/purl-spec/issues/222>`__.
 
