@@ -96,12 +96,12 @@ Multiple types of external dependencies can be distinguished:
   canonical location. This is typically the case for libraries and tools
   written in C, C++, Fortran, CUDA and other low-level languages. E.g.,
   Boost, OpenSSL, Protobuf, Intel MKL, GCC.
-- "Virtual" packages, which are names for concepts, types of tools or
+- "Virtual" or "abstract" packages, which are names for concepts, types of tools or
   interfaces. These typically have multiple implementations, which *are*
   concrete packages. E.g., a C++ compiler, BLAS, LAPACK, OpenMP, MPI.
 
 Concrete packages are straightforward to understand, and are a concept present
-in virtually every package management system. Virtual packages are a concept
+in virtually every package management system. Abstract packages are a concept
 also present in a number of packaging systems -- but not always, and the
 details of their implementation varies.
 
@@ -219,25 +219,31 @@ is situation-dependent. This PEP recommends using ``dep:generic`` when the
 package name is unambiguous and well-known (e.g., ``dep:generic/git`` or
 ``dep:generic/openblas``), and using the VCS as the PURL type otherwise.
 
-Virtual package specification
-'''''''''''''''''''''''''''''
+Abstract package specification
+''''''''''''''''''''''''''''''
 
 PURL does not offer support for virtual or abstract dependency specification yet.
-A `proposal to add an abstract type <https://github.com/package-url/purl-spec/issues/222>`__
+A `proposal to add an abstract type <https://github.com/package-url/purl-spec/pull/450>`__
 is being discussed for revision 1.1.
 
-In the meantime, we propose adding two new types to our ``dep:`` derivative:
+In the meantime, we propose adding a new *type* to our ``dep:`` derivative, the ``abstract``
+type, which can take two *namespaces*:
 
 - ``interface``: for components such as BLAS or MPI.
 - ``compiler``: for compiled languages like C or Rust.
 
+The *name* should be the most common name for the interface or language, lowercased.
+Some examples include::
+
+  dep:abstract/compiler/c
+  dep:abstract/compiler/c++
+  dep:abstract/compiler/rust
+  dep:abstract/interface/blas
+  dep:abstract/interface/lapack
+
 Since there are a relatively limited number of such dependencies,
 it seems like it will be understandable and map well to Linux
 distros with virtual packages and to the likes of conda and Spack.
-
-Once PURL 1.1 is published and the ``abstract`` type is implemented,
-``dep:interface`` and ``dep:compiler`` URLs can be converted to PURLs by
-prepending the type ``abstract``.
 
 .. JRG: A long shot for now. Assuming abstract PURLs would be formatted
 .. like ``pkg:abstract/{compiler,interface}/...``.
@@ -271,8 +277,8 @@ Some examples:
 
 - ``dep:pypi/numpy@2.0``: ``numpy`` pinned at exactly version 2.0.
 - ``dep:pypi/numpy@>=2.0``: ``numpy`` with version greater or equal than 2.0.
-- ``dep:interface/lapack@>=3.7.1``: any package implementing the LAPACK interface
-  for version greater or equal than ``3.7.1``.
+- ``dep:abstract/interface/lapack@>=3.7.1``: any package implementing the
+  LAPACK interface for version greater or equal than ``3.7.1``.
 
 Dependency specifiers
 '''''''''''''''''''''
@@ -324,8 +330,8 @@ Some examples:
   ``pkg:pypi/django?vers=vers%3Apypi%2F%3E%3D5``.
 - ``dep:generic/libarrow@>=19`` becomes
   ``pkg:generic/libarrow?vers=vers%3Apypi%2F%3E%3D19``.
-- ``dep:compiler/c`` becomes ``pkg:abstract/compiler/c``.
-- ``dep:interface/blas>=3,<4`` becomes
+- ``dep:abstract/compiler/c`` becomes ``pkg:abstract/compiler/c``.
+- ``dep:abstract/interface/blas>=3,<4`` becomes
   ``pkg:abstract/interface/blas?vers=vers%3Apypi%2F%3E%3D3%2C%3C4``.
 
 Differences between sdist and wheel metadata
@@ -467,8 +473,8 @@ cryptography 39.0:
 
     [external]
     build-requires = [
-      "dep:compiler/c",
-      "dep:compiler/rust",
+      "dep:abstract/compiler/c",
+      "dep:abstract/compiler/rust",
       "dep:generic/pkg-config",
     ]
     host-requires = [
@@ -482,15 +488,15 @@ SciPy 1.10:
 
     [external]
     build-requires = [
-      "dep:compiler/c",
-      "dep:compiler/cpp",
-      "dep:compiler/fortran",
+      "dep:abstract/compiler/c",
+      "dep:abstract/compiler/cpp",
+      "dep:abstract/compiler/fortran",
       "dep:generic/ninja",
       "dep:generic/pkg-config",
     ]
     host-requires = [
-      "dep:interface/blas",
-      "dep:interface/lapack@>=3.7.1",
+      "dep:abstract/interface/blas",
+      "dep:abstract/interface/lapack@>=3.7.1",
     ]
 
 Pillow 10.1.0:
@@ -499,7 +505,7 @@ Pillow 10.1.0:
 
     [external]
     build-requires = [
-      "dep:compiler/c",
+      "dep:abstract/compiler/c",
     ]
     host-requires = [
       "dep:generic/libjpeg",
@@ -664,12 +670,12 @@ Support in PURL for version expressions and ranges is now available via the
 discussed ``vers:`` scheme. However, the ergonomics of having to use two URLs
 is undesirable. Thus why we propose a joint ``dep:`` scheme.
 
-Versioning of virtual dependencies
-----------------------------------
+Versioning of abstract dependencies
+-----------------------------------
 
-Once PURL supports version expressions, virtual dependencies can be versioned
+Once PURL supports version expressions, abstract dependencies can be versioned
 with the same syntax. It must be better specified however what the version
-scheme is, because this is not as clear for virtual dependencies as it is for
+scheme is, because this is not as clear for abstract dependencies as it is for
 PURLs (e.g., there can be multiple implementations, and abstract interfaces may
 not be unambiguously versioned). E.g.:
 
@@ -695,18 +701,18 @@ Who defines canonical names and canonical package structure?
 Similarly to the logistics around versioning is the question about what names
 are allowed and where they are described. And then who is in control of that
 description and responsible for maintaining it. Our tentative answer is: there
-should be a central list for virtual dependencies and ``pkg:generic`` PURLs,
+should be a central list for abstract dependencies and ``dep:generic`` URLs,
 maintained as a PyPA project. See
 https://discuss.python.org/t/pep-725-specifying-external-dependencies-in-pyproject-toml/31888/62.
 TODO: once that list/project is prototyped, include it in the PEP and close
 this open issue.
 
-Syntax for virtual dependencies
--------------------------------
+Syntax for abstract dependencies
+--------------------------------
 
-The current syntax this PEP uses for virtual dependencies is
-``dep:(compiler|interface)/name``, which is analogous to but not part of the PURL spec.
-This open issue discusses supporting virtual dependencies within PURL:
+The current syntax this PEP uses for abstract dependencies is
+``dep:abstract/(compiler|interface)/name``, which is analogous to but not part of the PURL spec.
+This open issue discusses supporting abstract dependencies within PURL:
 `purl-spec#222 <https://github.com/package-url/purl-spec/issues/222>`__.
 
 Should a ``host-requires`` key be added under ``[build-system]``?
