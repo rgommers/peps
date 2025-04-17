@@ -199,9 +199,9 @@ The central registry defines which identifiers are recognized as canonical. Each
 provide a valid PURL in the field ``id``, with an optional free form ``description`` text.
 Additionally some entries MAY refer to another entry via the ``provides`` field, which takes a
 list of strings already defined as ``id`` in the registry. This is useful for aliases
-(e.g. ``pkg:generic/arrow`` and ``pkg:github/apache/arrow``), and concrete implementations of
-a ``virtual:`` entry (e.g. ``pkg:generic/gcc`` would provide ``virtual:compiler/c``).
-Entries without ``provides`` content or, if populated, only with ``virtual:`` identifiers,
+(e.g. ``dep:generic/arrow`` and ``dep:github/apache/arrow``), and concrete implementations of
+a ``dep:virtual/`` entry (e.g. ``dep:generic/gcc`` would provide ``dep:virtual/compiler/c``).
+Entries without ``provides`` content or, if populated, only with ``dep:virtual/`` identifiers,
 are considered canonical.
 
 The list of known ecosystems assigns an identifier to each ecosystem and reports the
@@ -289,7 +289,7 @@ Each entry in this list is defined as:
       - Description
       - Required
     * - ``id``
-      - ``PURLField`` (``string`` matching ``^(pkg:|virtual:).*``)
+      - ``PURLField`` (``string`` matching ``^(dep:|dep:virtual/).*``)
       - PURL-like identifier
       - True
     * - ``description``
@@ -467,7 +467,7 @@ Each entry in this list is defined as:
       - Description
       - Required
     * - ``id``
-      - ``PURLField`` (``string`` matching ``^(pkg:|virtual:).*``)
+      - ``PURLField`` (``string`` matching ``^(dep:|dep:virtual/).*``)
       - PURL-like identifier, as provided in the central registry
       - True
     * - ``description``
@@ -565,8 +565,8 @@ module, implemented in C++ and using Boost and ``pybind11``, plus
 
     [external]
     build-requires = [
-      "virtual:compiler/cpp",
-      "pkg:generic/boost",
+      "dep:virtual/compiler/cpp",
+      "dep:generic/boost",
     ]
 
 With complete name mappings for ``apt`` on Ubuntu, this may then show the
@@ -581,8 +581,8 @@ following:
 
     $ # show all external dependencies
     $ py-show --external
-    virtual:compiler/cpp
-    pkg:generic/boost
+    dep:virtual/compiler/cpp
+    dep:generic/boost
 
     $ # show how to install external dependencies
     $ py-show --external --system-install-cmd
@@ -608,8 +608,8 @@ missing. If we get a build failure, the output may look like:
     This package has the following external dependencies, if those are missing
     on your system they are likely to be the cause of this build failure:
 
-      virtual:compiler/cpp
-      pkg:generic/boost
+      dep:virtual/compiler/cpp
+      dep:generic/boost
 
 If Pip has implemented support for querying the name mapping registry, the end
 of that message could improve to:
