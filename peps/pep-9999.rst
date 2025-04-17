@@ -525,6 +525,17 @@ Each entry in this list is defined as:
       - Command used to install the given packages. ``{}`` is a special placeholder
         for the package names in ``specs``. If not provided, they are appended.
       - True
+    * - ``version_operators``
+      - ``dict[string, string]``
+      - Mapping of PEP440 version comparison operators to the syntax used in this
+        package manager. If omitted, PEP 440 operators are used. If set to an empty
+        dictionary, it means that the package manager (or ecosystem) doesn't support
+        the notion of requesting particular package versions. The keys are ``and``,
+        ``arbitrary``, ``compatible``, ``equal``, ``greater_than_equal``,
+        ``greater_than``, ``less_than_equal``, ``less_than``, ``not_equal``, and
+        ``separator``. Empty strings can be used as a value if that particular operator
+        is not supported.
+      - False
 
 
 Examples
