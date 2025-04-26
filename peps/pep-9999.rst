@@ -218,12 +218,13 @@ available in the central registry. Its main content is a list of dictionaries, i
 
 - a ``specs`` field whose value MUST be one of:
 
-  - a dictionary with three keys (``build``, ``host``, ``run``). The values MUST be a list
-  of strings representing the ecosystem-specific package identifiers.
+  - a dictionary with three keys (``build``, ``host``, ``run``). The values
+    MUST be a list of strings representing the ecosystem-specific package
+    identifiers.
 
-  - a string or a list of strings representing the ecosystem-specific package
-    identifiers. In this case, the identifier(s) will be used to populate the
-    three categories mentioned in the item above.
+  - for convenience,  a string or a list of strings are also accepted as a
+    shorthand form. In this case, the identifier(s) will be used to populate
+    the three categories mentioned in the item above.
 
   - an empty list, which is understood as the ecosystem not having packages to
     provide such dependency.
