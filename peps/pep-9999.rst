@@ -219,7 +219,7 @@ available in the central registry. Its main content is a list of dictionaries, i
 - a ``specs`` field whose value MUST be one of:
 
   - a dictionary with three keys (``build``, ``host``, ``run``). The values
-    MUST be a list of strings representing the ecosystem-specific package
+    MUST be a string or list of strings representing the ecosystem-specific package
     identifiers.
 
   - for convenience,  a string or a list of strings are also accepted as a
@@ -235,6 +235,53 @@ available in the central registry. Its main content is a list of dictionaries, i
 - an optional ``urls`` field whose value MUST be a dictionary that maps a string
   to a URL. This is useful to link to external resources that provide more
   information about the mapped packages.
+
+Some examples from the conda-forge mapping include:
+
+.. code-block:: js
+
+  [
+    {
+      "id": "dep:generic/zlib",
+      "description": "zlib data compression library for the next generation systems. From zlib-ng/zlib-ng.",
+      "specs": "zlib-ng",  // Simplest form
+      "urls": {
+        "feedstock": "https://github.com/conda-forge/zlib-ng-feedstock"
+      }
+    },
+    {
+      "id": "dep:generic/libwebp",
+      "description": "WebP image library. libwebp-base ships libraries; libwebp ships the binaries.",
+      "specs": {  // expanded form with single spec per category
+        "build": "libwebp-base",
+        "host": "libwebp-base",
+        "run": "libwebp"
+      },
+      "urls": {
+        "feedstock": "https://github.com/conda-forge/libwebp-feedstock"
+      }
+    },
+    {
+      "id": "dep:generic/clang",
+      "description": "Development headers and libraries for Clang",
+      "specs": { // expanded form with specs list
+        "build": [
+          "clang",
+          "clangxx"
+        ],
+        "host": [
+          "clangdev"
+        ],
+        "run": [
+          "clang-format",
+          "clang-tools"
+        ]
+      },
+      "urls": {
+        "feedstock": "https://github.com/conda-forge/clangdev-feedstock"
+      }
+    },
+  ]
 
 The mappings may also specify another section ``package_managers``, reporting
 which package managers are available in the ecosystem. This field MUST
