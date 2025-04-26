@@ -210,18 +210,39 @@ so tools can map package manager names back to ecosystems without querying each 
 .. JRG: Not sure if tying the package manager list to the known ecosystems list is worth it.
 
 The mappings specify which ecosystem-specific identifiers provide the canonical entries
-available in the central registry. Each mapping entry consists of an ``id`` field with
-the canonical identifier, plus an optional free form ``description`` text. The field ``specs``
-MUST contain a string, a list of a strings, or a dictionary that maps ``build``, ``host`` and
-``run`` categories to a list of strings. These strings MUST be ecosystem-specific package
-identifiers. The only null value allowed is the empty list, which is understood as the
-ecosystem not having packages to provide such dependency.
+available in the central registry. Its main content is a list of dictionaries, in which each entry consists of:
 
-The mappings may also specify which package managers are available in the ecosystem under the
-key ``package_managers``. This field MUST take a dictionary with two fields: ``name`` (string)
-and ``command`` (list of strings, as expected by ``subprocess.run`` commands). The string
-``{}`` is taken as a placeholder for the package names in the command. If not provided,
-package names will be concatenated at the end of the command.
+- an ``id`` field with the ``dep:`` canonical identifier.
+
+- an optional free form ``description`` text.
+
+- a ``specs`` field whose value MUST be one of:
+
+  - a dictionary with three keys (``build``, ``host``, ``run``). The values MUST be a list
+  of strings representing the ecosystem-specific package identifiers.
+
+  - a string or a list of strings representing the ecosystem-specific package
+    identifiers. In this case, the identifier(s) will be used to populate the
+    three categories mentioned in the item above.
+
+  - an empty list, which is understood as the ecosystem not having packages to
+    provide such dependency.
+
+- a ``specs_from`` field whose value is a ``dep:`` identifier from which the ``specs``
+  field will be imported. Either ``specs`` or ``specs_from`` MUST be present.
+
+- an optional ``urls`` field whose value MUST be a dictionary that maps a string
+  to a URL. This is useful to link to external resources that provide more
+  information about the mapped packages.
+
+The mappings may also specify another section ``package_managers``, reporting
+which package managers are available in the ecosystem. This field MUST
+take a dictionary with the following fields:
+
+- ``name`` (string), usually the name of the package manager executable
+- ``install_command`` (list of strings), the command to run to install the mapped package(s).
+- ``version_operators``: a mapping of PEP 440 operator names to the relevant
+  syntax for this package manager.
 
 Details
 -------
@@ -543,6 +564,7 @@ Examples
 This prototype repository provides examples of how these schemas would look like in real cases:
 
 - `Central registry <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json>`__.
+- `Known ecosystems <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/known-ecosystems.json>`__.
 - Mappings:
   - `Arch-linux <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/arch-linux.mapping.json>`__.
   - `Chocolatey <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/chocolatey.mapping.json>`__.
