@@ -124,19 +124,17 @@ package manager of choice (`example StackOverflow question <https://unix.stackex
 Maintenance costs of name mappings
 ----------------------------------
 
-The maintenance cost of name mappings from PyPI to a large number of system
-package managers is potentially high. We choose to define the registry in such
-a way that these mappings can be maintained as part of the system package
-manager or distro/OS. Hence this system is opt-in for a system package manager,
-and the associated maintenance costs are distributed. Some package managers
+The maintenance cost of name mappings from PyPI to a large number of packaging
+ecosystems is potentially high. We choose to define the registry in such
+a way that these mappings can be maintained by the packaging ecosystems
+themselves. Hence this system is opt-in for a given ecosystem,
+and the associated maintenance costs are distributed. Some ecosystems
 have such a name mapping already, because it's required for tools like pyp2rpm_
 and Grayskull_ to work. In those cases, the additional maintenance costs of
 connecting those mappings to a central registry are likely limited.
 
-.. JRG: In this section I'd prefer to speak of ecosystems instead of package managers
-
-Generating system package manager-specific install commands
------------------------------------------------------------
+Generating package manager-specific install commands
+----------------------------------------------------
 
 Python package authors with external dependencies usually have installation
 instructions for those external dependencies in their documentation. These
@@ -155,9 +153,10 @@ The package names vary a lot, and there are differences like some distros
 splitting off headers and other build-time dependencies in a separate
 ``-dev``/``-devel`` package while others do not. With the registry in this PEP,
 this could be made both more comprehensive and easier to maintain though a tool
-command with semantics of *"show the system package manager install command for
-all external dependencies"*. This may be done as a standalone tool, or as a new
-subcommand in any Python development workflow tool (e.g., Pip, Poetry, Hatch, PDM).
+command with semantics of *"show this ecosystem's preferred package manager
+install command for all external dependencies"*. This may be done as a
+standalone tool, or as a new subcommand in any Python development workflow tool
+(e.g., Pip, Poetry, Hatch, PDM).
 
 
 Registry design
@@ -166,12 +165,12 @@ Registry design
 The mapping infrastructure should include the following components and properties:
 
 - A central registry for known generic and virtual PURLs.
-- A list of known ecosystems and package managers, where ecosystem maintainers
+- A list of known ecosystems and their package managers, where ecosystem maintainers
   can register their name mapping(s).
-- A standardized schemsa that defines how mappings should be structured.
+- A standardized schema that defines how mappings should be structured.
 - The above documents should be written in a structured, human-readable file format.
   As long as it can be validated with the corresponding JSON Schemas, they could be
-  delivered as JSON, YAML, TOML and/or others. Authors recommend JSON or YAML.
+  delivered as JSON, YAML, TOML and/or others.
 - One central Python package for the central registry, list of ecosystems and known
   mappings.
 
@@ -190,7 +189,7 @@ Specification
 
 Three schemas are proposed:
 
-1. A central registry of PURLs.
+1. A central registry of external dependency identifiers.
 2. A list of known ecosystems and their package manager names.
 3. The ecosystem-specific mappings of PURLs to package specifiers,
    plus details of their package managers.
