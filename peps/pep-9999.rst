@@ -28,9 +28,9 @@ Packages on PyPI often require build-time and runtime dependencies that are not
 present on PyPI. :doc:`pep-0725` introduced metadata to express
 such dependencies. In order to make use of concrete external dependency metadata for
 a Python package, it is necessary to map given dependency identifiers to the names
-used in other ecosystems. The same is true for PyPI package names.
+used in other ecosystems.
 
-Key motivators for this PEP are:
+In the context of external dependencies, there are at least two key motivators:
 
 - Enable tools to automatically map external dependencies to packages in other
   packaging repositories/ecosystems,
@@ -51,16 +51,15 @@ this PEP, making packaging Python easier and more reliable. In addition, the
 authors envision other types of tools making use of this information, e.g.,
 dependency analysis tools like Repology_, Dependabot_ and libraries.io_.
 
-
-Other key motivation:
-
-- Allow other packaging ecosystems to avoid repackaging pure Python wheels.
-  One key requirement for that is to be able to have a mapping between PyPI
-  package names and the corresponding names in the other package manager:
-  https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68
-  Non-pure packages have to be rebuilt, pure Python ones don't have to.
-  https://github.com/spack/spack/issues/28282#issuecomment-1562178367
-  https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103
+It is also common that other ecosystems repackage Python projects with their own
+packaging system. While this is required for packages with compiled extensions, it
+is theoretically unnecessary for pure Python wheels. The mapping proposed in this PEP
+would allow downstream redistribution efforts to focus on the compiled packages and
+instead delegate pure wheels to Python packaging solutions directly.
+See https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68,
+https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103 and
+https://github.com/spack/spack/issues/28282#issuecomment-1562178367 for examples of
+discussions in this direction.
 
 
 Rationale
