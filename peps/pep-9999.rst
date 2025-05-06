@@ -693,11 +693,9 @@ of that message could improve to:
       g++
       libboost-all-dev
 
-If the user wants to use Conda packages and the ``mamba`` package manager to
+If the user wants to use conda packages and the ``mamba`` package manager to
 install external dependencies, they may specify that in a
 ``~/.pypi-name-mappings`` file:
-
-.. JRG: Should this file use a XDG-standardized location?
 
 .. code::
 
