@@ -203,13 +203,9 @@ Entries without ``provides`` content or, if populated, only with ``dep:virtual/`
 are considered canonical.
 
 The list of known ecosystems assigns an identifier to each ecosystem and reports the
-canonical location for its mapping. The known package managers are also provided here
-so tools can map package manager names back to ecosystems without querying each mapping.
-
-.. JRG: Not sure if tying the package manager list to the known ecosystems list is worth it.
-
-The mappings specify which ecosystem-specific identifiers provide the canonical entries
-available in the central registry. Its main content is a list of dictionaries, in which each entry consists of:
+canonical location for its mapping. The mappings specify which ecosystem-specific
+identifiers provide the canonical entries available in the central registry. Its
+main content is a list of dictionaries, in which each entry consists of:
 
 - an ``id`` field with the ``dep:`` canonical identifier.
 
@@ -431,16 +427,12 @@ to a sub-dictionary defined as:
     :widths: 20 25 40 15
 
     * - Field
-      - URL
+      - Type
       - Description
       - Required
     * - ``schema``
       - ``AnyURL``
       - URL to the mapping for this ecosystem
-      - True
-    * - ``package_managers``
-      - ``list[string]``
-      - List of package manager names known in this ecosystem
       - True
 
 Mappings schema
