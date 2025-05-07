@@ -1,0 +1,928 @@
+PEP: 9999
+Title: A package dependency name mapping mechanism
+Author: Pradyun Gedam <pradyunsg@gmail.com>,
+        Ralf Gommers <ralf.gommers@gmail.com>,
+        Jaime Rodríguez-Guerra <jrodriguez@quansight.com>,
+        Michael Sarahan <msarahan@gmail.com>
+Discussions-To:
+Status: Draft
+Type: Standards Track
+Topic: Packaging
+Created: 17-Aug-2023
+Post-History: 17-Aug-2023,
+Resolution:
+
+
+Abstract
+========
+
+This PEP specifies a name mapping mechanism that allows packaging tools to map
+canonical PyPI and external dependency identifiers to the specifiers
+of packages in other package repositories.
+
+
+Motivation
+==========
+
+Packages on PyPI often require build-time and runtime dependencies that are not
+present on PyPI. :doc:`pep-0725` introduced metadata to express
+such dependencies. In order to make use of concrete external dependency metadata for
+a Python package, it is necessary to map given dependency identifiers to the names
+used in other ecosystems.
+
+In the context of external dependencies, there are at least two key motivators:
+
+- Enable tools to automatically map external dependencies to packages in other
+  packaging repositories/ecosystems,
+- Make it possible to include needed external dependencies *with the package
+  names used by the relevant system package manager on the user's system* in
+  error messages emitted by Python package installers and build frontends,
+  as well as allow the user to query for those names directly to obtain install
+  instructions.
+
+Packaging ecosystems like Linux distros, conda, Homebrew, Spack, and Nix need
+full sets of dependencies for Python packages, and have tools like pyp2rpm_
+(Fedora), Grayskull_ (conda), and dh_python_ (Debian) which attempt to
+automatically generate dependency metadata automatically from the metadata in
+upstream Python packages. Before PEP 725, external dependencies were handled manually,
+because there was no metadata for this in ``pyproject.toml`` or any other
+standard metadata file. Enabling automating this conversion is a key benefit of
+this PEP, making packaging Python easier and more reliable. In addition, the
+authors envision other types of tools making use of this information, e.g.,
+dependency analysis tools like Repology_, Dependabot_ and libraries.io_.
+
+It is also common that other ecosystems repackage Python projects with their own
+packaging system. While this is required for packages with compiled extensions, it
+is theoretically unnecessary for pure Python wheels. The mapping proposed in this PEP
+would allow downstream redistribution efforts to focus on the compiled packages and
+instead delegate pure wheels to Python packaging solutions directly.
+See https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68,
+https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103 and
+https://github.com/spack/spack/issues/28282#issuecomment-1562178367 for examples of
+discussions in this direction.
+
+
+Rationale
+=========
+
+Prior art
+---------
+R: https://github.com/rstudio/r-system-requirements. The R system with central
+registry knows how to translate external dependency metadata to install
+commands for package managers like ``apt-get``. This registry centralises the
+mappings for a series of Linux distributions, and also Windows. macOS is not
+present. The "Rule Coverage" of its README shows how that improves the chance
+of success of building packages from CRAN from source. Across all CRAN packages,
+Ubuntu 18 improves from 78.1% to 95.8%, CentOS 7 from 77.8% to 93.7% and openSUSE
+15.0 from 78.2% to 89.7%. The chance of success depends on how well the registry
+is maintained, but the gain is significant - ~4x fewer packages fail to build on
+Ubuntu and CentOS in a Docker container.
+
+Fedora/RPM:
+https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/117?u=rgommers.
+The ``NameConvertor`` implementation in pyp2rpm_ is based on rules, with the
+base one being that the RPM name for a PyPI package is
+``f"python-{pypi_package_name}"``. This seems to work quite well; there are a
+few variants like Python version specific names, where the prefix contains the
+Python major and minor version numbers (e.g. ``python311-`` instead of
+``python-``).
+
+Gentoo follows a similar approach to naming Python packages, using the ``dev-python/``
+category and some `well-specified rules <https://projects.gentoo.org/python/guide/package-maintenance.html>`__.
+
+Conda-forge has a more explicit name mapping, because the base names are the
+same in conda-forge as on PyPI (e.g., ``numpy`` maps to ``numpy``), but there
+are many exceptions because of both name collisions and renames (e.g., the PyPI
+name for PyTorch is ``torch`` while in conda-forge it's ``pytorch``). There are
+several name mappings efforts maintained by different teams. Conda-forge's infrastructure
+generates one in `regro/cf-graph-countyfair <https://github.com/regro/cf-graph-countyfair/tree/master/mappings/pypi>`__.
+Grayskull maintains `its own curated mapping <https://github.com/conda/grayskull/blob/main/grayskull/strategy/config.yaml>`__.
+Prefix.dev created the `parselmouth mappings <https://github.com/prefix-dev/parselmouth>`__
+to support conda and PyPI integrations in their tooling. A more complete overview of
+their approaches, strengths and weaknesses can be found in
+`conda/grayskull#564 <https://github.com/conda/grayskull/issues/564>`__.
+
+The `OpenStack <https://www.openstack.org/>`__ ecosystem also needs to deal with
+some mapping efforts. All of them focus on Linux distributions, exclusively.
+`pkg-map <https://docs.openstack.org/diskimage-builder/latest/elements/pkg-map/README.html>`__
+accompanies ``diskimage-builder`` and provides a file format where the user defines
+arbitrary variable names and their corresponding name in the target distro
+(Red Hat, Debian, OpenSUSE, etc). See `example for PyYAML <https://github.com/stbenjam/diskimage-builder/blob/5bc5f8aff3b40b1918ce72660f1dba38c3c4f27a/diskimage_builder/elements/svc-map/pkg-map#L4>`__.
+`bindep <https://opendev.org/opendev/bindep>`__ defines a file ``bindep.txt``
+(see `example <https://opendev.org/opendev/bindep/src/branch/master/bindep/tests/bindep.txt>`__)
+where users can write down dependencies that are not pip-installable. The format is
+line-based, with each line containing a dependency as found in the Debian ecosystem.
+For other distributions, it offers a "filters" syntax between square brackets where users
+can indicate other target platforms, optional dependencies and extras.
+
+The need for mappings is also found in other ecosystems like `SageMath <https://github.com/sagemath/sage/issues/36356>`__,
+but also by end-users themselves who want to install PyPI packages with their system
+package manager of choice (`example StackOverflow question <https://unix.stackexchange.com/q/761371>`__).
+
+
+Maintenance costs of name mappings
+----------------------------------
+
+The maintenance cost of name mappings from PyPI to a large number of packaging
+ecosystems is potentially high. We choose to define the registry in such
+a way that these mappings can be maintained by the packaging ecosystems
+themselves. Hence this system is opt-in for a given ecosystem,
+and the associated maintenance costs are distributed. Some ecosystems
+have such a name mapping already, because it's required for tools like pyp2rpm_
+and Grayskull_ to work. In those cases, the additional maintenance costs of
+connecting those mappings to a central registry are likely limited.
+
+Generating package manager-specific install commands
+----------------------------------------------------
+
+Python package authors with external dependencies usually have installation
+instructions for those external dependencies in their documentation. These
+instructions are difficult to write and keep up-to-date, and are usually only
+covering one or at most a handful of platforms. As an example, here are SciPy's
+instructions for its external build dependencies (C/C++/Fortran compilers,
+OpenBLAS, pkg-config):
+
+- Debian/Ubuntu: ``sudo apt install -y gcc g++ gfortran libopenblas-dev liblapack-dev pkg-config python3-pip python3-dev``
+- Fedora: ``sudo dnf install gcc-gfortran python3-devel openblas-devel lapack-devel pkgconfig``
+- CentOS/RHEL: ``sudo yum install gcc-gfortran python3-devel openblas-devel lapack-devel pkgconfig``
+- Arch Linux: ``sudo pacman -S gcc-fortran openblas pkgconf``
+- Homebrew on macOS: ``brew install gfortran openblas pkg-config``
+
+The package names vary a lot, and there are differences like some distros
+splitting off headers and other build-time dependencies in a separate
+``-dev``/``-devel`` package while others do not. With the registry in this PEP,
+this could be made both more comprehensive and easier to maintain though a tool
+command with semantics of *"show this ecosystem's preferred package manager
+install command for all external dependencies"*. This may be done as a
+standalone tool, or as a new subcommand in any Python development workflow tool
+(e.g., Pip, Poetry, Hatch, PDM).
+
+
+Registry design
+---------------
+
+The mapping infrastructure should include the following components and properties:
+
+- A central registry for known generic and virtual PEP 725 identifiers (``dep:`` URLs).
+- A list of known ecosystems and their package managers, where ecosystem maintainers
+  can register their name mapping(s).
+- A standardized schema that defines how mappings should be structured.
+- The above documents should be written in a structured, human-readable file format.
+  As long as it can be validated with the corresponding JSON Schemas, they could be
+  delivered as JSON, YAML, TOML and/or others.
+- One central Python package for the central registry, list of ecosystems and known
+  mappings.
+
+On the client side, there should be:
+
+- A way for the system to specify a default (e.g., the Python install on Ubuntu
+  could register ``apt`` as the default system package manager with the
+  registry tool). It may also be left unspecified.
+- A way for the user to specify the default and/or current system package manager.
+  E.g., a user on Ubuntu may want either ``apt``, ``conda``, ``brew``  or ``spack``
+  as their package manager of choice to provide external dependencies.
+
+
+Specification
+=============
+
+Three schemas are proposed:
+
+1. A central registry of ``dep:`` identifiers.
+2. A list of known ecosystems and their package manager names.
+3. The ecosystem-specific mappings of ``dep:`` identifiers to their
+   corresponding ecosystem specifiers, plus details of their package managers.
+
+The central registry defines which identifiers are recognized as canonical. Each entry MUST
+provide a valid ``dep:`` identifier in the field ``id``, with an optional free form ``description`` text.
+Additionally some entries MAY refer to another entry via the ``provides`` field, which takes a
+list of strings already defined as ``id`` in the registry. This is useful for aliases
+(e.g. ``dep:generic/arrow`` and ``dep:github/apache/arrow``), and concrete implementations of
+a ``dep:virtual/`` entry (e.g. ``dep:generic/gcc`` would provide ``dep:virtual/compiler/c``).
+Entries without ``provides`` content or, if populated, only with ``dep:virtual/`` identifiers,
+are considered canonical.
+
+The list of known ecosystems assigns an identifier to each ecosystem and reports the
+canonical location for its mapping. The mappings specify which ecosystem-specific
+identifiers provide the canonical entries available in the central registry. Its
+main content is a list of dictionaries, in which each entry consists of:
+
+- an ``id`` field with the ``dep:`` canonical identifier.
+
+- an optional free form ``description`` text.
+
+- a ``specs`` field whose value MUST be one of:
+
+  - a dictionary with three keys (``build``, ``host``, ``run``). The values
+    MUST be a string or list of strings representing the ecosystem-specific package
+    identifiers.
+
+  - for convenience,  a string or a list of strings are also accepted as a
+    shorthand form. In this case, the identifier(s) will be used to populate
+    the three categories mentioned in the item above.
+
+  - an empty list, which is understood as the ecosystem not having packages to
+    provide such dependency.
+
+- a ``specs_from`` field whose value is a ``dep:`` identifier from which the ``specs``
+  field will be imported. Either ``specs`` or ``specs_from`` MUST be present.
+
+- an optional ``urls`` field whose value MUST be a dictionary that maps a string
+  to a URL. This is useful to link to external resources that provide more
+  information about the mapped packages.
+
+Some examples from the conda-forge mapping include:
+
+.. code-block:: js
+
+  [
+    {
+      "id": "dep:generic/zlib",
+      "description": "zlib data compression library for the next generation systems. From zlib-ng/zlib-ng.",
+      "specs": "zlib-ng",  // Simplest form
+      "urls": {
+        "feedstock": "https://github.com/conda-forge/zlib-ng-feedstock"
+      }
+    },
+    {
+      "id": "dep:generic/libwebp",
+      "description": "WebP image library. libwebp-base ships libraries; libwebp ships the binaries.",
+      "specs": {  // expanded form with single spec per category
+        "build": "libwebp-base",
+        "host": "libwebp-base",
+        "run": "libwebp"
+      },
+      "urls": {
+        "feedstock": "https://github.com/conda-forge/libwebp-feedstock"
+      }
+    },
+    {
+      "id": "dep:generic/clang",
+      "description": "Development headers and libraries for Clang",
+      "specs": { // expanded form with specs list
+        "build": [
+          "clang",
+          "clangxx"
+        ],
+        "host": [
+          "clangdev"
+        ],
+        "run": [
+          "clang",
+          "clangxx",
+          "clang-format",
+          "clang-tools"
+        ]
+      },
+      "urls": {
+        "feedstock": "https://github.com/conda-forge/clangdev-feedstock"
+      }
+    },
+  ]
+
+The mappings may also specify another section ``package_managers``, reporting
+which package managers are available in the ecosystem. This field MUST
+take a dictionary with the following fields:
+
+- ``name`` (string), usually the name of the package manager executable
+- ``install_command`` (list of strings), the command to run to install the mapped package(s).
+- ``version_operators``: a mapping of PEP 440 operator names to the relevant
+  syntax for this package manager.
+
+Details
+-------
+
+Two JSON Schema documents are provided to fully standardize the registry and mappings.
+
+Central registry schema
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The central registry is specified by the following
+`JSON schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json>`__:
+
+``$schema``
+~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - $Schema
+    * - Type
+      - ``string``
+    * - Description
+      - URL of the definition list schema in use for the document.
+    * - Required
+      - False
+
+``schema_version``
+~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Schema Version
+    * - Type
+      - ``integer``
+    * - Required
+      - False
+
+``definitions``
+~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Definitions
+    * - Type
+      - ``array``
+    * - Description
+      - List of ``dep:`` identifiers currently recognized.
+    * - Required
+      - True
+
+Each entry in this list is defined as:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 25 40 15
+
+    * - Field
+      - Type
+      - Description
+      - Required
+    * - ``id``
+      - ``DepURLField`` (``string`` matching ``^(dep:|dep:virtual/).*``)
+      - ``dep:`` identifier
+      - True
+    * - ``description``
+      - ``string``
+      - Free-form field to add some details about the package. Allows Markdown.
+      - False
+    * - ``provides``
+      - ``DepURLField | list[DepURLField]``
+      - List of identifiers this entry connects to.
+        Useful to annotate aliases or virtual package implementations.
+        If no `provides` info is added, the entry is considered canonical.
+      - False
+    * - ``urls``
+      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
+      - Hyperlinks to web locations that provide more information about the definition.
+      - False
+
+Known ecosystems schema
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The known ecosystems list is specified by the following
+`JSON Schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/known-ecosystems.schema.json>`__:
+
+``$schema``
+~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - $Schema
+    * - Type
+      - ``string``
+    * - Description
+      - URL of the mappings schema in use for the document.
+    * - Required
+      - False
+
+``schema_version``
+~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Schema Version
+    * - Type
+      - ``integer``
+    * - Required
+      - False
+
+``ecosystems``
+~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Ecosystems
+    * - Type
+      - ``dict``
+    * - Description
+      - Ecosystems names and their corresponding details.
+    * - Required
+      - True
+
+This dictionary maps non-empty string keys referring to the ecosystem identifiers
+to a sub-dictionary defined as:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 25 40 15
+
+    * - Field
+      - Type
+      - Description
+      - Required
+    * - ``schema``
+      - ``AnyURL``
+      - URL to the mapping for this ecosystem
+      - True
+
+Mappings schema
+^^^^^^^^^^^^^^^
+
+The mappings are specified by the following
+`JSON Schema <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json>`__:
+
+``$schema``
+~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - $Schema
+    * - Type
+      - ``string``
+    * - Description
+      - URL of the mappings schema in use for the document.
+    * - Required
+      - False
+
+``schema_version``
+~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Schema Version
+    * - Type
+      - ``integer``
+    * - Required
+      - False
+
+``name``
+~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Name
+    * - Type
+      - ``string``
+    * - Description
+      - Name of the schema
+    * - Required
+      - True
+
+``description``
+~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Description
+    * - Type
+      - ``string | None``
+    * - Description
+      - Free-form field to add information this mapping. Allows
+        Markdown.
+    * - Required
+      - False
+
+``mappings``
+~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Mappings
+    * - Type
+      - ``array``
+    * - Description
+      - List of ``dep:``-to-specs mappings.
+    * - Required
+      - True
+
+Each entry in this list is defined as:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 25 40 15
+
+    * - Field
+      - Type
+      - Description
+      - Required
+    * - ``id``
+      - ``DepURLField`` (``string`` matching ``^(dep:|dep:virtual/).*``)
+      - ``dep:`` identifier, as provided in the central registry
+      - True
+    * - ``description``
+      - ``string``
+      - Free-form field to add some details about the package. Allows Markdown.
+      - False
+    * - ``urls``
+      - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
+      - Hyperlinks to web locations that provide more information about the definition.
+      - False
+    * - ``specs``
+      - ``string | list[string] | dict[Literal['build', 'host', 'run'], string | list[string]]``
+      - Ecosystem-specific identifiers for this package. The full form is a dictionary
+        that maps the categories ``build``, ``host`` and ``run`` to their corresponding
+        package identifiers. As a shorthand, a single string or a list of strings can be
+        provided, in which case will be used to populate the three categories identically.
+      - Either ``specs`` or ``specs_from`` MUST be present.
+    * - ``specs_from``
+      - ``DepURLField``
+      - Take specs from another mapping entry.
+      - Either ``specs`` or ``specs_from`` MUST be present.
+
+``package_managers``
+~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+    :widths: 25 75
+
+    * - Title
+      - Package Managers
+    * - Type
+      - ``array``
+    * - Description
+      - List of tools that can be used to install packages in this
+        ecosystem.
+    * - Required
+      - True
+
+Each entry in this list is defined as:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 25 40 15
+
+    * - Field
+      - Type
+      - Description
+      - Required
+    * - ``name``
+      - ``string``
+      - Short identifier for this package manager (usually the command name)
+      - True
+    * - ``install_command``
+      - ``list[string]``
+      - Command used to install the given packages. ``{}`` is a special placeholder
+        for the package names in ``specs``. If not provided, they are appended.
+      - True
+    * - ``version_operators``
+      - ``dict[string, string]``
+      - Mapping of PEP440 version comparison operators to the syntax used in this
+        package manager. If omitted, PEP 440 operators are used. If set to an empty
+        dictionary, it means that the package manager (or ecosystem) doesn't support
+        the notion of requesting particular package versions. The keys are ``and``,
+        ``arbitrary``, ``compatible``, ``equal``, ``greater_than_equal``,
+        ``greater_than``, ``less_than_equal``, ``less_than``, ``not_equal``, and
+        ``separator``. Empty strings can be used as a value if that particular operator
+        is not supported.
+      - False
+
+
+Examples
+--------
+
+This prototype repository provides examples of how these schemas would look like in real cases:
+
+- `Central registry <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json>`__.
+- `Known ecosystems <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/known-ecosystems.json>`__.
+- Mappings:
+  - `Arch-linux <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/arch-linux.mapping.json>`__.
+  - `Chocolatey <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/chocolatey.mapping.json>`__.
+  - `Conda-forge <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/conda-forge.mapping.json>`__.
+  - `Fedora <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/fedora.mapping.json>`__.
+  - `Homebrew <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/homebrew.mapping.json>`__.
+  - `Scoop <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/scoop.mapping.json>`__.
+  - `Ubuntu <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/ubuntu.mapping.json>`__.
+  - `Winget <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/winget.mapping.json>`__.
+
+Practical cases
+^^^^^^^^^^^^^^^
+
+The following examples illustrate how the name mapping mechanism may be used.
+Note that the ``py-show`` command is hypothetical; this could be a ``pip``
+command or implemented in a new tool with a different name.
+
+Say we have a Python package named ``my-cpp-pkg`` with a single extension
+module, implemented in C++ and using Boost and ``pybind11``, plus
+``meson-python`` as the build backend:
+
+.. code:: toml
+
+    [build-system]
+    build-backend = 'mesonpy'
+    requires = [
+      "meson-python>=0.13.1",
+      "pybind11>=2.10.4",
+    ]
+
+    [external]
+    build-requires = [
+      "dep:virtual/compiler/cpp",
+      "dep:generic/boost",
+    ]
+
+With complete name mappings for ``apt`` on Ubuntu, this may then show the
+following:
+
+.. code:: bash
+
+    $ # show all PyPI dependencies
+    $ py-show --pypi
+    meson-python
+    pybind11
+
+    $ # show all external dependencies
+    $ py-show --external
+    dep:virtual/compiler/cpp
+    dep:generic/boost
+
+    $ # show how to install external dependencies
+    $ py-show --external --system-install-cmd
+    sudo apt install g++ libboost-all-dev
+
+    $ # show install command for both PyPI and external dependencies
+    $ # this could include the Python dev headers too if those are missing
+    $ py-show --all --system-install-cmd
+    sudo apt install python3-dev g++ libboost-all-dev python3-mesonpy python3-pybind11 pybind11-dev
+
+We have not yet run those install commands, so the external dependency may be
+missing. If we get a build failure, the output may look like:
+
+.. code::
+
+    $ pip install .
+    ...
+    × Encountered error while generating package metadata.
+    ╰─> See above for output.
+
+    note: This is an issue with the package mentioned above, not pip.
+
+    This package has the following external dependencies, if those are missing
+    on your system they are likely to be the cause of this build failure:
+
+      dep:virtual/compiler/cpp
+      dep:generic/boost
+
+If Pip has implemented support for querying the name mapping registry, the end
+of that message could improve to:
+
+.. code:: bash
+
+    The following external dependencies are needed to install the package
+    mentioned above, and are not installed with `apt`:
+
+      g++
+      libboost-all-dev
+
+If the user wants to use conda packages and the ``mamba`` package manager to
+install external dependencies, they may specify that in a
+``~/.pypi-name-mappings`` file:
+
+.. code::
+
+    system-package-manager: mamba
+
+This will then change the output of ``py-show``:
+
+.. code:: bash
+
+    $ py-show --all --system-install-cmd
+    mamba install cxx-compiler libboost-devel
+
+In order to use the name mappings for the recipe generator of our package, we
+can now run Grayskull_:
+
+.. code::
+
+    $ grayskull pypi my-cpp-pkg
+    #### Initializing recipe for my-cpp-pkg (pypi) ####
+
+    Recovering metadata from pypi...
+    Starting the download of the sdist package my-cpp-pkg
+    my-cpp-pkg 100% Time:  0:00:10   5.3 MiB/s|###########|
+    Checking for pyproject.toml
+    ...
+
+    Build requirements:
+      - python                                 # [build_platform != target_platform]
+      - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+      - meson-python >= 0.13.1                 # [build_platform != target_platform]
+      - pybind11 >= 2.10.4                     # [build_platform != target_platform]
+      - ninja                                  # [build_platform != target_platform]
+      - libboost-devel                         # [build_platform != target_platform]
+      - {{ compiler('cxx') }}
+    Host requirements:
+      - python
+      - meson-python >=0.13.1
+      - pybind11 >=2.10.4
+      - ninja
+      - libboost-devel
+    Run requirements:
+      - python
+
+    #### Recipe generated on /path/to/recipe/dir for my-cpp-pkg ####
+
+
+
+Backwards Compatibility
+=======================
+
+There is no impact on backwards compatibility.
+
+
+Security Implications
+=====================
+
+TBD.
+
+How to Teach This
+=================
+
+There are at least four audiences that need to learn a workflow here.
+
+1. Python package maintainers wishing to express an external dependency.
+2. Package ecosystem maintainers, who are responsible for keeping the
+   mapping for their ecosystem current.
+3. Core registry maintainers, who are responsible for curating the central
+   repository of ``dep:`` identifiers and descriptors.
+4. End users of packages that have external dependency metadata.
+
+Python package maintainer usage
+-------------------------------
+
+A package maintainer's responsibility is to decide the ``dep:`` identifier that best
+represents the external dependency that their package needs. Their task
+consists of:
+
+1. Understanding the nature of their dependency. Do they only need runtime
+   libraries, or do they need development packages for build-time concerns?
+   This understanding feeds into PEP 725, which specifies the expression of
+   these dependencies in metadata.
+2. Looking up the ``dep:`` identifier. This can either mean knowing the name of the package
+   in their package ecosystem, and then inverse-mapping that to the ``dep:`` identifier, or
+   it can mean looking up the ``dep:`` identifier directly.
+3. When a package maintainer does not find an appropriate mapping, they should look
+   for a fitting ``dep:`` identifier. It can be the case that although a ``dep:`` identifier is registered, not every
+   package ecosystem has a corresponding mapping. If no appropriate ``dep:`` identifier exists,
+   the package maintainer may consider submitting a new ``dep:`` identifier to the central registry.
+
+An overall workflow diagram might look like this:
+
+.. mermaid::
+
+   flowchart TD
+     A[Python package author with new external dependency] --> |Looks in| B(``dep:`` identifier/description collection)
+     B --> | Find ``dep:`` identifier OK | E(Add ``dep:`` identifier to pyproject.toml)
+     A --> | Looks in | C(Ecosystem mapping file)
+     C --> | Finds familiar ecosystem package name | D(Inverse map ecosystem package name to ``dep:`` identifier)
+     D --> | Mapping exists | E
+     B --> | ``dep:`` identifier not found | F(Submit identifier proposal to ``dep:`` identifier/description collection)
+     F --> | Accepted | G(Mapping maintainers notified of missing ``dep:`` identifier mappings)
+     D --> | Mapping missing. User looks in ``dep:`` identifier collection. | B
+     B --> | Was mapping missing? | H(User may contribute entry to mapping)
+
+Package ecosystem maintainers usage
+-----------------------------------
+
+Any packages that express a ``dep:`` identifier that does not have a mapping in a given package
+ecosystem might not be able to provide tailored error messages and other UX affordances for end users.
+It is thus recommended that each package ecosystem maintain their mappings. Key to this will
+be automation. Some ideas for automation are:
+
+1. Alert mapping maintainers whenever a new ``dep:`` identifier is added to the registry (probably noisy).
+2. Provide tools that allow maintainers to diff their mappings to the registry contents to
+   quickly identify missing entries.
+3. Provide automated tooling that submits PRs to known mapping locations, such that maintainers
+   need only fill in the ecosystem package name.
+4. Provide status for each ``dep:`` identifier, to readily identify which ``dep:`` identifiers need attention.
+
+This maintenance is likely to be a lot of work to establish the initial mapping, but ideally small
+on an ongoing basis.
+
+
+Central ``dep:`` identifier registry maintainers
+------------------------------------------------
+
+Central ``dep:`` identifier registry maintainers curate the collection of ``dep:`` identifiers. These contributors
+need to be able to refer to clearly defined rules for when a new ``dep:`` identifier can be defined. It is
+undesirable to be loose with canonical ``dep:`` identifier definitions, because each definition implies
+maintenance in the mappings in many other places.
+
+
+End user package consumers
+--------------------------
+
+There will be no change in user experience by default. End users do not need to know about
+this mechanism unless they opt in, which they may want to do to, for example, reduce their
+bandwidth and disk space usage.
+
+If they do opt-in, in an ideal case these package install commands can be done transparently,
+and the user experience remains unchanged. There are several foreseeable issues that will arise,
+though:
+
+* A mapping does not exist for the user's desired package ecosystem.
+* A user does not have permissions to run the install commands provided by our
+  tool (e.g. system Python users).
+
+These issues might impact the user experience with untailored error messages for the chosen
+ecosystem, permission errors reports, and so on.
+
+Reference Implementation
+========================
+
+A reference implementation should include three components:
+
+1. A central registry that captures at a minimum a ``dep:`` identifier and its description. This registry should
+   NOT contain specifics of package ecosystem mappings.
+2. A standard specification for a collection of mappings. JSON Schema is widely used for schema
+   in many text editors, and would be a natural choice for expression of the standard specification.
+3. An implementation of (2), providing mappings from the contents of the central
+   registry to the ecosystem-specific package names.
+
+For (1), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json.
+An example registry can be found at https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json.
+For (2), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json.
+For (3), a collection of example mappings for a sample of packages can be found at https://github.com/jaimergp/external-metadata-mappings/tree/main/data.
+
+The JSON Schemas are created with this Pydantic model (https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/schema.py).
+
+An example Python API, ``external-metadata-mappings``, to consume the different JSON documents
+can be found at https://github.com/jaimergp/external-metadata-mappings.
+
+A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for
+Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
+
+
+Rejected Ideas
+==============
+
+- Centralized registry and mappings governed by the same body. While a central authority for the
+  registry is useful, the maintenance burden of handling the mappings for multiple ecosystems is
+  unfeasible at the scale of PyPI.
+
+Open Issues
+===========
+
+References
+==========
+
+- https://github.com/rgommers/external-deps-build
+- https://github.com/jaimergp/external-metadata-mappings
+- https://github.com/conda/grayskull/pull/518
+
+Copyright
+=========
+
+This document is placed in the public domain or under the
+CC0-1.0-Universal license, whichever is more permissive.
+
+
+.. _PyPI: https://pypi.org
+.. _core metadata: https://packaging.python.org/specifications/core-metadata/
+.. _setuptools: https://setuptools.readthedocs.io/
+.. _setuptools metadata: https://setuptools.readthedocs.io/en/latest/setuptools.html#metadata
+.. _SPDX: https://spdx.dev/
+.. _PURL: https://github.com/package-url/purl-spec/
+.. _vers: https://github.com/package-url/purl-spec/blob/version-range-spec/VERSION-RANGE-SPEC.rst
+.. _vers implementation for PURL: https://github.com/package-url/purl-spec/pull/139
+.. _pyp2rpm: https://github.com/fedora-python/pyp2rpm
+.. _Grayskull: https://github.com/conda/grayskull
+.. _dh_python: https://www.debian.org/doc/packaging-manuals/python-policy/index.html#dh-python
+.. _Repology: https://repology.org/
+.. _Dependabot: https://github.com/dependabot
+.. _libraries.io: https://libraries.io/
+.. _crossenv: https://github.com/benfogle/crossenv
+.. _Python Packaging User Guide: https://packaging.python.org
+.. _pyOpenSci Python Open Source Package Development Guide: https://www.pyopensci.org/python-package-guide/
+.. _Scikit-HEP packaging guide: https://scikit-hep.org/developer/packaging
+
+
+..
+   Local Variables:
+   mode: indented-text
+   indent-tabs-mode: nil
+   sentence-end-double-space: t
+   fill-column: 70
+   coding: utf-8
+   End:
