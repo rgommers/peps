@@ -627,7 +627,9 @@ there are parts that do have a reference implementation:
    with ``tomllib``.
 2. The PURL specification, as a key part of this spec, has a Python package
    with a reference implementation for constructing and parsing PURLs:
-   `packageurl-python`_.
+   `packageurl-python`_. The ``dep:`` URLs can be handled with this package.
+
+.. JRG: Once https://github.com/package-url/packageurl-python/pull/184 goes in.
 
 There are multiple possible consumers and use cases of this metadata, once
 that metadata gets added to Python packages. Tested metadata for all of the
