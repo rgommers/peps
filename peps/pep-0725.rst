@@ -96,7 +96,7 @@ Multiple types of external dependencies can be distinguished:
   canonical location. This is typically the case for libraries and tools
   written in C, C++, Fortran, CUDA and other low-level languages. E.g.,
   Boost, OpenSSL, Protobuf, Intel MKL, GCC.
-- "Virtual" or "abstract" packages, which are names for concepts, types of tools or
+- "Virtual" packages, which are names for concepts, types of tools or
   interfaces. These typically have multiple implementations, which *are*
   concrete packages. E.g., a C++ compiler, BLAS, LAPACK, OpenMP, MPI.
 
