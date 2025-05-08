@@ -26,7 +26,7 @@ are for specifying three types of dependencies:
 3. ``dependencies``, needed at runtime on the host machine but not needed at build time.
 
 Cross compilation is taken into account by distinguishing build and host dependencies.
-Optional build-time and runtime dependencies are supported too, in a manner analogies
+Optional build-time and runtime dependencies are supported too, in a manner analogous
 to how that is supported in the ``[project]`` table.
 
 
@@ -48,7 +48,7 @@ this PEP are to:
 
 Packaging ecosystems like Linux distros, conda, Homebrew, Spack, and Nix need
 full sets of dependencies for Python packages, and have tools like pyp2spec_
-(Fedora), Grayskull_ (Conda), and dh_python_ (Debian) which attempt to
+(Fedora), Grayskull_ (conda), and dh_python_ (Debian) which attempt to
 automatically generate dependency metadata for their own package managers from the metadata in
 upstream Python packages. External dependencies are currently handled manually,
 because there is no metadata for this in ``pyproject.toml`` or any other
@@ -101,9 +101,9 @@ Multiple types of external dependencies can be distinguished:
   concrete packages. E.g., a C++ compiler, BLAS, LAPACK, OpenMP, MPI.
 
 Concrete packages are straightforward to understand, and are a concept present
-in virtually every package management system. Abstract packages are a concept
+in every package management system. Virtual packages are a concept
 also present in a number of packaging systems -- but not always, and the
-details of their implementation varies.
+details of their implementation vary.
 
 Cross compilation
 -----------------
@@ -192,7 +192,7 @@ The ``scheme`` component is a fixed string, ``pkg``, and of the other
 components only ``type`` and ``name`` are required.
 
 Since external dependencies are likely to be typed by hand, we propose a PURL
-derivate that, in the name of ergonomics and user-friendliness, introduce a
+derivative that, in the name of ergonomics and user-friendliness, introduces a
 number of changes, discussed in the following sections. In this derivative,
 we replace the ``pkg`` scheme with ``dep``. Hence, we will refer to them as
 ``dep:`` URLs.
@@ -217,13 +217,13 @@ that the package is maintained in (e.g.,
 ``dep:github/user-or-org-name/dep-name``). Which of these is more appropriate
 is situation-dependent. This PEP recommends using ``dep:generic`` when the
 package name is unambiguous and well-known (e.g., ``dep:generic/git`` or
-``dep:generic/openblas``), and using the VCS as the PURL type otherwise.
+``dep:generic/openblas``), and using the VCS as the type otherwise.
 
 Virtual package specification
 ''''''''''''''''''''''''''''''
 
 PURL does not offer support for virtual or virtual dependency specification yet.
-A `proposal to add an virtual type <https://github.com/package-url/purl-spec/pull/450>`__
+A `proposal to add a virtual type <https://github.com/package-url/purl-spec/pull/450>`__
 is being discussed for revision 1.1.
 
 In the meantime, we propose adding a new *type* to our ``dep:`` derivative, the ``virtual``
@@ -256,7 +256,7 @@ PURLs support fixed versions via the ``@`` component of the URL. For example,
 
 Support in PURL for version expressions and ranges beyond a fixed version is
 available via the ``vers`` scheme. Users are supposed to couple a ``pkg:``
-URL with a ``vers`` URL. For example, to express ``numpy>=2.0``, the PURL
+URL with a ``vers:`` URL. For example, to express ``numpy>=2.0``, the PURL
 equivalent would be ``pkg:pypi/numpy`` plus ``vers:pypi/>=2.0``. This
 can be expressed as a two-item list: ``["pkg:pypi/numpy",
 "vers:pypi/>=2.0"]``. Additionally, a new proposal to add the ``vers``
