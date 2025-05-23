@@ -109,7 +109,7 @@ details of their implementation vary.
 Cross compilation
 -----------------
 
-Cross compilation is not yet (as of March 2025) well-supported by stdlib
+Cross compilation is not yet (as of May 2025) well-supported by stdlib
 modules and ``pyproject.toml`` metadata. It is however important when
 translating external dependencies to those of other packaging systems (with
 tools like ``pyp2spec``). Introducing support for cross compilation immediately
