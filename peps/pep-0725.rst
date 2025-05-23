@@ -303,34 +303,31 @@ metadata fields. The ``optional-dependencies`` content from ``[external]``
 would need to either reuse ``Provides-Extra`` or require a new
 ``Provides-External-Extra`` field. Neither seems desirable.
 
-The ``dep:`` URLs MUST be converted to PURL identifiers prior to their
-inclusion in the core metadata by following these rules:
+The ``dep:`` URLs MUST be processed prior to their inclusion in the core
+metadata by following these rules:
 
-- The ``dep`` *scheme* MUST be replaced with ``pkg``.
-- If the *type* is ``compiler`` or ``interface``, it MUST be transformed
-  into a ``virtual/(compiler|interface)`` type.
-- If present, the *version* field MUST follow these rules:
+- If the *type* is not ``virtual``, the ``dep`` *scheme* MUST
+  be replaced with ``pkg``.
+- If present, the *version* field MUST be split from the URL and added
+  next to it, between parentheses and after a space, with the following
+  transformations:
 
-  - If the value contains no operators, it MUST be kept as is.
+  - If the value is a literal (it contains no operators), it MUST be kept as is.
 
-  - Otherwise, the version field MUST be removed and its value moved into
-    a ``vers`` qualifier. The *type* of the PURL MUST be prepended to the
-    value, followed by a forward slash. If the *type* does not have a
-    matching ``vers`` type, ``pypi`` MUST be used.
-
-- The PURL percent-encoding rules MUST be applied.
+  - Otherwise, the value MUST be transformed into a ``vers:`` URL. The *type* of the
+    PURL MUST be prepended to the value, followed by a forward slash. If the
+    *type* does not have a matching ``vers`` type, ``pypi`` MUST be used.
 
 Some examples:
 
-- ``dep:pypi/requests`` becomes ``pkg:pypi/requests``.
-- ``dep:generic/gcc@14`` becomes ``pkg:generic/gcc@14``.
-- ``dep:pypi/django@>=5`` becomes
-  ``pkg:pypi/django?vers=vers%3Apypi%2F%3E%3D5``.
-- ``dep:generic/libarrow@>=19`` becomes
-  ``pkg:generic/libarrow?vers=vers%3Apypi%2F%3E%3D19``.
-- ``dep:virtual/compiler/c`` becomes ``pkg:virtual/compiler/c``.
+- ``dep:generic/gcc@14`` becomes ``pkg:generic/gcc (14)``.
+- ``dep:generic/libarrow@>=19`` becomes ``pkg:generic/libarrow (vers:pypi/>=19)``.
+- ``dep:virtual/compiler/c`` stays ``dep:virtual/compiler/c``.
 - ``dep:virtual/interface/blas>=3,<4`` becomes
-  ``pkg:virtual/interface/blas?vers=vers%3Apypi%2F%3E%3D3%2C%3C4``.
+  ``dep:virtual/interface/blas (vers:pypi/>=3,<4)``.
+- For completeness, ``dep:pypi/requests`` would become ``pkg:pypi/requests`` and
+  ``dep:pypi/django@>=5`` would become ``pkg:pypi/django (vers:pypi/>=5)``, but
+  these examples are unlikely to be seen in ``Requires-External``.
 
 Differences between sdist and wheel metadata
 ''''''''''''''''''''''''''''''''''''''''''''
