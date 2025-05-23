@@ -245,9 +245,6 @@ Since there are a relatively limited number of such dependencies,
 it seems like it will be understandable and map well to Linux
 distros with virtual packages and to the likes of conda and Spack.
 
-.. JRG: A long shot for now. Assuming virtual PURLs would be formatted
-.. like ``pkg:virtual/{compiler,interface}/...``.
-
 Versioning
 ''''''''''
 
@@ -628,8 +625,6 @@ there are parts that do have a reference implementation:
 2. The PURL specification, as a key part of this spec, has a Python package
    with a reference implementation for constructing and parsing PURLs:
    `packageurl-python`_. The ``dep:`` URLs can be handled with this package.
-
-.. JRG: Once https://github.com/package-url/packageurl-python/pull/184 goes in.
 
 There are multiple possible consumers and use cases of this metadata, once
 that metadata gets added to Python packages. Tested metadata for all of the
