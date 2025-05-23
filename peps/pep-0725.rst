@@ -308,8 +308,10 @@ metadata by following these rules:
 
 - If the *type* is not ``virtual``, the ``dep`` *scheme* MUST
   be replaced with ``pkg``.
-- If present, the *version* field MUST be split from the URL and added
-  next to it, between parentheses and after a space, with the following
+- If present, as per the
+  `Requires-External syntax rules <https://packaging.python.org/en/latest/specifications/core-metadata/#requires-external-multiple-use>`__
+  the *version* field MUST be split from the URL and added next to it,
+  between parentheses and after a space, with the following
   transformations:
 
   - If the value is a literal (it contains no operators), it MUST be kept as is.
