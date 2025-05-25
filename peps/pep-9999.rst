@@ -17,8 +17,8 @@ Abstract
 ========
 
 This PEP specifies a name mapping mechanism that allows packaging tools to map
-canonical PyPI and external dependency identifiers to the specifiers
-of packages in other package repositories.
+canonical PyPI and external dependency identifiers to their counterparts
+in other package repositories.
 
 
 Motivation
@@ -71,7 +71,8 @@ R: https://github.com/rstudio/r-system-requirements. The R system with central
 registry knows how to translate external dependency metadata to install
 commands for package managers like ``apt-get``. This registry centralises the
 mappings for a series of Linux distributions, and also Windows. macOS is not
-present. The "Rule Coverage" of its README shows how that improves the chance
+present. The `"Rule Coverage" of its README <https://github.com/rstudio/r-system-requirements/blob/7314012a48d38854c19f439e1c2d2e4b383fe7ea/README.md#rule-coverage>`__
+used to show that improves the chance
 of success of building packages from CRAN from source. Across all CRAN packages,
 Ubuntu 18 improves from 78.1% to 95.8%, CentOS 7 from 77.8% to 93.7% and openSUSE
 15.0 from 78.2% to 89.7%. The chance of success depends on how well the registry
@@ -110,7 +111,7 @@ arbitrary variable names and their corresponding name in the target distro
 (Red Hat, Debian, OpenSUSE, etc). See `example for PyYAML <https://github.com/stbenjam/diskimage-builder/blob/5bc5f8aff3b40b1918ce72660f1dba38c3c4f27a/diskimage_builder/elements/svc-map/pkg-map#L4>`__.
 `bindep <https://opendev.org/opendev/bindep>`__ defines a file ``bindep.txt``
 (see `example <https://opendev.org/opendev/bindep/src/branch/master/bindep/tests/bindep.txt>`__)
-where users can write down dependencies that are not pip-installable. The format is
+where users can write down dependencies that are not installable from PyPI. The format is
 line-based, with each line containing a dependency as found in the Debian ecosystem.
 For other distributions, it offers a "filters" syntax between square brackets where users
 can indicate other target platforms, optional dependencies and extras.
@@ -175,7 +176,7 @@ The mapping infrastructure should include the following components and propertie
 
 On the client side, there should be:
 
-- A way for the system to specify a default (e.g., the Python install on Ubuntu
+- A way for the system to specify a default (e.g., the Python installation on Ubuntu
   could register ``apt`` as the default system package manager with the
   registry tool). It may also be left unspecified.
 - A way for the user to specify the default and/or current system package manager.
@@ -188,19 +189,21 @@ Specification
 
 Three schemas are proposed:
 
-1. A central registry of ``dep:`` identifiers.
+1. A central registry of known ``dep:`` identifiers, as introduced in PEP 725.
 2. A list of known ecosystems and their package manager names.
 3. The ecosystem-specific mappings of ``dep:`` identifiers to their
-   corresponding ecosystem specifiers, plus details of their package managers.
+   corresponding ecosystem specifiers, plus details of their package manager(s).
 
-The central registry defines which identifiers are recognized as canonical. Each entry MUST
-provide a valid ``dep:`` identifier in the field ``id``, with an optional free form ``description`` text.
-Additionally some entries MAY refer to another entry via the ``provides`` field, which takes a
-list of strings already defined as ``id`` in the registry. This is useful for aliases
-(e.g. ``dep:generic/arrow`` and ``dep:github/apache/arrow``), and concrete implementations of
-a ``dep:virtual/`` entry (e.g. ``dep:generic/gcc`` would provide ``dep:virtual/compiler/c``).
-Entries without ``provides`` content or, if populated, only with ``dep:virtual/`` identifiers,
-are considered canonical.
+The central registry defines which identifiers are recognized as canonical,
+plus known aliases. Each entry MUST provide a valid ``dep:`` identifier in the
+field ``id``, with an optional free form ``description`` text. Additionally
+some entries MAY refer to another entry via the ``provides`` field, which takes
+a string or a list of strings already defined as ``id`` in the registry. This is useful for
+aliases (e.g. ``dep:generic/arrow`` and ``dep:github/apache/arrow``), and
+concrete implementations of a ``dep:virtual/`` entry (e.g. ``dep:generic/gcc``
+would provide ``dep:virtual/compiler/c``). Entries without ``provides`` content
+or, if populated, only with ``dep:virtual/`` identifiers, are considered
+canonical.
 
 The list of known ecosystems assigns an identifier to each ecosystem and reports the
 canonical location for its mapping. The mappings specify which ecosystem-specific
@@ -215,7 +218,8 @@ main content is a list of dictionaries, in which each entry consists of:
 
   - a dictionary with three keys (``build``, ``host``, ``run``). The values
     MUST be a string or list of strings representing the ecosystem-specific package
-    identifiers.
+    identifiers as needed as build-, host- and runtime dependencies (see PEP 725 for
+    details on these definitions).
 
   - for convenience,  a string or a list of strings are also accepted as a
     shorthand form. In this case, the identifier(s) will be used to populate
@@ -227,9 +231,9 @@ main content is a list of dictionaries, in which each entry consists of:
 - a ``specs_from`` field whose value is a ``dep:`` identifier from which the ``specs``
   field will be imported. Either ``specs`` or ``specs_from`` MUST be present.
 
-- an optional ``urls`` field whose value MUST be a dictionary that maps a string
-  to a URL. This is useful to link to external resources that provide more
-  information about the mapped packages.
+- an optional ``urls`` field whose value MUST be a URL, a list of URLs, or a
+  dictionary that maps a string to a URL. This is useful to link to external
+  resources that provide more information about the mapped packages.
 
 Some examples from the conda-forge mapping include:
 
@@ -248,7 +252,7 @@ Some examples from the conda-forge mapping include:
       "id": "dep:generic/libwebp",
       "description": "WebP image library. libwebp-base ships libraries; libwebp ships the binaries.",
       "specs": {  // expanded form with single spec per category
-        "build": "libwebp-base",
+        "build": "libwebp",
         "host": "libwebp-base",
         "run": "libwebp"
       },
@@ -280,7 +284,7 @@ Some examples from the conda-forge mapping include:
     },
   ]
 
-The mappings may also specify another section ``package_managers``, reporting
+The mappings MAY also specify another section ``package_managers``, reporting
 which package managers are available in the ecosystem. This field MUST
 take a dictionary with the following fields:
 
@@ -292,7 +296,7 @@ take a dictionary with the following fields:
 Details
 -------
 
-Two JSON Schema documents are provided to fully standardize the registry and mappings.
+Three JSON Schema documents are provided to fully standardize the registries and mappings.
 
 Central registry schema
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -354,7 +358,7 @@ Each entry in this list is defined as:
       - Description
       - Required
     * - ``id``
-      - ``DepURLField`` (``string`` matching ``^(dep:|dep:virtual/).*``)
+      - ``DepURLField`` (``string`` matching regex ``^dep:.+$``)
       - ``dep:`` identifier
       - True
     * - ``description``
@@ -365,7 +369,6 @@ Each entry in this list is defined as:
       - ``DepURLField | list[DepURLField]``
       - List of identifiers this entry connects to.
         Useful to annotate aliases or virtual package implementations.
-        If no `provides` info is added, the entry is considered canonical.
       - False
     * - ``urls``
       - ``AnyUrl | list[AnyUrl] | dict[NonEmptyString, AnyUrl]``
@@ -428,11 +431,11 @@ to a sub-dictionary defined as:
     :header-rows: 1
     :widths: 20 25 40 15
 
-    * - Field
-      - Type
-      - Description
+    * - Key
+      - Value type
+      - Value description
       - Required
-    * - ``schema``
+    * - ``Literal['mapping']``
       - ``AnyURL``
       - URL to the mapping for this ecosystem
       - True
@@ -528,7 +531,7 @@ Each entry in this list is defined as:
       - Description
       - Required
     * - ``id``
-      - ``DepURLField`` (``string`` matching ``^(dep:|dep:virtual/).*``)
+      - ``DepURLField`` (``string`` matching regex ``^dep:.+$``)
       - ``dep:`` identifier, as provided in the central registry
       - True
     * - ``description``
@@ -547,7 +550,7 @@ Each entry in this list is defined as:
         provided, in which case will be used to populate the three categories identically.
       - Either ``specs`` or ``specs_from`` MUST be present.
     * - ``specs_from``
-      - ``DepURLField``
+      - ``DepURLField`` (``string`` matching regex ``^dep:.+$``)
       - Take specs from another mapping entry.
       - Either ``specs`` or ``specs_from`` MUST be present.
 
@@ -587,7 +590,7 @@ Each entry in this list is defined as:
         for the package names in ``specs``. If not provided, they are appended.
       - True
     * - ``version_operators``
-      - ``dict[string, string]``
+      - ``dict[Literal['and', 'arbitrary', 'compatible', 'equal', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equal', 'separator'],  string]``
       - Mapping of PEP440 version comparison operators to the syntax used in this
         package manager. If omitted, PEP 440 operators are used. If set to an empty
         dictionary, it means that the package manager (or ecosystem) doesn't support
@@ -609,11 +612,16 @@ This prototype repository provides examples of how these schemas would look like
 - Mappings:
   - `Arch-linux <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/arch-linux.mapping.json>`__.
   - `Chocolatey <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/chocolatey.mapping.json>`__.
+  - `Conan <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/conan.mapping.json>`__.
   - `Conda-forge <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/conda-forge.mapping.json>`__.
   - `Fedora <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/fedora.mapping.json>`__.
+  - `Gentoo <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/gentoo.mapping.json>`__.
   - `Homebrew <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/homebrew.mapping.json>`__.
+  - `Nix <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/nix.mapping.json>`__.
   - `Scoop <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/scoop.mapping.json>`__.
+  - `Spack <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/spack.mapping.json>`__.
   - `Ubuntu <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/ubuntu.mapping.json>`__.
+  - `Vcpkg <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/vcpkg.mapping.json>`__.
   - `Winget <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/winget.mapping.json>`__.
 
 Practical cases
@@ -696,7 +704,7 @@ of that message could improve to:
       libboost-all-dev
 
 If the user wants to use conda packages and the ``mamba`` package manager to
-install external dependencies, they may specify that in a
+install external dependencies, they may specify that in a hypothetical
 ``~/.pypi-name-mappings`` file:
 
 .. code::
@@ -787,6 +795,9 @@ consists of:
    package ecosystem has a corresponding mapping. If no appropriate ``dep:`` identifier exists,
    the package maintainer may consider submitting a new ``dep:`` identifier to the central registry.
 
+A prototype interactive mappings browser that showcases this workflow is available at
+`external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__.
+
 An overall workflow diagram might look like this:
 
 .. mermaid::
@@ -810,12 +821,12 @@ ecosystem might not be able to provide tailored error messages and other UX affo
 It is thus recommended that each package ecosystem maintain their mappings. Key to this will
 be automation. Some ideas for automation are:
 
-1. Alert mapping maintainers whenever a new ``dep:`` identifier is added to the registry (probably noisy).
-2. Provide tools that allow maintainers to diff their mappings to the registry contents to
-   quickly identify missing entries.
-3. Provide automated tooling that submits PRs to known mapping locations, such that maintainers
-   need only fill in the ecosystem package name.
-4. Provide status for each ``dep:`` identifier, to readily identify which ``dep:`` identifiers need attention.
+- Alert mapping maintainers whenever a new ``dep:`` identifier is added to the registry (probably noisy).
+- Provide tools that allow maintainers to diff their mappings to the registry contents to
+  quickly identify missing entries.
+- Provide automated tooling that submits PRs to known mapping locations, such that maintainers
+  need only fill in the ecosystem package name.
+- Provide status for each ``dep:`` identifier, to readily identify which ``dep:`` identifiers need attention.
 
 This maintenance is likely to be a lot of work to establish the initial mapping, but ideally small
 on an ongoing basis.
