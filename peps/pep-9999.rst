@@ -835,11 +835,18 @@ on an ongoing basis.
 Central ``dep:`` identifier registry maintainers
 ------------------------------------------------
 
-Central ``dep:`` identifier registry maintainers curate the collection of ``dep:`` identifiers. These contributors
-need to be able to refer to clearly defined rules for when a new ``dep:`` identifier can be defined. It is
-undesirable to be loose with canonical ``dep:`` identifier definitions, because each definition implies
-maintenance in the mappings in many other places.
+Central ``dep:`` identifier registry maintainers curate the collection of
+``dep:`` identifiers. These contributors need to be able to refer to clearly
+defined rules for when a new ``dep:`` identifier can be defined. It is
+undesirable to be loose with canonical ``dep:`` identifier definitions, because
+each definition implies maintenance in the mappings in many other places.
 
+The ``provides`` key mechanism offer ways to maintain aliases, so hopefully a
+compromise of flexibility and strictness can be found easily. Particular attention
+must be put to deciding which of the aliases will be the canonical form, though,
+especially when it comes to dependencies where a number of synonyms are commonly
+used (e.g. what is the best identifier for a C++ compiler:
+``dep:virtual/compiler/c++``, ``cxx`, ``cpp`` or ``c-plus-plus``?).
 
 End user package consumers
 --------------------------
