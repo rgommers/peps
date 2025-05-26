@@ -184,7 +184,7 @@ Specifying external dependencies
 Concrete package specification
 ''''''''''''''''''''''''''''''
 
-`PURLs <PURL>`__ implement a scheme for identifying packages that is meant to be portable
+A `PURL`_ implements a scheme for identifying packages that is meant to be portable
 across packaging ecosystems. Its design is::
 
     scheme:type/namespace/name@version?qualifiers#subpath
