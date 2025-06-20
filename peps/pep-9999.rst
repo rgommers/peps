@@ -901,7 +901,7 @@ in the central registry and to recommend using the canonical form instead of a s
     $ python -m pyproject_external --validate grpcio-1.71.0.tar.gz
     WARNING  Dep URL 'dep:virtual/compiler/cpp' is not recognized in the central registry. Did you
     mean any of ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx', 'dep:virtual/compiler/cuda',
-    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?                     
+    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
     [external]
     build-requires = [
         "dep:virtual/compiler/c",
@@ -925,7 +925,7 @@ The proposed Python API also allows users to do it programmatically:
     >>> external.validate()
     Dep URL 'dep:virtual/compiler/cpp' is not recognized in the central registry. Did you
     mean any of ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx', 'dep:virtual/compiler/cuda',
-    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?  
+    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
 
 Rejected Ideas
 ==============
