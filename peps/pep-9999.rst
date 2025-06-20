@@ -203,7 +203,7 @@ aliases (e.g. ``dep:generic/arrow`` and ``dep:github/apache/arrow``), and
 concrete implementations of a ``dep:virtual/`` entry (e.g. ``dep:generic/gcc``
 would provide ``dep:virtual/compiler/c``). Entries without ``provides`` content
 or, if populated, only with ``dep:virtual/`` identifiers, are considered
-canonical.
+canonical. The ``provides`` field MUST NOT be present in ``dep:virtual/`` definitions.
 
 The list of known ecosystems assigns an identifier to each ecosystem and reports the
 canonical location for its mapping. The mappings specify which ecosystem-specific
@@ -845,8 +845,8 @@ The ``provides`` key mechanism offer ways to maintain aliases, so hopefully a
 compromise of flexibility and strictness can be found easily. Particular attention
 must be put to deciding which of the aliases will be the canonical form, though,
 especially when it comes to dependencies where a number of synonyms are commonly
-used (e.g. what is the best identifier for a C++ compiler:
-``dep:virtual/compiler/c++``, ``cxx`, ``cpp`` or ``c-plus-plus``?).
+used. This does not apply to ``dep:virtual/*`` identifiers, where a single canonical
+form is proposed and no additional aliases are allowed.
 
 End user package consumers
 --------------------------
@@ -891,6 +891,41 @@ can be found at https://github.com/jaimergp/external-metadata-mappings.
 A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for
 Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
 
+Having a central registry enables client-side validation of the ``[external]`` table of any given
+project. The key idea behind the validation is to disallow ``dep:`` identifiers that are not included
+in the central registry and to recommend using the canonical form instead of a secondary alias. The
+``pyproject-external`` project provides a simple way to do so:
+
+.. code-block:: bash
+
+    $ python -m pyproject_external --validate grpcio-1.71.0.tar.gz
+    WARNING  Dep URL 'dep:virtual/compiler/cpp' is not recognized in the central registry. Did you
+    mean any of ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx', 'dep:virtual/compiler/cuda',
+    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
+    [external]
+    build-requires = [
+        "dep:virtual/compiler/c",
+        "dep:virtual/compiler/cpp",
+    ]
+
+The proposed Python API also allows users to do it programmatically:
+
+.. code-block:: python
+
+    >>> from pyproject_external import External
+    >>> external = External.from_pyproject_data(
+          {
+            "external": {
+              "build-requires": [
+                "dep:virtual/compiler/c",
+                "dep:virtual/compiler/cpp",
+              ]
+          }
+        )
+    >>> external.validate()
+    Dep URL 'dep:virtual/compiler/cpp' is not recognized in the central registry. Did you
+    mean any of ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx', 'dep:virtual/compiler/cuda',
+    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
 
 Rejected Ideas
 ==============
