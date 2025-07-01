@@ -337,9 +337,12 @@ Impact on core metadata fields
 The `core metadata`_ specification contains one relevant field, namely
 ``Requires-External``. While it would be a good candidate to record the
 ``external.dependencies`` table, the authors have decided to not use this
-field to propagate the external runtime dependencies metadata. To avoid any
-confusion in the future, this PEP also proposes to deprecate the
-``Requires-External`` field altogether. The reasons are discussed below.
+field to propagate the external runtime dependencies metadata.
+
+To avoid any confusion in the future, this PEP also proposes to deprecate the
+``Requires-External`` field altogether. 
+
+The reasons are discussed below.
 
 Insufficient fields in core metadata
 ''''''''''''''''''''''''''''''''''''
