@@ -593,7 +593,8 @@ of this deprecation to be negligible, given the its low penetration in the ecosy
   ``hatch`` (see `pypa/hatch#1712`_), ``flit`` (see `pypa/flit#353`_), or ``poetry``
   do not offer ways to specify it or require a plugin (e.g. `poetry-external-dependencies`_).
   ``maturin`` does seem to support it since 0.7.0 (see `PyO3/maturin@5b0e4808`_),
-  but it's not directly documented.
+  but it's not directly documented. Other backends like ``scikit-build-core`` or
+  ``meson-python`` returned no results for ``External-Requires``.
 - The field is not included in the `PyPI JSON API responses`_.
 
 The field will still be recognized by existing tools such as `setuptools-ext`_
