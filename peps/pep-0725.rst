@@ -589,7 +589,7 @@ deprecation of the ``External-Requires`` core metadata field. We estimate the im
 of this deprecation to be negligible, given the its low penetration in the ecosystem:
 
 - There is no direct correspondence to a field in the ``pyproject.toml`` metadata.
-- Mainstream build backends like ``setuptools`` (see `pypa/setuptools#4220`_), 
+- Mainstream build backends like ``setuptools`` (see `pypa/setuptools#4220`_),
   ``hatch`` (see `pypa/hatch#1712`_), ``flit`` (see `pypa/flit#353`_), or ``poetry``
   do not offer ways to specify it or require a plugin (e.g. `poetry-external-dependencies`_).
 - The field is not included in the `PyPI JSON API responses`_.
