@@ -340,7 +340,7 @@ The `core metadata`_ specification contains one relevant field, namely
 field to propagate the external runtime dependencies metadata.
 
 To avoid any confusion in the future, this PEP also proposes to deprecate the
-``Requires-External`` field altogether. 
+``Requires-External`` field altogether.
 
 The reasons are discussed below.
 
@@ -573,10 +573,19 @@ PyEnchant 3.2.2:
 Backwards Compatibility
 =======================
 
-There is no impact on backwards compatibility, as this PEP only adds new,
+There is no major impact on backwards compatibility, as this PEP primarily adds new,
 optional metadata. In the absence of such metadata, nothing changes for package
 authors or packaging tooling.
 
+The only change introduced in this PEP that has impact on existing projects is the
+deprecation of the ``External-Requires`` core metadata field. Given its low
+penetration in the ecosystem (e.g. not supported by mainsteam build backends like
+``setuptools``), we estimate the impact to be low.
+
+The field will still be recognized by existing tools such as `setuptools-ext`_
+but its usage will be discouraged in the `Python Packaging User Guide`_, similar to
+what it's done for obsolete fields like ``Requires``
+(deprecated in favor of ``Requires-Dist``).
 
 Security Implications
 =====================
@@ -615,7 +624,9 @@ there are parts that do have a reference implementation:
    with ``tomllib``.
 2. The PURL specification, as a key part of this spec, has a Python package
    with a reference implementation for constructing and parsing PURLs:
-   `packageurl-python`_. The ``dep:`` URLs can be handled with this package.
+   `packageurl-python`_. The ``dep:`` URLs can be handled with this package,
+   but a ``dep``-specific implementation is available in `pyproject-external`_
+   too.
 
 There are multiple possible consumers and use cases of this metadata, once
 that metadata gets added to Python packages. Tested metadata for all of the
@@ -767,3 +778,5 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _verspurl: https://github.com/package-url/purl-spec/issues/386
 .. _rgommers/external-deps-build: https://github.com/rgommers/external-deps-build
 .. _Reference LAPACK: https://github.com/Reference-LAPACK/lapack
+.. _setuptools-ext: https://pypi.org/project/setuptools-ext/
+.. _pyproject-external: https://github.com/jaimergp/pyproject-external
