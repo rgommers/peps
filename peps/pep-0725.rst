@@ -336,8 +336,10 @@ Impact on core metadata fields
 
 The `core metadata`_ specification contains one relevant field, namely
 ``Requires-External``. While it would be a good candidate to record the
- ``external.dependencies`` table (runtime dependencies), this PEP proposes
-to deprecate this field. The reasons are discussed below.
+``external.dependencies`` table, the authors have decided to not use this
+field to propagate the external runtime dependencies metadata. To avoid any
+confusion in the future, this PEP also proposes to deprecate the
+``Requires-External`` field altogether. The reasons are discussed below.
 
 Insufficient fields in core metadata
 ''''''''''''''''''''''''''''''''''''
@@ -346,13 +348,17 @@ Insufficient fields in core metadata
   version 2.4. Essentially: ``name [(version)][; environment marker]``
   (with square brackets denoting optional fields). The ``dep:`` URLs would need
   to be decomposed to fit in this syntax.
-- The core metadata specification does not contain fields for any metadata in
-  ``pyproject.toml``'s ``[build-system]`` table. Therefore the ``build-requires``
-  and ``host-requires`` content also could not be reflected in existing core
-  metadata fields. New ones would need to be added.
 - The ``optional-dependencies`` content from ``[external]`` would need to either
   reuse ``Provides-Extra`` or require a new ``Provides-External-Extra`` field.
-  Neither seems desirable.
+- The core metadata specification does not contain fields for any metadata in
+  ``pyproject.toml``'s ``[build-system]`` table. Therefore the ``build-requires``
+  and ``host-requires`` content cannot be reflected in existing core
+  metadata fields. This creates an inconsistency in the type of external metadata
+  that is included in sdists and wheels. The alternative would be to add new
+  fields, resulting in a core metadata version bump.
+
+The authors consider that none of these options are desirable and hence decide
+not to leverage core metadata for the ``[external]`` table.
 
 Differences between sdist and wheel metadata
 ''''''''''''''''''''''''''''''''''''''''''''
@@ -369,9 +375,9 @@ dependencies via a ``--exclude`` or ``--no-dll`` command-line flag. This is
 used to avoid vendoring large shared libraries, for example those from CUDA.
 
 ``Requires-External`` entries generated from external dependencies in
-``pyproject.toml`` in a wheel would need therefore to be allowed to be different
-(narrower) than those for the corresponding sdist. Managing this complexity
-in build backends and vendoring tools does not seem to be desirable either.
+``pyproject.toml`` in a wheel would need therefore to be allowed to be dynamic
+and different (narrower) than those for the corresponding sdist. Managing this
+complexity in build backends and vendoring tools does not seem to be desirable either.
 
 Specification
 =============
