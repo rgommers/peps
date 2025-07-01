@@ -298,44 +298,6 @@ to already have a robust implementation to parse it. And we do not expect to
 need the extra possibilities that PURL qualifiers provide (e.g. to specify a
 Conan or conda channel, or a RubyGems platform).
 
-Usage of core metadata fields
------------------------------
-
-The `core metadata`_ specification contains one relevant field, namely
-``Requires-External``. This has no well-defined semantics as of core metadata 2.4;
-this PEP chooses to reuse the field for external runtime dependencies. The core
-metadata specification does not contain fields for any metadata in
-``pyproject.toml``'s ``[build-system]`` table. Therefore the ``build-requires``
-and ``host-requires`` content also does not need to be reflected in core
-metadata fields. The ``optional-dependencies`` content from ``[external]``
-would need to either reuse ``Provides-Extra`` or require a new
-``Provides-External-Extra`` field. Neither seems desirable.
-
-The ``dep:`` URLs must be converted into ``pkg`` and ``vers`` URIs prior to their
-inclusion in ``Requires-External``. The rules are discussed in the specification
-section below.
-
-Differences between sdist and wheel metadata
-''''''''''''''''''''''''''''''''''''''''''''
-
-A wheel may vendor its external dependencies. This happens in particular when
-distributing wheels on PyPI or other Python package indexes -- and tools like
-auditwheel_, delvewheel_ and delocate_ automate this process. As a result, a
-``Requires-External`` entry in an sdist may disappear from a wheel built from
-that sdist. It is also possible that a ``Requires-External`` entry remains in a
-wheel, either unchanged or with narrower constraints. ``auditwheel`` does not
-vendor certain allow-listed dependencies, such as OpenGL, by default. In
-addition, ``auditwheel`` and ``delvewheel`` allow a user to manually exclude
-dependencies via a ``--exclude`` or ``--no-dll`` command-line flag. This is
-used to avoid vendoring large shared libraries, for example those from CUDA.
-
-``Requires-External`` entries generated from external dependencies in
-``pyproject.toml`` in a wheel are therefore allowed to be narrower than those
-for the corresponding sdist. They must not be wider, i.e. constraints must not
-allow a version of a dependency for a wheel that isn't allowed for an sdist,
-nor contain new dependencies that are not listed in the sdist's metadata at
-all.
-
 Canonical names of dependencies and ``-dev(el)`` split packages
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -369,6 +331,47 @@ consistency between Python dependencies and external dependencies, we choose to
 add it implicitly. Python development headers must be assumed to be necessary
 when an ``[external]`` table contains one or more compiler packages.
 
+Impact on core metadata fields
+------------------------------
+
+The `core metadata`_ specification contains one relevant field, namely
+``Requires-External``. While it would be a good candidate to record the
+ ``external.dependencies`` table (runtime dependencies), this PEP proposes
+to deprecate this field. The reasons are discussed below.
+
+Insufficient fields in core metadata
+''''''''''''''''''''''''''''''''''''
+
+- The ``Requires-External`` field has very loosely defined semantics as of
+  version 2.4. Essentially: ``name [(version)][; environment marker]``
+  (with square brackets denoting optional fields). The ``dep:`` URLs would need
+  to be decomposed to fit in this syntax.
+- The core metadata specification does not contain fields for any metadata in
+  ``pyproject.toml``'s ``[build-system]`` table. Therefore the ``build-requires``
+  and ``host-requires`` content also could not be reflected in existing core
+  metadata fields. New ones would need to be added.
+- The ``optional-dependencies`` content from ``[external]`` would need to either
+  reuse ``Provides-Extra`` or require a new ``Provides-External-Extra`` field.
+  Neither seems desirable.
+
+Differences between sdist and wheel metadata
+''''''''''''''''''''''''''''''''''''''''''''
+
+A wheel may vendor its external dependencies. This happens in particular when
+distributing wheels on PyPI or other Python package indexes -- and tools like
+auditwheel_, delvewheel_ and delocate_ automate this process. As a result, a
+``Requires-External`` entry in an sdist may disappear from a wheel built from
+that sdist. It is also possible that a ``Requires-External`` entry remains in a
+wheel, either unchanged or with narrower constraints. ``auditwheel`` does not
+vendor certain allow-listed dependencies, such as OpenGL, by default. In
+addition, ``auditwheel`` and ``delvewheel`` allow a user to manually exclude
+dependencies via a ``--exclude`` or ``--no-dll`` command-line flag. This is
+used to avoid vendoring large shared libraries, for example those from CUDA.
+
+``Requires-External`` entries generated from external dependencies in
+``pyproject.toml`` in a wheel would need therefore to be allowed to be different
+(narrower) than those for the corresponding sdist. Managing this complexity
+in build backends and vendoring tools does not seem to be desirable either.
 
 Specification
 =============
@@ -395,7 +398,6 @@ to be present on the system already.
 
 - Format: Array of ``dep:`` strings (``build-requires``) and a table
   with values of arrays of ``dep:`` strings (``optional-build-requires``)
-- `Core metadata`_: N/A
 
 The (optional) external build requirements needed to build the project.
 
@@ -412,7 +414,6 @@ strings of the arrays MUST be valid ``dep:`` strings.
 
 - Format: Array of ``dep:`` strings (``host-requires``) and a table
   with values of arrays of ``dep:`` strings (``optional-host-requires``)
-- `Core metadata`_: N/A
 
 The (optional) external host requirements needed to build the project.
 
@@ -429,36 +430,16 @@ strings of the arrays MUST be valid ``dep:`` strings.
 
 - Format: Array of ``dep:`` strings (``dependencies``) and a table
   with values of arrays of ``dep:`` strings (``optional-dependencies``)
-- `Core metadata`_: ``Requires-External``, N/A
 
 The (optional) runtime dependencies of the project.
 
 For ``dependencies``, it is a key whose value is an array of strings. Each
-string represents a dependency of the project and MUST be formatted as either a
-valid ``dep:`` string. Each string maps directly to a ``Requires-External``
-entry in the `core metadata`_, once converted into ``pkg`` / ``vers`` URIs
-(whenever possible) using the following rules:
-
-- If the *type* is not ``virtual``, the ``dep`` *scheme* MUST
-  be replaced with ``pkg``.
-- If present, as per the
-  `Requires-External syntax rules <https://packaging.python.org/en/latest/specifications/core-metadata/#requires-external-multiple-use>`__
-  the *version* field MUST be processed using these rules:
-
-  - Split the version field from the URL and remove the ``@`` symbol.
-
-  - If the value is a literal (it contains no operators), it MUST be kept as is.
-
-  - Otherwise, the value MUST be transformed into a ``vers:`` URL. The *type* of the
-    PURL MUST be prepended to the value, followed by a forward slash. If the
-    *type* does not have a matching ``vers`` type, ``pypi`` MUST be used.
-
-  - Wrap the resulting value in parentheses and add it next to the URL, separated by
-    a space.
+string represents a dependency of the project and MUST be formatted as a
+valid ``dep:`` string.
 
 For ``optional-dependencies``, it is a table where each key specifies an extra
 and whose value is an array of strings. The strings of the arrays MUST be valid
-``dep:`` strings. Optional dependencies do not map to a core metadata field.
+``dep:`` strings.
 
 Examples
 --------
@@ -579,18 +560,6 @@ PyEnchant 3.2.2:
       # dependency from wheel metadata.
       "dep:github/AbiWord/enchant",
     ]
-
-Core-metadata entries of ``external.dependencies`` items:
-
-- ``dep:generic/gcc@14`` becomes ``pkg:generic/gcc (14)``.
-- ``dep:generic/libarrow@>=19`` becomes ``pkg:generic/libarrow (vers:pypi/>=19)``.
-- ``dep:virtual/compiler/c`` stays ``dep:virtual/compiler/c``.
-- ``dep:virtual/interface/blas>=3,<4`` becomes
-  ``dep:virtual/interface/blas (vers:pypi/>=3,<4)``.
-- For completeness, ``dep:pypi/requests`` would become ``pkg:pypi/requests`` and
-  ``dep:pypi/django@>=5`` would become ``pkg:pypi/django (vers:pypi/>=5)``, but
-  these examples are unlikely to be seen in ``Requires-External``.
-
 
 Backwards Compatibility
 =======================
