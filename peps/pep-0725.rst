@@ -570,6 +570,13 @@ PyEnchant 3.2.2:
       "dep:github/AbiWord/enchant",
     ]
 
+
+Deprecations
+------------
+
+The ``External-Requires`` core metadata field will be marked as obsolete and its
+usage will be discouraged.
+
 Backwards Compatibility
 =======================
 
