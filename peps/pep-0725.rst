@@ -331,21 +331,27 @@ consistency between Python dependencies and external dependencies, we choose to
 add it implicitly. Python development headers must be assumed to be necessary
 when an ``[external]`` table contains one or more compiler packages.
 
-Impact on core metadata fields
+Impact on Core Metadata fields
 ------------------------------
 
-The `core metadata`_ specification contains one relevant field, namely
+The `Core Metadata`_ specification contains one relevant field, namely
 ``Requires-External``. While it would be a good candidate to record the
 ``external.dependencies`` table, the authors have decided to not use this
 field to propagate the external runtime dependencies metadata.
 
+Instead, two new Core Metadata fields are proposed:
+
+- ``Requires-External-Dep``. An external requirement expressed as a ``dep:``
+  URL. Mimics the transition from ``Requires`` to ``Requires-Dist``. We
+  chose the ``-Dep`` suffix to emphasize that the value is not a regular
+  Python specifier (distribution), but a ``dep:`` URL.
+- ``Provides-External-Extra``. An *extra* group that carries external dependencies
+  (as found in ``Requires-External-Dep``) only.
+
 To avoid any confusion in the future, this PEP also proposes to deprecate the
 ``Requires-External`` field altogether.
 
-The reasons are discussed below.
-
-Insufficient fields in core metadata
-''''''''''''''''''''''''''''''''''''
+The reasons are:
 
 - The ``Requires-External`` field has very loosely defined semantics as of
   version 2.4. Essentially: ``name [(version)][; environment marker]``
@@ -353,18 +359,17 @@ Insufficient fields in core metadata
   to be decomposed to fit in this syntax.
 - The ``optional-dependencies`` content from ``[external]`` would need to either
   reuse ``Provides-Extra`` or require a new ``Provides-External-Extra`` field.
-- The core metadata specification does not contain fields for any metadata in
+- The Core Metadata specification does not contain fields for any metadata in
   ``pyproject.toml``'s ``[build-system]`` table. Therefore the ``build-requires``
-  and ``host-requires`` content cannot be reflected in existing core
-  metadata fields. This creates an inconsistency in the type of external metadata
-  that is included in sdists and wheels. The alternative would be to add new
-  fields, resulting in a core metadata version bump.
+  and ``host-requires`` content do not need to be reflected in existing core
+  metadata fields.
 
 The authors consider that none of these options are desirable and hence decide
-not to leverage core metadata for the ``[external]`` table.
+not to leverage existing Core Metadata for the runtime information encoded in the
+``[external]`` table.
 
-Differences between sdist and wheel metadata
-''''''''''''''''''''''''''''''''''''''''''''
+Note about the differences between sdist and wheel metadata
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 A wheel may vendor its external dependencies. This happens in particular when
 distributing wheels on PyPI or other Python package indexes -- and tools like
@@ -378,9 +383,8 @@ dependencies via a ``--exclude`` or ``--no-dll`` command-line flag. This is
 used to avoid vendoring large shared libraries, for example those from CUDA.
 
 ``Requires-External`` entries generated from external dependencies in
-``pyproject.toml`` in a wheel would need therefore to be allowed to be dynamic
-and different (narrower) than those for the corresponding sdist. Managing this
-complexity in build backends and vendoring tools does not seem to be desirable either.
+``pyproject.toml`` in a wheel need therefore to be allowed to be dynamic
+and different (narrower) than those for the corresponding sdist.
 
 Specification
 =============
@@ -388,8 +392,28 @@ Specification
 If metadata is improperly specified then tools MUST raise an error to notify
 the user about their mistake.
 
-Details
--------
+Changes in Core Metadata
+------------------------
+
+Deprecations
+''''''''''''
+
+The ``External-Requires`` Core Metadata field will be marked as *obsolete* and its
+usage will be discouraged.
+
+Additions
+'''''''''
+
+Two new fields are added to Core Metadata:
+
+- ``Requires-External-Dep``. An external requirement expressed as a ``dep:`` URL.
+- ``Provides-External-Extra``. An *extra* group that carries external dependencies
+  (as found in ``Requires-External-Dep``) only.
+
+This will require a Core Metadata version bump.
+
+Changes in ``pyproject.toml``
+-----------------------------
 
 Note that ``pyproject.toml`` content is in the same format as in :pep:`621`.
 
@@ -407,6 +431,7 @@ to be present on the system already.
 
 - Format: Array of ``dep:`` strings (``build-requires``) and a table
   with values of arrays of ``dep:`` strings (``optional-build-requires``)
+- `Core metadata`_: N/A
 
 The (optional) external build requirements needed to build the project.
 
@@ -423,6 +448,7 @@ strings of the arrays MUST be valid ``dep:`` strings.
 
 - Format: Array of ``dep:`` strings (``host-requires``) and a table
   with values of arrays of ``dep:`` strings (``optional-host-requires``)
+- `Core metadata`_: N/A
 
 The (optional) external host requirements needed to build the project.
 
@@ -439,16 +465,24 @@ strings of the arrays MUST be valid ``dep:`` strings.
 
 - Format: Array of ``dep:`` strings (``dependencies``) and a table
   with values of arrays of ``dep:`` strings (``optional-dependencies``)
+- `Core metadata`_: ``Requires-External-Dep``, ``Provides-External-Extra``
 
 The (optional) runtime dependencies of the project.
 
 For ``dependencies``, it is a key whose value is an array of strings. Each
-string represents a dependency of the project and MUST be formatted as a
-valid ``dep:`` string.
+string represents a dependency of the project and MUST be formatted as either a
+valid ``dep:`` string. Each string must be added to `Core Metadata`_ as a
+``Requires-External-Dep`` field.
 
-For ``optional-dependencies``, it is a table where each key specifies an extra
+For ``optional-dependencies``, it is a table where each key specifies an *extra*
 and whose value is an array of strings. The strings of the arrays MUST be valid
-``dep:`` strings.
+``dep:`` strings. For each ``optional-dependencies`` group:
+
+- The name of the group MUST be added to `Core Metadata`_ as a
+  ``Provides-External-Extra`` field.
+- The ``dep:`` URLs in that group MUST be added to `Core Metadata`_ as a
+  ``Requires-External-Dep`` field, with the corresponding ``; extra == 'name'``
+  environment marker.
 
 Examples
 --------
@@ -533,6 +567,12 @@ NAVis 1.4.0:
       "dep:cran/nat.nblast",
     ]
 
+.. code::
+
+  Provides-External-Extra: nat
+  Requires-External-Dep: dep:cran/nat; extra == 'nat'
+  Requires-External-Dep: dep:cran/nat.nblast; extra == 'nat'
+
 Spyder 6.0:
 
 .. code:: toml
@@ -543,6 +583,12 @@ Spyder 6.0:
       "dep:cargo/tree-sitter-cli",
       "dep:golang/github.com/junegunn/fzf",
     ]
+
+.. code::
+
+  Requires-External-Dep: dep:cargo/ripgrep
+  Requires-External-Dep: dep:cargo/tree-sitter-cli
+  Requires-External-Dep: dep:golang/github.com/junegunn/fzf
 
 jupyterlab-git 0.41.0:
 
@@ -558,6 +604,10 @@ jupyterlab-git 0.41.0:
       "dep:generic/nodejs",
     ]
 
+.. code::
+
+  Requires-External-Dep: dep:generic/git
+
 PyEnchant 3.2.2:
 
 .. code:: toml
@@ -570,13 +620,6 @@ PyEnchant 3.2.2:
       "dep:github/AbiWord/enchant",
     ]
 
-
-Deprecations
-------------
-
-The ``External-Requires`` core metadata field will be marked as obsolete and its
-usage will be discouraged.
-
 Backwards Compatibility
 =======================
 
@@ -585,7 +628,7 @@ optional metadata. In the absence of such metadata, nothing changes for package
 authors or packaging tooling.
 
 The only change introduced in this PEP that has impact on existing projects is the
-deprecation of the ``External-Requires`` core metadata field. We estimate the impact
+deprecation of the ``External-Requires`` Core Metadata field. We estimate the impact
 of this deprecation to be negligible, given the its low penetration in the ecosystem:
 
 - There is no direct correspondence to a field in the ``pyproject.toml`` metadata.
@@ -771,7 +814,7 @@ CC0-1.0-Universal license, whichever is more permissive.
 
 
 .. _PyPI: https://pypi.org
-.. _core metadata: https://packaging.python.org/specifications/core-metadata/
+.. _Core Metadata: https://packaging.python.org/specifications/core-metadata/
 .. _setuptools: https://setuptools.readthedocs.io/
 .. _setuptools metadata: https://setuptools.readthedocs.io/en/latest/setuptools.html#metadata
 .. _SPDX: https://spdx.dev/
