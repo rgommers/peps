@@ -57,10 +57,13 @@ standard location. Enabling automating this conversion is a key benefit of
 this PEP, making packaging Python packages for distros easier and more reliable. In addition, the
 authors envision other types of tools making use of this information, e.g.,
 dependency analysis tools like Repology_, Dependabot_ and libraries.io_.
+
 Software bill of materials (SBOM) generation tools may also be able to use this
 information, e.g. for flagging that external dependencies listed in
 ``pyproject.toml`` but not contained in wheel metadata are likely vendored
-within the wheel.
+within the wheel. :pep:`770` ("Improving measurability of Python packages with
+Software Bill-of-Materials"), which standardizes how SBOMs are included in
+wheels, contains an instructive section on how that PEP differs from this one.
 
 Packages with external dependencies are typically hard to build from source,
 and error messages from build failures tend to be hard to decipher for end
@@ -263,14 +266,13 @@ available via ``vers`` URIs (`see specification <vers>`__)::
 
 Users are supposed to couple a ``pkg:`` URL with a ``vers:`` URL. For example,
 to express ``numpy>=2.0``, the PURL equivalent would be ``pkg:pypi/numpy`` plus
-``vers:pypi/>=2.0``. This can be expressed as a two-item list:
-``["pkg:pypi/numpy", "vers:pypi/>=2.0"]``. Additionally, a new proposal to add
-the ``vers`` URL in a PURL qualifier is being `discussed
-<https://github.com/package-url/purl-spec/pull/433>`__, but the current
-direction requires percent-encoding and the repetition of some components for
-disambiguation.
+``vers:pypi/>=2.0``. This can be done with:
 
-Since this is not very ergonomic, the version field in ``dep:`` URLs accepts
+- A two-item list: ``["pkg:pypi/numpy", "vers:pypi/>=2.0"]``.
+- A `percent-encoded <https://github.com/package-url/purl-spec/blob/main/PURL-SPECIFICATION.rst#character-encoding>`__
+  URL qualifier: ``pkg:pypi/numpy?vers=vers:pypi%2F%3E%3D2.0``.
+
+Since none of these options are very ergonomic, the version field in ``dep:`` URLs accepts
 version range specifiers too, with these rules:
 
 - The ``vers:`` scheme is omitted.
@@ -679,12 +681,12 @@ there will not be code implementing the metadata spec as a whole. However,
 there are parts that do have a reference implementation:
 
 1. The ``[external]`` table has to be valid TOML and therefore can be loaded
-   with ``tomllib``.
+   with ``tomllib``. This table can be further processed with the
+   `pyproject-external`_ package, demonstrated below.
 2. The PURL specification, as a key part of this spec, has a Python package
    with a reference implementation for constructing and parsing PURLs:
-   `packageurl-python`_. The ``dep:`` URLs can be handled with this package,
-   but a ``dep``-specific implementation is available in `pyproject-external`_
-   too.
+   `packageurl-python`_. This package is wrapped in `pyproject-external`_
+   to provide ``dep:``-specific validation and handling.
 
 There are multiple possible consumers and use cases of this metadata, once
 that metadata gets added to Python packages. Tested metadata for all of the
@@ -692,6 +694,64 @@ top 150 most-downloaded packages from PyPI with published platform-specific
 wheels can be found in `rgommers/external-deps-build`_. This metadata has
 been validated by using it to build wheels from sdists patched with that
 metadata in clean Docker containers.
+
+Example
+-------
+
+Given a ``pyproject.toml`` with this ``[external]`` table:
+
+.. code-block:: toml
+
+  [external]
+  build-requires = [
+    "dep:virtual/compiler/c",
+    "dep:virtual/compiler/rust",
+    "dep:generic/pkg-config",
+  ]
+  host-requires = [
+    "dep:generic/openssl",
+    "dep:generic/libffi",
+  ]
+
+You can use ``pyproject_external.External`` to parse it and manipulate it:
+
+.. code-block:: python
+
+  >>> from pyproject_external import External
+  >>> external = External.from_pyproject_path("./pyproject.toml")
+  >>> external.validate()
+  >>> external.to_dict()
+  {'external': {'build_requires': ['dep:virtual/compiler/c', 'dep:virtual/compiler/rust', 'dep:generic/pkg-config'], 'host_requires': ['dep:generic/openssl', 'dep:generic/libffi']}}
+  >>> external.build_requires
+  [DepURL(type='virtual', namespace='compiler', name='c', version=None, qualifiers={}, subpath=None), DepURL(type='virtual', namespace='compiler', name='rust', version=None, qualifiers={}, subpath=None), DepURL(type='generic', namespace=None, name='pkg-config', version=None, qualifiers={}, subpath=None)]
+  >>> external.build_requires[0]
+  DepURL(type='virtual', namespace='compiler', name='c', version=None, qualifiers={}, subpath=None)
+
+Note the proposed ``[external]`` table was well-formed. With invalid contents such as:
+
+.. code-block:: toml
+
+  [external]
+  build-requires = [
+    "dep:this-is-missing-the-type",
+    "pkg:not-a-dep-url"
+  ]
+
+You would fail the validation:
+
+.. code-block:: python
+
+  >>> external = External.from_pyproject_data(
+    {
+      "external": {
+        "build_requires": [
+          "dep:this-is-missing-the-type",
+          "pkg:not-a-dep-url"
+        ]
+      }
+    }
+  )
+  ValueError: purl is missing the required type component: 'dep:this-is-missing-the-type'.
 
 
 Rejected Ideas
@@ -716,16 +776,22 @@ proposed using specific library and header names as external dependencies. This
 is too granular; using package names is a well-established pattern across
 packaging ecosystems and should be preferred.
 
+Adding a ``host-requires`` key under ``[build-system]``
+-------------------------------------------------------
+
+Adding ``host-requires`` for host dependencies that are on PyPI in order to
+better support name mapping to other packaging systems with support for
+cross-compiling seems useful in principle, for the same reasons as this PEP
+adds a ``host-requires`` under the ``[external]`` table. However, it isn't
+necessary to include in this PEP, and hence the authors prefer to keep the
+scope of this PEP limited - a future PEP on cross compilation may want to
+tackle this. `This issue <https://github.com/rgommers/peps/issues/6>`__
+contains more arguments in favor and against adding ``host-requires`` under
+``[build-system]`` as part of this PEP.
+
 
 Open Issues
 ===========
-
-Version specifiers for PURLs
-----------------------------
-
-Support in PURL for version expressions and ranges is now available via the
-discussed ``vers:`` scheme. However, the ergonomics of having to use two URLs
-is undesirable. Thus why we propose a joint ``dep:`` scheme.
 
 Versioning of virtual dependencies
 -----------------------------------
@@ -762,24 +828,6 @@ maintained as a PyPA project. See
 https://discuss.python.org/t/pep-725-specifying-external-dependencies-in-pyproject-toml/31888/62.
 TODO: once that list/project is prototyped, include it in the PEP and close
 this open issue.
-
-Syntax for virtual dependencies
---------------------------------
-
-The current syntax this PEP uses for virtual dependencies is
-``dep:virtual/(compiler|interface)/name``, which is analogous to but not part of the PURL spec.
-This open issue discusses supporting virtual dependencies within PURL:
-`purl-spec#222 <https://github.com/package-url/purl-spec/issues/222>`__.
-
-Should a ``host-requires`` key be added under ``[build-system]``?
------------------------------------------------------------------
-
-Adding ``host-requires`` for host dependencies that are on PyPI in order to
-better support name mapping to other packaging systems with support for
-cross-compiling may make sense.
-`This issue <https://github.com/rgommers/peps/issues/6>`__ tracks this topic
-and has arguments in favor and against adding ``host-requires`` under
-``[build-system]`` as part of this PEP.
 
 
 References
@@ -835,9 +883,9 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _delvewheel: https://github.com/adang1345/delvewheel
 .. _verspurl: https://github.com/package-url/purl-spec/issues/386
 .. _rgommers/external-deps-build: https://github.com/rgommers/external-deps-build
+.. _pyproject-external: https://github.com/jaimergp/pyproject-external
 .. _Reference LAPACK: https://github.com/Reference-LAPACK/lapack
 .. _setuptools-ext: https://pypi.org/project/setuptools-ext/
-.. _pyproject-external: https://github.com/jaimergp/pyproject-external
 .. _PyPI JSON API responses: https://docs.pypi.org/api/json/
 .. _pypa/hatch#1712: https://github.com/pypa/hatch/issues/1712
 .. _pypa/flit#353: https://github.com/pypa/flit/issues/353
