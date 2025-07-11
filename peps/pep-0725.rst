@@ -19,7 +19,7 @@ runtime dependencies in a ``pyproject.toml`` file for packaging-related tools
 to consume.
 
 This PEP proposes to add an ``[external]`` table to ``pyproject.toml`` with
-seven keys. "build-requires", "host-requires", "dependencies" are
+seven keys. "build-requires", "host-requires" and "dependencies" are
 are for specifying three types of required dependencies:
 
 1. ``build-requires``, build tools to run on the build machine
