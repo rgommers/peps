@@ -639,8 +639,8 @@ Example with dependency groups:
 
     [external.dependency-groups]
     dev = [
-      "dep:generic/clang-format",
-      "dep:github/gcovr/gcovr",
+      "dep:generic/catch2",
+      "dep:generic/valgrind",
     ]
 
 Core-metadata entries of ``external.dependencies`` items:
