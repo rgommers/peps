@@ -401,16 +401,15 @@ the ``optional-*`` keys purpose be fulfilled by ``dependency-groups``.
 
 The ``optional-build-requires`` and ``optional-host-requires`` keys have a very specific
 meaning: they are optional dependencies to be used as build tools or as linked libraries,
-respectively. If present, they will be used by the build machinery, but if absent no error
+respectively. If present, they may be used by the build machinery, but if absent no error
 will be raised. ``[external]``-aware tools will inspect these fields to provision or analyze
-the dependency tree as needed, taking this meaning into account (which is specially important
+the dependency tree as needed, taking this meaning into account (which is especially important
 in cross-compiling scenarios). The ``dependency-groups`` field doesn't provide this nuance
 and choosing a naming convention (or reserving a few keywords) doesn't seem practical or robust.
 
 About the overlaps between ``dependency-groups`` and ``optional-dependencies``, there is one
 key distinction: ``dependency-groups`` will not make it to distributed metadata. It is hence
-useful to provide external dependency metadata for e.g. development or testing, without
-polluting the Core Metadata file with unneeded bloat.
+useful to provide external dependency metadata for e.g. development or testing.
 
 Specification
 =============
@@ -639,10 +638,9 @@ Example with dependency groups:
 .. code:: toml
 
     [external.dependency-groups]
-    test = [
-      "dep:virtual/compiler/c",
-      "dep:generic/cmake",
-      "dep:generic/make",
+    dev = [
+      "dep:generic/clang-format",
+      "dep:github/gcovr/gcovr",
     ]
 
 Core-metadata entries of ``external.dependencies`` items:
