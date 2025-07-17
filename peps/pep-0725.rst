@@ -19,17 +19,17 @@ runtime dependencies in a ``pyproject.toml`` file for packaging-related tools
 to consume.
 
 This PEP proposes to add an ``[external]`` table to ``pyproject.toml`` with
-seven keys. "build-requires", "host-requires" and "dependencies" are
-are for specifying three types of required dependencies:
+seven keys. "build-requires", "host-requires" and "dependencies"
+are for specifying three types of *required* dependencies:
 
 1. ``build-requires``, build tools to run on the build machine
 2. ``host-requires``, build dependencies needed for the host machine but also needed at build time.
 3. ``dependencies``, needed at runtime on the host machine but not needed at build time.
 
-These three keys also have their optional counterparts (``optional-build-requires``,
-``optional-host-requires``, ``optional-dependencies``), which play the same role and
-have the same format as ``optional-dependencies`` key in the ``[project]`` table.
-Finally ``dependency-groups`` offers the same functionality as :pep:`735` but for external
+These three keys also have their *optional* ``external`` counterparts (``optional-build-requires``,
+``optional-host-requires``, ``optional-dependencies``), which have the same role that
+``project.optional-dependencies`` plays for ``project.dependencies``. Finally,
+``dependency-groups`` offers the same functionality as :pep:`735` but for external
 dependencies.
 
 Cross compilation is taken into account by distinguishing between build and host dependencies.
