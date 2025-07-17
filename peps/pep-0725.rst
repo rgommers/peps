@@ -402,6 +402,17 @@ specifiers in the same data structure. We believe it's cleaner to separate conce
 in different top-level tables, hence why we still prefer to have
 ``external.dependency-groups``.
 
+Optional dependencies versus dependency groups
+''''''''''''''''''''''''''''''''''''''''''''''
+
+The rationale for having ``external.dependency-groups`` is identical for the
+rationale given in :pep:`735` for introducing ``[dependency-groups]``. The
+intended usage and semantics of inclusion/exclusion into Core Metadata
+is thus identical to ``[dependency-groups]``.
+
+``external.optional-dependencies`` will show up in Core Metadata.
+``external.dependency-groups`` will not.
+
 Specification
 =============
 
