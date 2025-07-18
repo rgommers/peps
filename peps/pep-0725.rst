@@ -393,7 +393,7 @@ dependencies in per-group sub-tables::
 
   [dependency-groups]
   dev = [
-    "pytest"
+    "pytest",
     { external = ["dep:cargo/ripgrep"] },
   ]
 
