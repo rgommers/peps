@@ -544,7 +544,10 @@ Examples
 These examples show what the ``[external]`` content for a number of packages is
 expected to be.
 
-cryptography 39.0:
+cryptography 39.0
+'''''''''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
@@ -559,7 +562,10 @@ cryptography 39.0:
       "dep:generic/libffi",
     ]
 
-SciPy 1.10:
+SciPy 1.10
+''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
@@ -576,7 +582,10 @@ SciPy 1.10:
       "dep:virtual/interface/lapack@>=3.7.1",
     ]
 
-Pillow 10.1.0:
+Pillow 10.1.0
+'''''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
@@ -603,7 +612,10 @@ Pillow 10.1.0:
     ]
 
 
-NAVis 1.4.0:
+NAVis 1.4.0
+'''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
@@ -621,13 +633,18 @@ NAVis 1.4.0:
       "dep:cran/nat.nblast",
     ]
 
+``PKG-INFO`` / ``METADATA`` content:
+
 .. code::
 
   Provides-External-Extra: nat
   Requires-External-Dep: dep:cran/nat; extra == 'nat'
   Requires-External-Dep: dep:cran/nat.nblast; extra == 'nat'
 
-Spyder 6.0:
+Spyder 6.0
+''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
@@ -637,6 +654,7 @@ Spyder 6.0:
       "dep:cargo/tree-sitter-cli",
       "dep:golang/github.com/junegunn/fzf",
     ]
+``PKG-INFO`` / ``METADATA`` content:
 
 .. code::
 
@@ -644,7 +662,10 @@ Spyder 6.0:
   Requires-External-Dep: dep:cargo/tree-sitter-cli
   Requires-External-Dep: dep:golang/github.com/junegunn/fzf
 
-jupyterlab-git 0.41.0:
+jupyterlab-git 0.41.0
+'''''''''''''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
@@ -658,11 +679,16 @@ jupyterlab-git 0.41.0:
       "dep:generic/nodejs",
     ]
 
+``PKG-INFO`` / ``METADATA`` content:
+
 .. code::
 
   Requires-External-Dep: dep:generic/git
 
-PyEnchant 3.2.2:
+PyEnchant 3.2.2
+'''''''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
@@ -674,7 +700,10 @@ PyEnchant 3.2.2:
       "dep:github/AbiWord/enchant",
     ]
 
-Example with dependency groups:
+With dependency groups
+''''''''''''''''''''''
+
+``pyproject.toml`` content:
 
 .. code:: toml
 
