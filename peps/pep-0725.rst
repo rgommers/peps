@@ -365,8 +365,6 @@ The reasons are:
   version 2.4. Essentially: ``name [(version)][; environment marker]``
   (with square brackets denoting optional fields). The ``dep:`` URLs would need
   to be decomposed to fit in this syntax.
-- The ``optional-dependencies`` content from ``[external]`` would need to either
-  reuse ``Provides-Extra`` or require a new ``Provides-External-Extra`` field.
 - The Core Metadata specification does not contain fields for any metadata in
   ``pyproject.toml``'s ``[build-system]`` table. Therefore the ``build-requires``
   and ``host-requires`` content do not need to be reflected in existing core
