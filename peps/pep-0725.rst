@@ -339,8 +339,8 @@ consistency between Python dependencies and external dependencies, we choose to
 add it implicitly. Python development headers must be assumed to be necessary
 when an ``[external]`` table contains one or more compiler packages.
 
-Impact on Core Metadata fields
-------------------------------
+New Core Metadata fields
+------------------------
 
 The `Core Metadata`_ specification contains one relevant field, namely
 ``Requires-External``. While it would be a good candidate to record the
