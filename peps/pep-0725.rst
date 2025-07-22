@@ -342,12 +342,7 @@ when an ``[external]`` table contains one or more compiler packages.
 New Core Metadata fields
 ------------------------
 
-The `Core Metadata`_ specification contains one relevant field, namely
-``Requires-External``. While it would be a good candidate to record the
-``external.dependencies`` table, the authors have decided to not use this
-field to propagate the external runtime dependencies metadata.
-
-Instead, two new Core Metadata fields are proposed:
+Two new Core Metadata fields are proposed:
 
 - ``Requires-External-Dep``. An external requirement expressed as a ``dep:``
   URL. Mimics the transition from ``Requires`` to ``Requires-Dist``. We
@@ -356,23 +351,25 @@ Instead, two new Core Metadata fields are proposed:
 - ``Provides-External-Extra``. An *extra* group that carries external dependencies
   (as found in ``Requires-External-Dep``) only.
 
-To avoid any confusion in the future, this PEP also proposes to deprecate the
-``Requires-External`` field altogether.
+Since the Core Metadata specification does not contain fields for any metadata in
+``pyproject.toml``'s ``[build-system]`` table, the ``build-requires``
+and ``host-requires`` content do not need to be reflected in existing core
+metadata fields.
 
-The reasons are:
+Additionally, this PEP also proposes to deprecate the ``Requires-External`` field.
+The reasons being:
 
-- The ``Requires-External`` field has very loosely defined semantics as of
-  version 2.4. Essentially: ``name [(version)][; environment marker]``
-  (with square brackets denoting optional fields). The ``dep:`` URLs would need
-  to be decomposed to fit in this syntax.
-- The Core Metadata specification does not contain fields for any metadata in
-  ``pyproject.toml``'s ``[build-system]`` table. Therefore the ``build-requires``
-  and ``host-requires`` content do not need to be reflected in existing core
-  metadata fields.
-
-The authors consider that none of these options are desirable and hence decide
-not to leverage existing Core Metadata for the runtime information encoded in the
-``[external]`` table.
+- Avoiding confusion with the newly proposed fields.
+- Avoiding potential incompatibilities with existing usage (even if limited).
+- Low penetration in the ecosystem:
+  - There is no direct correspondence to a field in the ``pyproject.toml`` metadata.
+  - Mainstream build backends like ``setuptools`` (see `pypa/setuptools#4220`_),
+    ``hatch`` (see `pypa/hatch#1712`_), ``flit`` (see `pypa/flit#353`_), or ``poetry``
+    do not offer ways to specify it or require a plugin (e.g. `poetry-external-dependencies`_).
+    ``maturin`` does seem to support it since 0.7.0 (see `PyO3/maturin@5b0e4808`_),
+    but it's not directly documented. Other backends like ``scikit-build-core`` or
+    ``meson-python`` returned no results for ``External-Requires``.
+  - The field is not included in the `PyPI JSON API responses`_.
 
 Note about the differences between sdist and wheel metadata
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -725,16 +722,8 @@ authors or packaging tooling.
 
 The only change introduced in this PEP that has impact on existing projects is the
 deprecation of the ``External-Requires`` Core Metadata field. We estimate the impact
-of this deprecation to be negligible, given the its low penetration in the ecosystem:
-
-- There is no direct correspondence to a field in the ``pyproject.toml`` metadata.
-- Mainstream build backends like ``setuptools`` (see `pypa/setuptools#4220`_),
-  ``hatch`` (see `pypa/hatch#1712`_), ``flit`` (see `pypa/flit#353`_), or ``poetry``
-  do not offer ways to specify it or require a plugin (e.g. `poetry-external-dependencies`_).
-  ``maturin`` does seem to support it since 0.7.0 (see `PyO3/maturin@5b0e4808`_),
-  but it's not directly documented. Other backends like ``scikit-build-core`` or
-  ``meson-python`` returned no results for ``External-Requires``.
-- The field is not included in the `PyPI JSON API responses`_.
+of this deprecation to be negligible, given the its low penetration in the ecosystem
+(see Rationale).
 
 The field will still be recognized by existing tools such as `setuptools-ext`_
 but its usage will be discouraged in the `Python Packaging User Guide`_, similar to
@@ -882,6 +871,19 @@ scope of this PEP limited - a future PEP on cross compilation may want to
 tackle this. `This issue <https://github.com/rgommers/peps/issues/6>`__
 contains more arguments in favor and against adding ``host-requires`` under
 ``[build-system]`` as part of this PEP.
+
+Reusing the ``Requires-External`` field in Core Metadata
+--------------------------------------------------------
+
+The `Core Metadata`_ specification contains one relevant field, namely
+``Requires-External``. While at first sight it would be a good candidate
+to record the ``external.dependencies`` table, the authors have decided
+to not re-use this field to propagate the external runtime dependencies metadata.
+
+The ``Requires-External`` field has very loosely defined semantics as of
+version 2.4. Essentially: ``name [(version)][; environment marker]``
+(with square brackets denoting optional fields). The ``dep:`` URLs would need
+to be decomposed to fit in this syntax.
 
 
 Open Issues
