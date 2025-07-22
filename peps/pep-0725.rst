@@ -386,8 +386,16 @@ dependencies via a ``--exclude`` or ``--no-dll`` command-line flag. This is
 used to avoid vendoring large shared libraries, for example those from CUDA.
 
 ``Requires-External`` entries generated from external dependencies in
-``pyproject.toml`` in a wheel need therefore to be allowed to be dynamic
-and different (narrower) than those for the corresponding sdist.
+``pyproject.toml`` MAY differ between an sdist and its corresponding wheel(s).
+However, the ``Requires-External`` entries in the wheels MUST always specify
+a narrower set of dependencies.
+
+Note that this does not imply that the field must be marked as Dynamic, since this
+distinction only applies to wheels built from an sdist by a build backend. In
+particular, wheels built from other wheels do not need to satisfy this constraint (see
+`message 179 in this DPO thread
+<https://discuss.python.org/t/split-from-pep-639-expressing-project-vs-distribution-licenses-post-pep-639-mod-titled/90314/179>`__
+.)
 
 Dependency groups
 -----------------
@@ -453,7 +461,7 @@ Version bump
 ''''''''''''
 
 Given that the proposed changes are purely additive, the Core Metadata
-version will be bumped to 2.5. 
+version will be bumped to 2.5.
 
 This will only impact tools that want to support external runtime dependencies,
 and require no changes otherwise.
