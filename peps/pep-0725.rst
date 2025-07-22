@@ -655,6 +655,7 @@ Spyder 6.0
       "dep:cargo/tree-sitter-cli",
       "dep:golang/github.com/junegunn/fzf",
     ]
+
 ``PKG-INFO`` / ``METADATA`` content:
 
 .. code::
