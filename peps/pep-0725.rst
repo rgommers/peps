@@ -437,6 +437,8 @@ the user about their mistake.
 Changes in Core Metadata
 ------------------------
 
+The Core Metadata version will be bumped to 2.5, with these changes:
+
 Deprecations
 ''''''''''''
 
@@ -452,7 +454,6 @@ Two new fields are added to Core Metadata:
 - ``Provides-External-Extra``. An *extra* group that carries external dependencies
   (as found in ``Requires-External-Dep``) only.
 
-This will require a Core Metadata version bump.
 
 Changes in ``pyproject.toml``
 -----------------------------
