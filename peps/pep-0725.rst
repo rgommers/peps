@@ -362,6 +362,7 @@ The reasons being:
 - Avoiding confusion with the newly proposed fields.
 - Avoiding potential incompatibilities with existing usage (even if limited).
 - Low penetration in the ecosystem:
+
   - There is no direct correspondence to a field in the ``pyproject.toml`` metadata.
   - Mainstream build backends like ``setuptools`` (see `pypa/setuptools#4220`_),
     ``hatch`` (see `pypa/hatch#1712`_), ``flit`` (see `pypa/flit#353`_), or ``poetry``
