@@ -464,7 +464,7 @@ Version bump
 Given that the proposed changes are purely additive, the Core Metadata
 version will be bumped to 2.5.
 
-This will only impact tools that want to support external runtime dependencies,
+This will only impact PyPI and tools that want to support external runtime dependencies,
 and require no changes otherwise.
 
 
@@ -898,7 +898,10 @@ to not re-use this field to propagate the external runtime dependencies metadata
 
 The ``Requires-External`` field has very loosely defined semantics as of
 version 2.4. Essentially: ``name [(version)][; environment marker]``
-(with square brackets denoting optional fields). The ``dep:`` URLs would need
+(with square brackets denoting optional fields). It is not defined what valid strings for ``name`` are;
+the example in the specification uses both "C" as a language name, and "libpng" as a package name.
+Tightening up the semantics would be backwards incompatible, and leaving it as is seems 
+unsatisfactory. The ``dep:`` URLs would need
 to be decomposed to fit in this syntax.
 
 
