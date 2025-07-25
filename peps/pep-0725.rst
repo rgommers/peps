@@ -57,7 +57,7 @@ Packaging ecosystems like Linux distros, conda, Homebrew, Spack, and Nix need
 full sets of dependencies for Python packages, and have tools like pyp2spec_
 (Fedora), Grayskull_ (conda), and dh_python_ (Debian) which attempt to
 automatically generate dependency metadata for their own package managers from the metadata in
-upstream Python packages. Other projects resort to symbol metadata directly, like elfdeps_
+upstream Python packages. Other tools resort to extracting dependencies from extension modules and shared libraries inside Python packages, like elfdeps_
 (Fedora). External dependencies are currently handled manually,
 because there is no metadata for this in ``pyproject.toml`` or any other
 standard location. Enabling automating this conversion is a key benefit of
