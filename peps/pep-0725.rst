@@ -901,7 +901,7 @@ The ``Requires-External`` field has very loosely defined semantics as of
 version 2.4. Essentially: ``name [(version)][; environment marker]``
 (with square brackets denoting optional fields). It is not defined what valid strings for ``name`` are;
 the example in the specification uses both "C" as a language name, and "libpng" as a package name.
-Tightening up the semantics would be backwards incompatible, and leaving it as is seems 
+Tightening up the semantics would be backwards incompatible, and leaving it as is seems
 unsatisfactory. The ``dep:`` URLs would need
 to be decomposed to fit in this syntax.
 
