@@ -61,7 +61,7 @@ upstream Python packages. External dependencies are currently handled manually,
 because there is no metadata for this in ``pyproject.toml`` or any other
 standard location. Other tools resort to extracting dependencies from extension
 modules and shared libraries inside Python packages, like elfdeps_ (Fedora).
-Enabling this kind of automated conversion without expensive inspection processes
+Enabling automating this type of conversion by only using explicitly annotated metadata
 is a key benefit of this PEP, making packaging Python packages for distros easier
 and more reliable. In addition, the authors envision other types of tools
 making use of this information, e.g., dependency analysis tools like Repology_,
