@@ -57,7 +57,8 @@ Packaging ecosystems like Linux distros, conda, Homebrew, Spack, and Nix need
 full sets of dependencies for Python packages, and have tools like pyp2spec_
 (Fedora), Grayskull_ (conda), and dh_python_ (Debian) which attempt to
 automatically generate dependency metadata for their own package managers from the metadata in
-upstream Python packages. External dependencies are currently handled manually,
+upstream Python packages. Other projects resort to symbol metadata directly, like elfdeps_
+(Fedora). External dependencies are currently handled manually,
 because there is no metadata for this in ``pyproject.toml`` or any other
 standard location. Enabling automating this conversion is a key benefit of
 this PEP, making packaging Python packages for distros easier and more reliable. In addition, the
@@ -250,7 +251,7 @@ The *name* should be the most common name for the interface or language, lowerca
 Some examples include::
 
   dep:virtual/compiler/c
-  dep:virtual/compiler/c++
+  dep:virtual/compiler/cxx
   dep:virtual/compiler/rust
   dep:virtual/interface/blas
   dep:virtual/interface/lapack
@@ -1007,3 +1008,4 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _pypa/setuptools#4220: https://github.com/pypa/setuptools/discussions/4220#discussioncomment-8930671
 .. _poetry-external-dependencies: https://pypi.org/project/poetry-external-dependencies/
 .. _PyO3/maturin@5b0e4808: https://github.com/PyO3/maturin/commit/5b0e4808bb8852fe796cd2848932a35fbb14de8b
+.. _elfdeps: https://github.com/python-wheel-build/elfdeps/
