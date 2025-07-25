@@ -57,13 +57,15 @@ Packaging ecosystems like Linux distros, conda, Homebrew, Spack, and Nix need
 full sets of dependencies for Python packages, and have tools like pyp2spec_
 (Fedora), Grayskull_ (conda), and dh_python_ (Debian) which attempt to
 automatically generate dependency metadata for their own package managers from the metadata in
-upstream Python packages. Other tools resort to extracting dependencies from extension modules and shared libraries inside Python packages, like elfdeps_
-(Fedora). External dependencies are currently handled manually,
+upstream Python packages. External dependencies are currently handled manually,
 because there is no metadata for this in ``pyproject.toml`` or any other
-standard location. Enabling automating this conversion is a key benefit of
-this PEP, making packaging Python packages for distros easier and more reliable. In addition, the
-authors envision other types of tools making use of this information, e.g.,
-dependency analysis tools like Repology_, Dependabot_ and libraries.io_.
+standard location. Other tools resort to extracting dependencies from extension
+modules and shared libraries inside Python packages, like elfdeps_ (Fedora).
+Enabling this kind of automated conversion without expensive inspection processes
+is a key benefit of this PEP, making packaging Python packages for distros easier
+and more reliable. In addition, the authors envision other types of tools
+making use of this information, e.g., dependency analysis tools like Repology_,
+Dependabot_ and libraries.io_.
 
 Software bill of materials (SBOM) generation tools may also be able to use this
 information, e.g. for flagging that external dependencies listed in
