@@ -167,7 +167,8 @@ Registry design
 
 The mapping infrastructure should include the following components and properties:
 
-- A central registry for known generic and virtual PEP 725 identifiers (``dep:`` URLs).
+- A central registry of PEP 725 identifiers (``dep:`` URLs), including at least the
+  well-known generic and virtual identifiers considered canonical.
 - A list of known ecosystems and their package managers, where ecosystem maintainers
   can register their name mapping(s).
 - A standardized schema that defines how mappings should be structured.
