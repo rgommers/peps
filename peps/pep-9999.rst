@@ -124,9 +124,9 @@ package manager of choice (`example StackOverflow question <https://unix.stackex
 Maintenance costs of name mappings
 ----------------------------------
 
-The maintenance cost of name mappings from PyPI to a large number of packaging
+The maintenance cost of external dependency mappings to a large number of packaging
 ecosystems is potentially high. We choose to define the registry in such
-a way that these mappings can be maintained by the packaging ecosystems
+a way that these mappings can be maintained by the target packaging ecosystems
 themselves. Hence this system is opt-in for a given ecosystem,
 and the associated maintenance costs are distributed. Some ecosystems
 have such a name mapping already, because it's required for tools like pyp2rpm_
