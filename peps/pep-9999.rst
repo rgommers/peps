@@ -67,20 +67,20 @@ Rationale
 
 Prior art
 ---------
-R: https://github.com/rstudio/r-system-requirements. The R system with central
+
+`R <https://github.com/rstudio/r-system-requirements>`__: The R system with a central
 registry knows how to translate external dependency metadata to install
 commands for package managers like ``apt-get``. This registry centralises the
 mappings for a series of Linux distributions, and also Windows. macOS is not
 present. The `"Rule Coverage" of its README <https://github.com/rstudio/r-system-requirements/blob/7314012a48d38854c19f439e1c2d2e4b383fe7ea/README.md#rule-coverage>`__
-used to show that improves the chance
+used to show that this system improves the chance
 of success of building packages from CRAN from source. Across all CRAN packages,
-Ubuntu 18 improves from 78.1% to 95.8%, CentOS 7 from 77.8% to 93.7% and openSUSE
+Ubuntu 18 improved from 78.1% to 95.8%, CentOS 7 from 77.8% to 93.7% and openSUSE
 15.0 from 78.2% to 89.7%. The chance of success depends on how well the registry
-is maintained, but the gain is significant - ~4x fewer packages fail to build on
+is maintained, but the gain is significant: ~4x fewer packages fail to build on
 Ubuntu and CentOS in a Docker container.
 
-Fedora/RPM:
-https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/117?u=rgommers.
+`Fedora/RPM <https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/117>`__:
 The ``NameConvertor`` implementation in pyp2rpm_ is based on rules, with the
 base one being that the RPM name for a PyPI package is
 ``f"python-{pypi_package_name}"``. This seems to work quite well; there are a
@@ -107,7 +107,7 @@ The `OpenStack <https://www.openstack.org/>`__ ecosystem also needs to deal with
 some mapping efforts. All of them focus on Linux distributions, exclusively.
 `pkg-map <https://docs.openstack.org/diskimage-builder/latest/elements/pkg-map/README.html>`__
 accompanies ``diskimage-builder`` and provides a file format where the user defines
-arbitrary variable names and their corresponding name in the target distro
+arbitrary variable names and their corresponding names in the target distro
 (Red Hat, Debian, OpenSUSE, etc). See `example for PyYAML <https://github.com/stbenjam/diskimage-builder/blob/5bc5f8aff3b40b1918ce72660f1dba38c3c4f27a/diskimage_builder/elements/svc-map/pkg-map#L4>`__.
 `bindep <https://opendev.org/opendev/bindep>`__ defines a file ``bindep.txt``
 (see `example <https://opendev.org/opendev/bindep/src/branch/master/bindep/tests/bindep.txt>`__)
