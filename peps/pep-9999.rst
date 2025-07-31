@@ -704,7 +704,7 @@ of that message could improve to:
 .. code:: bash
 
     The following external dependencies are needed to install the package
-    mentioned above, and are not installed with `apt`:
+    mentioned above. You may need to install them with `apt`:
 
       g++
       libboost-all-dev
