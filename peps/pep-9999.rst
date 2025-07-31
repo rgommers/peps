@@ -635,7 +635,9 @@ The following examples illustrate how the name mapping mechanism may be used.
 Note that the ``py-show`` command is hypothetical; this could be a ``pip``
 command or implemented in a new tool with a different name.
 
-Say we have a Python package named ``my-cpp-pkg`` with a single extension
+.. JRG: Should we change this to use pyproject-external or leave it as a hypothethical CLI?
+
+Say we have a Python package named ``my-cxx-pkg`` with a single extension
 module, implemented in C++ and using Boost and ``pybind11``, plus
 ``meson-python`` as the build backend:
 
@@ -650,7 +652,7 @@ module, implemented in C++ and using Boost and ``pybind11``, plus
 
     [external]
     build-requires = [
-      "dep:virtual/compiler/cpp",
+      "dep:virtual/compiler/cxx",
       "dep:generic/boost",
     ]
 
@@ -666,7 +668,7 @@ following:
 
     $ # show all external dependencies
     $ py-show --external
-    dep:virtual/compiler/cpp
+    dep:virtual/compiler/cxx
     dep:generic/boost
 
     $ # show how to install external dependencies
@@ -693,7 +695,7 @@ missing. If we get a build failure, the output may look like:
     This package has the following external dependencies, if those are missing
     on your system they are likely to be the cause of this build failure:
 
-      dep:virtual/compiler/cpp
+      dep:virtual/compiler/cxx
       dep:generic/boost
 
 If Pip has implemented support for querying the name mapping registry, the end
@@ -727,12 +729,12 @@ can now run Grayskull_:
 
 .. code::
 
-    $ grayskull pypi my-cpp-pkg
-    #### Initializing recipe for my-cpp-pkg (pypi) ####
+    $ grayskull pypi my-cxx-pkg
+    #### Initializing recipe for my-cxx-pkg (pypi) ####
 
     Recovering metadata from pypi...
-    Starting the download of the sdist package my-cpp-pkg
-    my-cpp-pkg 100% Time:  0:00:10   5.3 MiB/s|###########|
+    Starting the download of the sdist package my-cxx-pkg
+    my-cxx-pkg 100% Time:  0:00:10   5.3 MiB/s|###########|
     Checking for pyproject.toml
     ...
 
@@ -753,7 +755,7 @@ can now run Grayskull_:
     Run requirements:
       - python
 
-    #### Recipe generated on /path/to/recipe/dir for my-cpp-pkg ####
+    #### Recipe generated on /path/to/recipe/dir for my-cxx-pkg ####
 
 
 
