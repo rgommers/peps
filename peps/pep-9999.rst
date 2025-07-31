@@ -20,6 +20,9 @@ This PEP specifies a name mapping mechanism that allows packaging tools to map
 canonical PyPI and external dependency identifiers to their counterparts
 in other package repositories.
 
+.. JRG: Are we mapping PyPI identifiers here? I don't think so, right? I think the
+   abstract should just say "... to map external dependency identifiers (as introduced
+   in PEP 725) to..."
 
 Motivation
 ==========
