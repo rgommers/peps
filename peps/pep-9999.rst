@@ -194,16 +194,16 @@ Specification
 Three schemas are proposed:
 
 1. A central registry of known ``dep:`` identifiers, as introduced in PEP 725.
-2. A list of known ecosystems and their package manager names.
+2. A list of known ecosystems and the location of their mappings.
 3. The ecosystem-specific mappings of ``dep:`` identifiers to their
    corresponding ecosystem specifiers, plus details of their package manager(s).
 
 The central registry defines which identifiers are recognized as canonical,
 plus known aliases. Each entry MUST provide a valid ``dep:`` identifier in the
 field ``id``, with an optional free form ``description`` text. Additionally
-some entries MAY refer to another entry via the ``provides`` field, which takes
-a string or a list of strings already defined as ``id`` in the registry. This is useful for
-aliases (e.g. ``dep:generic/arrow`` and ``dep:github/apache/arrow``), and
+an entry MAY refer to another entry via its ``provides`` field, which takes
+a string or a list of strings already defined as ``id`` in the registry. This is useful
+for both aliases (e.g. ``dep:generic/arrow`` and ``dep:github/apache/arrow``) and
 concrete implementations of a ``dep:virtual/`` entry (e.g. ``dep:generic/gcc``
 would provide ``dep:virtual/compiler/c``). Entries without ``provides`` content
 or, if populated, only with ``dep:virtual/`` identifiers, are considered
@@ -225,7 +225,7 @@ main content is a list of dictionaries, in which each entry consists of:
     identifiers as needed as build-, host- and runtime dependencies (see PEP 725 for
     details on these definitions).
 
-  - for convenience,  a string or a list of strings are also accepted as a
+  - for convenience, a string or a list of strings are also accepted as a
     shorthand form. In this case, the identifier(s) will be used to populate
     the three categories mentioned in the item above.
 
@@ -239,7 +239,7 @@ main content is a list of dictionaries, in which each entry consists of:
   dictionary that maps a string to a URL. This is useful to link to external
   resources that provide more information about the mapped packages.
 
-Some examples from the conda-forge mapping include:
+Some examples from a hypothetical conda-forge mapping would include:
 
 .. code-block:: js
 
@@ -290,9 +290,9 @@ Some examples from the conda-forge mapping include:
 
 The mappings MAY also specify another section ``package_managers``, reporting
 which package managers are available in the ecosystem. This field MUST
-take a dictionary with the following fields:
+take a list of dictionaries, with each of them reporting the following fields:
 
-- ``name`` (string), usually the name of the package manager executable
+- ``name`` (string), usually the name of the package manager executable.
 - ``install_command`` (list of strings), the command to run to install the mapped package(s).
 - ``version_operators``: a mapping of PEP 440 operator names to the relevant
   syntax for this package manager.
@@ -574,7 +574,7 @@ Each entry in this list is defined as:
     * - Required
       - True
 
-Each entry in this list is defined as:
+Each entry in this list is defined as a dictionary with these fields:
 
 .. list-table::
     :header-rows: 1
