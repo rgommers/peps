@@ -26,32 +26,32 @@ Motivation
 
 Packages on PyPI often require build-time and runtime dependencies that are not
 present on PyPI. :doc:`pep-0725` introduced metadata to express
-such dependencies. In order to make use of concrete external dependency metadata for
-a Python package, it is necessary to map given dependency identifiers to the names
+such dependencies. Using concrete external dependency metadata for
+a Python package requires mapping the given dependency identifiers to the specifiers
 used in other ecosystems.
 
 In the context of external dependencies, there are at least two key motivators:
 
-- Enable tools to automatically map external dependencies to packages in other
+- Enabling tools to automatically map external dependencies to packages in other
   packaging repositories/ecosystems,
-- Make it possible to include needed external dependencies *with the package
+- Including the needed external dependencies *with the package
   names used by the relevant system package manager on the user's system* in
   error messages emitted by Python package installers and build frontends,
-  as well as allow the user to query for those names directly to obtain install
+  as well as allowing the user to query for those names directly to obtain install
   instructions.
 
 Packaging ecosystems like Linux distros, conda, Homebrew, Spack, and Nix need
 full sets of dependencies for Python packages, and have tools like pyp2rpm_
 (Fedora), Grayskull_ (conda), and dh_python_ (Debian) which attempt to
-automatically generate dependency metadata automatically from the metadata in
+automatically generate dependency information from the metadata available in
 upstream Python packages. Before PEP 725, external dependencies were handled manually,
 because there was no metadata for this in ``pyproject.toml`` or any other
-standard metadata file. Enabling automating this conversion is a key benefit of
-this PEP, making packaging Python easier and more reliable. In addition, the
-authors envision other types of tools making use of this information, e.g.,
+standard metadata file. Enabling its automatic conversion is a key benefit of
+this PEP, making Python packaging easier and more reliable. In addition, the
+authors envision other types of tools making use of this information; e.g.,
 dependency analysis tools like Repology_, Dependabot_ and libraries.io_.
 
-It is also common that other ecosystems repackage Python projects with their own
+It is also common that other ecosystems redistribute Python projects with their own
 packaging system. While this is required for packages with compiled extensions, it
 is theoretically unnecessary for pure Python wheels. The mapping proposed in this PEP
 would allow downstream redistribution efforts to focus on the compiled packages and
