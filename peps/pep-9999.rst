@@ -159,7 +159,7 @@ this could be made both more comprehensive and easier to maintain though a tool
 command with semantics of *"show this ecosystem's preferred package manager
 install command for all external dependencies"*. This may be done as a
 standalone tool, or as a new subcommand in any Python development workflow tool
-(e.g., Pip, Poetry, Hatch, PDM).
+(e.g., Pip, Poetry, Hatch, PDM, uv).
 
 
 Registry design
