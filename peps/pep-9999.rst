@@ -779,7 +779,7 @@ How to Teach This
 There are at least four audiences that need to learn a workflow here.
 
 1. Python package maintainers wishing to express an external dependency.
-2. Package ecosystem maintainers, who are responsible for keeping the
+2. Packaging ecosystem maintainers, who are responsible for keeping the
    mapping for their ecosystem current.
 3. Core registry maintainers, who are responsible for curating the central
    repository of ``dep:`` identifiers and descriptors.
@@ -828,16 +828,16 @@ Package ecosystem maintainers usage
 Any packages that express a ``dep:`` identifier that does not have a mapping in a given package
 ecosystem might not be able to provide tailored error messages and other UX affordances for end users.
 It is thus recommended that each package ecosystem maintain their mappings. Key to this will
-be automation. Some ideas for automation are:
+be automation. Some ideas for opt-in automation are:
 
-- Alert mapping maintainers whenever a new ``dep:`` identifier is added to the registry (probably noisy).
+- Alert mapping maintainers whenever a new ``dep:`` identifier is added to the registry (maybe noisy).
 - Provide tools that allow maintainers to diff their mappings to the registry contents to
   quickly identify missing entries.
 - Provide automated tooling that submits PRs to known mapping locations, such that maintainers
   need only fill in the ecosystem package name.
 - Provide status for each ``dep:`` identifier, to readily identify which ``dep:`` identifiers need attention.
 
-This maintenance is likely to be a lot of work to establish the initial mapping, but ideally small
+This maintenance is likely to involve a lot of work to establish the initial mapping, but ideally become small
 on an ongoing basis.
 
 
@@ -857,12 +857,17 @@ especially when it comes to dependencies where a number of synonyms are commonly
 used. This does not apply to ``dep:virtual/*`` identifiers, where a single canonical
 form is proposed and no additional aliases are allowed.
 
+Having client-side validation when the Python project is being packaged and/or uploaded
+to PyPI may help keep the maintenance efforts contained, since end-users can be pointed
+to the recommended identifiers.
+
 End user package consumers
 --------------------------
 
 There will be no change in user experience by default. End users do not need to know about
 this mechanism unless they opt in, which they may want to do to, for example, reduce their
-bandwidth and disk space usage.
+bandwidth and disk space usage. This is particularly true if the user only relies on wheels,
+since the only impact will be driven by external runtime dependencies.
 
 If they do opt-in, in an ideal case these package install commands can be done transparently,
 and the user experience remains unchanged. There are several foreseeable issues that will arise,
