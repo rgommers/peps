@@ -770,6 +770,9 @@ Security Implications
 
 TBD.
 
+.. JRG: Something about arbitrary command execution, untrusted mappings,
+   and superuser permissions being required in some systems.
+
 How to Teach This
 =================
 
