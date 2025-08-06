@@ -997,7 +997,7 @@ For (3), a collection of example mappings for a sample of packages can be found 
 
 The JSON Schemas are created with `this Pydantic model <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/schema.py>`__.
 
-The reference Python API to consume the different JSON documents and ``[external]`` tables
+The reference CLI and Python API to consume the different JSON documents and ``[external]`` tables
 can be found in `pyproject-external <https://github.com/jaimergp/pyproject-external>`__.
 
 Rejected Ideas
