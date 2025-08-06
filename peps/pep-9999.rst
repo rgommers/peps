@@ -653,14 +653,11 @@ Practical cases
 ^^^^^^^^^^^^^^^
 
 The following examples illustrate how the name mapping mechanism may be used.
-Note that the ``py-show`` command is hypothetical; this could be a ``pip``
-command or implemented in a new tool with a different name.
+They use the CLI implemented as part of the ``pyproject-external`` package.
 
-.. JRG: Should we change this to use pyproject-external or leave it as a hypothethical CLI?
-
-Say we have a Python package named ``my-cxx-pkg`` with a single extension
-module, implemented in C++ and using Boost and ``pybind11``, plus
-``meson-python`` as the build backend:
+Say we have cloned the source of a Python package named ``my-cxx-pkg`` with a
+single extension module, implemented in C++, linking to ``zlib``, using ``pybind11``,
+plus ``meson-python`` as the build backend:
 
 .. code:: toml
 
@@ -674,7 +671,9 @@ module, implemented in C++ and using Boost and ``pybind11``, plus
     [external]
     build-requires = [
       "dep:virtual/compiler/cxx",
-      "dep:generic/boost",
+    ]
+    host-requires = [
+      "dep:generic/zlib",
     ]
 
 With complete name mappings for ``apt`` on Ubuntu, this may then show the
@@ -682,24 +681,32 @@ following:
 
 .. code:: bash
 
-    $ # show all PyPI dependencies
-    $ py-show --pypi
-    meson-python
-    pybind11
 
-    $ # show all external dependencies
-    $ py-show --external
-    dep:virtual/compiler/cxx
-    dep:generic/boost
+    # show all external dependencies as dep: URLs
+    $ python -m pyproject_external show .
+    [external]
+    build-requires = [
+        "dep:virtual/compiler/cxx",
+    ]
+    host-requires = [
+        "dep:generic/zlib",
+    ]
 
-    $ # show how to install external dependencies
-    $ py-show --external --system-install-cmd
-    sudo apt install g++ libboost-all-dev
+    # show all external dependencies, but mapped to the autodetected ecosystem
+    $ python -m pyproject_external show --output=mapped .
+    [external]
+    build_requires = [
+        "g++",
+        "python3",
+    ]
+    host_requires = [
+        "zlib1g",
+        "zlib1g-dev",
+    ]
 
-    $ # show install command for both PyPI and external dependencies
-    $ # this could include the Python dev headers too if those are missing
-    $ py-show --all --system-install-cmd
-    sudo apt install python3-dev g++ libboost-all-dev python3-mesonpy python3-pybind11 pybind11-dev
+    # show how to install external dependencies
+    $ python -m pyproject_external show --output=command .
+    sudo apt install --yes g++ zlib1g zlib1g-dev python3
 
 We have not yet run those install commands, so the external dependency may be
 missing. If we get a build failure, the output may look like:
@@ -717,7 +724,7 @@ missing. If we get a build failure, the output may look like:
     on your system they are likely to be the cause of this build failure:
 
       dep:virtual/compiler/cxx
-      dep:generic/boost
+      dep:generic/zlib
 
 If Pip has implemented support for querying the name mapping registry, the end
 of that message could improve to:
@@ -728,22 +735,23 @@ of that message could improve to:
     mentioned above. You may need to install them with `apt`:
 
       g++
-      libboost-all-dev
+      zlib1g
+      zlib1g-dev
 
 If the user wants to use conda packages and the ``mamba`` package manager to
-install external dependencies, they may specify that in a hypothetical
-``~/.pypi-name-mappings`` file:
+install external dependencies, they may specify that in their
+``~/.config/pyproject-external/config.toml`` file:
 
-.. code::
+.. code:: toml
 
-    system-package-manager: mamba
+    preferred_package_manager = "mamba"
 
-This will then change the output of ``py-show``:
+This will then change the output of ``pyproject-external``:
 
 .. code:: bash
 
-    $ py-show --all --system-install-cmd
-    mamba install cxx-compiler libboost-devel
+    $ python -m pyproject_external show --output command .
+    mamba install --yes --channel=conda-forge --channel-priority=strict cxx-compiler zlib python
 
 In order to use the name mappings for the recipe generator of our package, we
 can now run Grayskull_:
