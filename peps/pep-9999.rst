@@ -680,6 +680,10 @@ plus ``meson-python`` as the build backend:
 With complete name mappings for ``apt`` on Ubuntu, this may then show the
 following:
 
+.. JRG: Note previous iterations of this section showed a hypothetical command
+   that knew how to map [build-system] dependencies to the system package manager.
+   This is NOT available in pyproject-external or the mappings, so I have removed it.
+
 .. code:: bash
 
     # show all external dependencies as dep: URLs
