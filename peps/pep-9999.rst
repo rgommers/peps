@@ -643,6 +643,7 @@ The following repository provides examples of how these schemas would look like 
   - `Gentoo <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/gentoo.mapping.json>`__.
   - `Homebrew <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/homebrew.mapping.json>`__.
   - `Nix <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/nix.mapping.json>`__.
+  - `PyPI <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/pypi.mapping.json>`__.
   - `Scoop <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/scoop.mapping.json>`__.
   - `Spack <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/spack.mapping.json>`__.
   - `Ubuntu <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/ubuntu.mapping.json>`__.
