@@ -630,7 +630,7 @@ Each entry in this list is defined as a dictionary with these fields:
 Examples
 --------
 
-This prototype repository provides examples of how these schemas would look like in real cases:
+The following repository provides examples of how these schemas would look like in real cases:
 
 - `Central registry <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json>`__.
 - `Known ecosystems <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/known-ecosystems.json>`__.
@@ -649,8 +649,8 @@ This prototype repository provides examples of how these schemas would look like
   - `Vcpkg <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/vcpkg.mapping.json>`__.
   - `Winget <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/winget.mapping.json>`__.
 
-Practical cases
-^^^^^^^^^^^^^^^
+pyproject-external CLI
+^^^^^^^^^^^^^^^^^^^^^^
 
 The following examples illustrate how the name mapping mechanism may be used.
 They use the CLI implemented as part of the ``pyproject-external`` package.
@@ -680,7 +680,6 @@ With complete name mappings for ``apt`` on Ubuntu, this may then show the
 following:
 
 .. code:: bash
-
 
     # show all external dependencies as dep: URLs
     $ python -m pyproject_external show .
@@ -752,6 +751,79 @@ This will then change the output of ``pyproject-external``:
 
     $ python -m pyproject_external show --output command .
     mamba install --yes --channel=conda-forge --channel-priority=strict cxx-compiler zlib python
+
+
+Having a central registry enables client-side validation of the ``[external]``
+table of any given project. The key idea behind the validation is to disallow
+``dep:`` identifiers that are not included in the central registry and to
+recommend using the canonical form instead of a secondary alias. The
+``pyproject-external`` project provides a simple way to do so:
+
+.. code-block:: bash
+
+    $ python -m pyproject_external show --validate grpcio-1.71.0.tar.gz
+    WARNING  Dep URL 'dep:virtual/compiler/cpp' is not recognized in the
+    central registry. Did you mean any of ['dep:virtual/compiler/c',
+    'dep:virtual/compiler/cxx', 'dep:virtual/compiler/cuda',
+    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
+    [external]
+    build-requires = [
+        "dep:virtual/compiler/c",
+        "dep:virtual/compiler/cpp",
+    ]
+
+
+pyproject-external API
+^^^^^^^^^^^^^^^^^^^^^^
+
+The proposed Python API also allows users to do these operations programmatically:
+
+.. code-block:: python
+
+    >>> from pyproject_external import External
+    >>> external = External.from_pyproject_data(
+          {
+            "external": {
+              "build-requires": [
+                "dep:virtual/compiler/c",
+                "dep:virtual/compiler/cpp",
+              ]
+            }
+          }
+        )
+    >>> external.validate()
+    Dep URL 'dep:virtual/compiler/cpp' is not recognized in the central registry. Did you
+    mean any of ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx',
+    'dep:virtual/compiler/cuda', 'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
+    >>> external = External.from_pyproject_data(
+          {
+            "external": {
+              "build-requires": [
+                "dep:virtual/compiler/c",
+                "dep:virtual/compiler/cxx",  # fixed
+              ]
+            }
+          }
+        )
+    >>> external.validate()
+    >>> external.to_dict()
+    {'external': {'build_requires': ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx']}}
+    >>> from pyproject_external import detect_ecosystem_and_package_manager
+    >>> ecosystem, package_manager = detect_ecosystem_and_package_manager()
+    >>> ecosystem
+    'conda-forge'
+    >>> package_manager
+    'pixi'
+    >>> external.to_dict(mapped_for=ecosystem, package_manager=package_manager)
+    {'external': {'build_requires': ['c-compiler', 'cxx-compiler', 'python']}}
+    >>> external.install_command(ecosystem, package_manager=package_manager)
+    ['pixi', 'add', 'c-compiler', 'cxx-compiler', 'python']
+
+Grayskull
+^^^^^^^^^
+
+A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for
+Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
 
 In order to use the name mappings for the recipe generator of our package, we
 can now run Grayskull_:
@@ -928,47 +1000,8 @@ For (3), a collection of example mappings for a sample of packages can be found 
 
 The JSON Schemas are created with `this Pydantic model <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/schema.py>`__.
 
-An example Python API to consume the different JSON documents can be found in
-`pyproject-external <https://github.com/jaimergp/pyproject-external>`__.
-
-A prototype proof of concept implementation was contributed to Grayskull, a conda recipe generator for
-Python packages, via `conda/grayskull#518 <https://github.com/conda/grayskull/pull/518>`__.
-
-Having a central registry enables client-side validation of the ``[external]`` table of any given
-project. The key idea behind the validation is to disallow ``dep:`` identifiers that are not included
-in the central registry and to recommend using the canonical form instead of a secondary alias. The
-``pyproject-external`` project provides a simple way to do so:
-
-.. code-block:: bash
-
-    $ python -m pyproject_external --validate grpcio-1.71.0.tar.gz
-    WARNING  Dep URL 'dep:virtual/compiler/cpp' is not recognized in the central registry. Did you
-    mean any of ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx', 'dep:virtual/compiler/cuda',
-    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
-    [external]
-    build-requires = [
-        "dep:virtual/compiler/c",
-        "dep:virtual/compiler/cpp",
-    ]
-
-The proposed Python API also allows users to do it programmatically:
-
-.. code-block:: python
-
-    >>> from pyproject_external import External
-    >>> external = External.from_pyproject_data(
-          {
-            "external": {
-              "build-requires": [
-                "dep:virtual/compiler/c",
-                "dep:virtual/compiler/cpp",
-              ]
-          }
-        )
-    >>> external.validate()
-    Dep URL 'dep:virtual/compiler/cpp' is not recognized in the central registry. Did you
-    mean any of ['dep:virtual/compiler/c', 'dep:virtual/compiler/cxx', 'dep:virtual/compiler/cuda',
-    'dep:virtual/compiler/go', 'dep:virtual/compiler/c-sharp']?
+The reference Python API to consume the different JSON documents and ``[external]`` tables
+can be found in `pyproject-external <https://github.com/jaimergp/pyproject-external>`__.
 
 Rejected Ideas
 ==============
