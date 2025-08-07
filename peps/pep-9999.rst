@@ -122,17 +122,23 @@ but also by end-users themselves who want to install PyPI packages with their sy
 package manager of choice (`example StackOverflow question <https://unix.stackexchange.com/q/761371>`__).
 
 
-Maintenance costs of name mappings
-----------------------------------
+Governance and maintenance costs of name mappings
+-------------------------------------------------
 
 The maintenance cost of external dependency mappings to a large number of packaging
 ecosystems is potentially high. We choose to define the registry in such
-a way that these mappings can be maintained by the target packaging ecosystems
-themselves. Hence this system is opt-in for a given ecosystem,
-and the associated maintenance costs are distributed. Some ecosystems
-have such a name mapping already, because it's required for tools like pyp2rpm_
-and Grayskull_ to work. In those cases, the additional maintenance costs of
-connecting those mappings to a central registry are likely limited.
+a way that:
+
+- A central authority maintains the list of recognized ``dep:`` identifiers and the
+  known ecosystem mappings.
+- The mappings themselves are maintained by the target packaging ecosystems.
+
+Hence this system is opt-in for a given ecosystem, and the associated
+maintenance costs are distributed. Some ecosystems have such a name mapping
+already, because it's required for tools like pyp2rpm_ and Grayskull_ to work.
+In those cases, the additional maintenance costs of connecting those mappings
+to a central registry are likely limited.
+
 
 Generating package manager-specific install commands
 ----------------------------------------------------
@@ -303,6 +309,41 @@ take a list of dictionaries, with each of them reporting the following fields:
   superuser permissions to run.
 - ``version_operators``: a mapping of PEP 440 operator names to the relevant
   syntax for this package manager.
+
+
+Governance
+----------
+
+The central registry and the list of known ecosystems MUST be maintained by a
+central authority. These responsibilities include:
+
+- Guaranteeing access to the central registry and list of known ecosystems
+  documents, via online and offline (prepackaged) mechanisms.
+- Maintaining the central registry up-to-date: curating and triaging requests
+  for newly added ``dep:`` identifiers, updating descriptions, etc.
+- Maintaining the list of known ecosystems: adding new ecosystems to the list,
+  removing deprecated ones, and updating the canonical location for each entry.
+- Maintaining the tooling built around the registry and mappings, such as CLIs,
+  Python APIs, and automation infrastructure.
+
+The authors believe that the first authority to govern these efforts should be
+well connected to the Python packaging ecosystem. Hence, we propose to initialy
+host these two pieces under the PyPA_ organization. Given the ecosystem
+agnostic nature of these documents, the authors also recognize that the scope
+of these mappings may evolve beyond the context of Python packaging and find
+useful applications in other packaging ecosystems. Thus, this PEP allows the
+central registry to change homes if the designated central authority so
+decides.
+
+The maintenance of mappings for the target ecosystems are explicitly out of scope.
+This is delegated to the maintainers of such target ecosystems, who MAY decide how
+to attend those tasks, including:
+
+- Submitting their mapping documents to the list of known ecosystems and keeping its
+  location up-to-date.
+- Updating their mappings when new entries are added to the central registry.
+- Ensuring that the mapped entries stay relevant across releases and package renames.
+
 
 Details
 -------
@@ -1047,7 +1088,7 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _Python Packaging User Guide: https://packaging.python.org
 .. _pyOpenSci Python Open Source Package Development Guide: https://www.pyopensci.org/python-package-guide/
 .. _Scikit-HEP packaging guide: https://scikit-hep.org/developer/packaging
-
+.. _PyPA: https://github.com/pypa
 
 ..
    Local Variables:
