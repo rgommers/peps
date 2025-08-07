@@ -50,16 +50,6 @@ this PEP, making Python packaging easier and more reliable. In addition, the
 authors envision other types of tools making use of this information; e.g.,
 dependency analysis tools like Repology_, Dependabot_ and libraries.io_.
 
-It is also common that other ecosystems redistribute Python projects with their own
-packaging system. While this is required for packages with compiled extensions, it
-is theoretically unnecessary for pure Python wheels. The mapping proposed in this PEP
-would allow downstream redistribution efforts to focus on the compiled packages and
-instead delegate pure wheels to Python packaging solutions directly.
-See https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68,
-https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103 and
-https://github.com/spack/spack/issues/28282#issuecomment-1562178367 for examples of
-discussions in this direction.
-
 
 Rationale
 =========
@@ -1047,6 +1037,47 @@ maintenance burden on the governance body.
 Hence, we choose to leave these details out of the central registry, and instead
 suggest external contributors to maintain their own mappings where they can
 annotate the identifiers with extra metadata via the free-form ``extra`` field.
+
+Mapping PyPI projects to repackaged counterparts in target ecosystems
+---------------------------------------------------------------------
+
+It is common that other ecosystems redistribute Python projects with their own
+packaging system. While this is required for packages with compiled extensions, it
+is theoretically unnecessary for pure Python wheels; the only need for this seems to
+be metadata translation. See https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68,
+https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103 and
+https://github.com/spack/spack/issues/28282#issuecomment-1562178367 for examples of
+discussions in this direction.
+
+The proposals in this PEP do not consider PyPI -> *ecosystem* mappings, but
+the same schemas can be repurposed to that end. After all, it is trivial to build a PURL or
+``dep:`` URL from a PyPI name (e.g. ``numpy`` becomes ``pkg:pypi/numpy``). A hypothetical
+mapping maintainer could annotate their repackaging efforts with the source PURL identifier,
+and then use that metadata to generate compatible mappings, such as:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/main/schemas/external-mapping.schema.json",
+  "schema_version": 1,
+  "name": "PyPI packages in Ubuntu 24.04",
+  "description": "PyPI mapping for the Ubuntu 24.04 LTS (Noble) distro",
+  "mappings": [
+    {
+      "id": "dep:pypi/numpy",
+      "description": "The fundamental package for scientific computing with Python",
+      "specs": ["python3-numpy"],
+      "urls": {
+        "home": "https://numpy.org/"
+      }
+    }
+  ]
+}
+```
+
+Such a mapping would allow downstream redistribution efforts to focus on the
+compiled packages and instead delegate pure wheels to Python packaging
+solutions directly.
+
 
 Open Issues
 ===========
