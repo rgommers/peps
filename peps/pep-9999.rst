@@ -207,6 +207,11 @@ would provide ``dep:virtual/compiler/c``). Entries without ``provides`` content
 or, if populated, only with ``dep:virtual/`` identifiers, are considered
 canonical. The ``provides`` field MUST NOT be present in ``dep:virtual/`` definitions.
 
+Having a central registry enables client-side validation of the ``[external]``
+table of any given project. Tools SHOULD disallow ``dep:`` identifiers
+that are not included in the central registry and SHOULD recommend using the
+canonical form instead of a secondary alias.
+
 The list of known ecosystems assigns an identifier to each ecosystem and reports the
 canonical location for its mapping. The mappings specify which ecosystem-specific
 identifiers provide the canonical entries available in the central registry. Its
@@ -752,11 +757,8 @@ This will then change the output of ``pyproject-external``:
     mamba install --yes --channel=conda-forge --channel-priority=strict cxx-compiler zlib python
 
 
-Having a central registry enables client-side validation of the ``[external]``
-table of any given project. The key idea behind the validation is to disallow
-``dep:`` identifiers that are not included in the central registry and to
-recommend using the canonical form instead of a secondary alias. The
-``pyproject-external`` project provides a simple way to do so:
+The ``pyproject-external`` CLI also provides a simple way to perform
+``[external]`` table validation:
 
 .. code-block:: bash
 
