@@ -1055,24 +1055,24 @@ the same schemas can be repurposed to that end. After all, it is trivial to buil
 mapping maintainer could annotate their repackaging efforts with the source PURL identifier,
 and then use that metadata to generate compatible mappings, such as:
 
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/main/schemas/external-mapping.schema.json",
-  "schema_version": 1,
-  "name": "PyPI packages in Ubuntu 24.04",
-  "description": "PyPI mapping for the Ubuntu 24.04 LTS (Noble) distro",
-  "mappings": [
+.. code:: json
+
     {
-      "id": "dep:pypi/numpy",
-      "description": "The fundamental package for scientific computing with Python",
-      "specs": ["python3-numpy"],
-      "urls": {
-        "home": "https://numpy.org/"
-      }
+      "$schema": "https://raw.githubusercontent.com/jaimergp/external-metadata-mappings/main/schemas/external-mapping.schema.json",
+      "schema_version": 1,
+      "name": "PyPI packages in Ubuntu 24.04",
+      "description": "PyPI mapping for the Ubuntu 24.04 LTS (Noble) distro",
+      "mappings": [
+        {
+          "id": "dep:pypi/numpy",
+          "description": "The fundamental package for scientific computing with Python",
+          "specs": ["python3-numpy"],
+          "urls": {
+            "home": "https://numpy.org/"
+          }
+        }
+      ]
     }
-  ]
-}
-```
 
 Such a mapping would allow downstream redistribution efforts to focus on the
 compiled packages and instead delegate pure wheels to Python packaging
