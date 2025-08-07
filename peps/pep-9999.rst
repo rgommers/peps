@@ -775,7 +775,7 @@ recommend using the canonical form instead of a secondary alias. The
 pyproject-external API
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The proposed Python API also allows users to do these operations programmatically:
+The ``pyproject-external`` Python API also allows users to do these operations programmatically:
 
 .. code-block:: python
 
