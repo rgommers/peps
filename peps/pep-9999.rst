@@ -870,10 +870,24 @@ There is no impact on backwards compatibility.
 Security Implications
 =====================
 
-TBD.
+This proposal does not impose any security implications on existing projects.
+The proposed schemas, registries and mappings are available resources for downstream
+tooling to use at their own will, in whatever way they find suitable.
 
-.. JRG: Something about arbitrary command execution, untrusted mappings,
-   and superuser permissions being required in some systems.
+We do have some recommendations for future implementors. The mapping schema proposes
+fields to encode instructions for command execution (install, query). A tampered
+mapping may change these instructions into something else. Hence, tools should not rely
+on internet connectivity to fetch the mappings from their online sources. Instead:
+
+- they should vendor the relevant documents in the distributed packages,
+- or depend on prepackaged, offline distributions of these documents,
+- or implement best-practices for integrity verification of the fetched documents.
+
+The install commands have the potential to modify the system configuration of the user.
+When available, tools should prefer creating ephemeral, isolated environments for the
+installation of external dependencies. If the ecosystem lacks that feature natively,
+other solutions like containerization may be used. At the very least, informative messaging
+of the impact of the operation should be provided.
 
 How to Teach This
 =================
