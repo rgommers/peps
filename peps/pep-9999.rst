@@ -1016,6 +1016,17 @@ Hence, we propose that the central authority only governs the central registry a
 the list of known ecosystems, while the maintenance of the mappings themselves is handled
 by the target ecosystems. More details are given in Rationale and Governance.
 
+Allowing ecosystem-specific variants of packages
+------------------------------------------------
+
+Some ecosystems have their own variants of known packages; e.g. Debian's
+``libsymspg2-dev``. While an identifier such as ``dep:debian/libsymspg2-dev``
+is syntactically valid, the central registry should not recognize it as a
+well-known identifier, preferring its ``generic`` counterpart instead. Users
+may still choose to use it, but tools may warn about it and suggest using the
+generic one. This is meant to encourage ecosystem agnostic metadata whenever
+possible to facilitate adoption across platforms and operating systems.
+
 
 Open Issues
 ===========
