@@ -564,6 +564,10 @@ Each entry in this list is defined as:
       - ``DepURLField`` (``string`` matching regex ``^dep:.+$``)
       - Take specs from another mapping entry.
       - Either ``specs`` or ``specs_from`` MUST be present.
+    * - ``extra``
+      - ``dict[NonEmptyString, Any]``
+      - Free-form key-value store for arbitrary metadata.
+      - False
 
 ``package_managers``
 ~~~~~~~~~~~~~~~~~~~~
@@ -1027,6 +1031,22 @@ may still choose to use it, but tools may warn about it and suggest using the
 generic one. This is meant to encourage ecosystem agnostic metadata whenever
 possible to facilitate adoption across platforms and operating systems.
 
+Adding more package metadata to the central registry
+----------------------------------------------------
+
+A central registry should only contain a list of ``dep:`` URLs and a
+minimal set of metadata fields to facilitate its identification (a free-form
+text description, and one or more URLs to relevant locations).
+
+These fields should be enough to identify the project home,
+where that extra metadata can be obtained (e.g. the repository URL will likely
+include details about authorship and licensing). Also, those details may change
+over the lifetime of the project, and keeping them up-to-date would increase the
+maintenance burden on the governance body.
+
+Hence, we choose to leave these details out of the central registry, and instead
+suggest external contributors to maintain their own mappings where they can
+annotate the identifiers with extra metadata via the free-form ``extra`` field.
 
 Open Issues
 ===========
