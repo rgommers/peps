@@ -323,8 +323,6 @@ central authority. These responsibilities include:
   for newly added ``dep:`` identifiers, updating descriptions, etc.
 - Maintaining the list of known ecosystems: adding new ecosystems to the list,
   removing deprecated ones, and updating the canonical location for each entry.
-- Maintaining the tooling built around the registry and mappings, such as CLIs,
-  Python APIs, and automation infrastructure.
 
 The authors believe that the first authority to govern these efforts should be
 well connected to the Python packaging ecosystem. Hence, we propose to initially
