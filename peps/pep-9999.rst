@@ -1028,15 +1028,25 @@ A central registry should only contain a list of ``dep:`` URLs and a
 minimal set of metadata fields to facilitate its identification (a free-form
 text description, and one or more URLs to relevant locations).
 
-These fields should be enough to identify the project home,
-where that extra metadata can be obtained (e.g. the repository URL will likely
-include details about authorship and licensing). Also, those details may change
-over the lifetime of the project, and keeping them up-to-date would increase the
-maintenance burden on the governance body.
-
-Hence, we choose to leave these details out of the central registry, and instead
+We have chosen to leave additional details out of the central registry, and instead
 suggest external contributors to maintain their own mappings where they can
 annotate the identifiers with extra metadata via the free-form ``extra`` field.
+
+The reasons include:
+
+- The existing fields should be enough to identify the project home,
+  where that extra metadata can be obtained (e.g. the repository URL will likely
+  include details about authorship and licensing).
+- These details can also be obtained from the actual target ecosystems. In some
+  cases this might be even preferable; e.g. for licenses, where downstream packaging
+  can actually affect it by unvendoring dependencies or adjusting optional bits.
+- Those details may change over the lifetime of the project, and keeping them
+  up-to-date would increase the maintenance burden on the governance body.
+- Centralizing additional metadata would hence introduce ambiguities and
+  discrepancies across target ecosystems, where different versions may be
+  available or required.
+
+
 
 Mapping PyPI projects to repackaged counterparts in target ecosystems
 ---------------------------------------------------------------------
