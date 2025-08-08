@@ -881,7 +881,7 @@ on internet connectivity to fetch the mappings from their online sources. Instea
 
 - they should vendor the relevant documents in the distributed packages,
 - or depend on prepackaged, offline distributions of these documents,
-- or implement best-practices for integrity verification of the fetched documents.
+- or implement best-practices for authenticity verification of the fetched documents.
 
 The install commands have the potential to modify the system configuration of the user.
 When available, tools should prefer creating ephemeral, isolated environments for the
