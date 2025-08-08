@@ -319,7 +319,7 @@ central authority. These responsibilities include:
 
 - Guaranteeing access to the central registry and list of known ecosystems
   documents, via online and offline (prepackaged) mechanisms.
-- Maintaining the central registry up-to-date: curating and triaging requests
+- Keeping the central registry up-to-date: curating and triaging requests
   for newly added ``dep:`` identifiers, updating descriptions, etc.
 - Maintaining the list of known ecosystems: adding new ecosystems to the list,
   removing deprecated ones, and updating the canonical location for each entry.
@@ -327,7 +327,7 @@ central authority. These responsibilities include:
   Python APIs, and automation infrastructure.
 
 The authors believe that the first authority to govern these efforts should be
-well connected to the Python packaging ecosystem. Hence, we propose to initialy
+well connected to the Python packaging ecosystem. Hence, we propose to initially
 host these two pieces under the PyPA_ organization. Given the ecosystem
 agnostic nature of these documents, the authors also recognize that the scope
 of these mappings may evolve beyond the context of Python packaging and find
@@ -335,7 +335,7 @@ useful applications in other packaging ecosystems. Thus, this PEP allows the
 central registry to change homes if the designated central authority so
 decides.
 
-The maintenance of mappings for the target ecosystems are explicitly out of scope.
+The maintenance of mappings for the target ecosystems is explicitly out of scope.
 This is delegated to the maintainers of such target ecosystems, who MAY decide how
 to attend those tasks, including:
 
