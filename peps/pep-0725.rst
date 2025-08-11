@@ -877,7 +877,8 @@ Using library and header names as external dependencies
 
 A previous draft PEP (`"External dependencies" (2015) <https://github.com/pypa/interoperability-peps/pull/30>`__)
 proposed using specific library and header names as external dependencies. This
-is both too granular, and insufficient (headers are often unversioned). Using
+is both too granular, and insufficient (e.g., headers are often unversioned; multiple
+packages may provide the same header or library). Using
 package names is a well-established pattern across packaging ecosystems
 and should be preferred.
 
