@@ -297,9 +297,7 @@ take a list of dictionaries, with each of them reporting the following fields:
 
 - ``name`` (string), usually the name of the package manager executable.
 - ``install_command`` (list of strings), the command to run to install the mapped package(s).
-- ``query_command`` (list of strings), the command to check if the mapped package(s)
-  are already installed.
-- ``requires_elevation`` (bool, ``install`` or ``query``): whether the associated commands require
+- ``requires_elevation`` (bool): whether the associated commands require
   superuser permissions to run.
 - ``version_operators``: a mapping of PEP 440 operator names to the relevant
   syntax for this package manager.
@@ -602,20 +600,9 @@ Each entry in this list is defined as a dictionary with these fields:
         Use `{}` as a placeholder where the package specs must be injected, if
         needed. If `{}` is not present, they will be added at the end.
       - True
-    * - ``query_command``
-      - ``list[string]``
-      - Command to check whether a package is installed. Each argument must be
-        provided as a separate string, as in `subprocess.run`. The `{}`
-        placeholder will be replaced by a single package spec, if needed.
-        Otherwise, the package specifier will be added at the end. An empty
-        list means no query command is available for this package manager.
-      - True
     * - ``requires_elevation``
-      - ``bool | Literal['install', 'query']``
-      - Whether the install and query commands require elevated permissions to
-        run. Use ``True`` to require on all commands, ``False`` for none. ``install``
-        and ``query`` can be used individually to only require elevation on one
-        of them.
+      - ``bool``
+      - Whether the install command requires elevated permissions to run.
       - False
     * - ``version_operators``
       - ``dict[Literal['and', 'arbitrary', 'compatible', 'equal', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equal', 'separator'],  string]``
