@@ -597,8 +597,9 @@ Each entry in this list is defined as a dictionary with these fields:
       - ``list[string]``
       - Command that must be used to install the given package(s). Each
         argument must be provided as a separate string, as in `subprocess.run`.
-        Use `{}` as a placeholder where the package specs must be injected, if
-        needed. If `{}` is not present, they will be added at the end.
+        Use `"{}"` as a placeholder (that is, it must be its own list item) where
+        the package specifiers must be injected, if needed. If `"{}"` is not present,
+        they will be added at the end.
       - True
     * - ``requires_elevation``
       - ``bool``
