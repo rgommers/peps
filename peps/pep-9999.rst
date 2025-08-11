@@ -1034,8 +1034,8 @@ annotate the identifiers with extra metadata via the free-form ``extra`` field.
 
 The reasons include:
 
-- The existing fields should be enough to identify the project home,
-  where that extra metadata can be obtained (e.g. the repository URL will likely
+- The existing fields should be sufficient to identify the project home,
+  where that extra metadata can be obtained (e.g. the repository at the URL will likely
   include details about authorship and licensing).
 - These details can also be obtained from the actual target ecosystems. In some
   cases this might be even preferable; e.g. for licenses, where downstream packaging
