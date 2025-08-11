@@ -897,11 +897,15 @@ present in the PURL schema (``?key=value``) to implement the necessary adjustmen
 Identifier indirections
 -----------------------
 
-Some ecosystems have methods to select packages based on parametrized functions
+Some ecosystems exhibit methods to select packages based on parametrized functions
 like ``cmake("dependency")`` or ``compiler("language")``, which return package
-names based on some additional context or configuration. This is not well-established
-across all ecosystems, and prone to change meaning over time. The authors prefer static
-identifiers that can be mapped explicitly via known metadata (e.g. as proposed in *name mapping PEP*).
+names based on some additional context or configuration. This feature is arguably
+not very common and, even when present, rarely used. Additionally, its dynamic
+nature makes it prone to changing meaning over time, and relying on specific build
+systems for the name resolution is in general not a good idea.
+
+The authors prefer static identifiers that can be mapped explicitly via well known metadata
+(e.g. as proposed in *name mapping PEP*).
 
 Ecosystems that do implement these indirections can use them to support the infrastructure
 designed to generate the mappings proposed in *name mapping PEP*.
