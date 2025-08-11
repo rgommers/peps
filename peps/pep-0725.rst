@@ -885,13 +885,14 @@ and should be preferred.
 Splitting host dependencies with explicit ``-dev`` or ``-devel`` suffixes
 -------------------------------------------------------------------------
 
-This convention is not consistent across all ecosystems and is thus impossible
-to implement robustly for all of them. Instead the ``build``, ``host`` and
-``run`` categories are proposed, with tools being in charge of which category
-applies to each case in a context-dependent way. If this proves to be
-insufficient, the URL design adopted by PURL and hence ``dep:`` identifiers
-allows extensions via qualifiers (``?key=value``) that can be adopted for
-manual overrides in further work.
+This convention is not consistent across all ecosystems. Since the need
+for explicit control is quite niche and we don't want to add design
+complexity without enough clear use cases, we have chosen to rely solely
+on the the ``build``, ``host`` and ``run`` category split, with tools
+being in charge of which category applies to each case in a context-dependent way.
+
+If this proves to be insufficient, a future PEP could use the URL qualifier features
+present in the PURL schema (``?key=value``) to implement the necessary adjustments.
 
 Identifier indirections
 -----------------------
