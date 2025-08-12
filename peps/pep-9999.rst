@@ -863,7 +863,7 @@ The proposed schemas, registries and mappings are available resources for downst
 tooling to use at their own will, in whatever way they find suitable.
 
 We do have some recommendations for future implementors. The mapping schema proposes
-fields to encode instructions for command execution (install, query). A tampered
+fields to encode instructions for command execution (``install_command``). A tampered
 mapping may change these instructions into something else. Hence, tools should not rely
 on internet connectivity to fetch the mappings from their online sources. Instead:
 
