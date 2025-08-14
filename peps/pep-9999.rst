@@ -308,39 +308,6 @@ take a list of dictionaries, with each of them reporting the following fields:
 - ``version_operators``: a mapping of PEP 440 operator names to the relevant
   syntax for this package manager.
 
-
-Governance
-----------
-
-The central registry and the list of known ecosystems MUST be maintained by a
-central authority. These responsibilities include:
-
-- Guaranteeing access to the central registry and list of known ecosystems
-  documents, via online and offline (prepackaged) mechanisms.
-- Keeping the central registry up-to-date: curating and triaging requests
-  for newly added ``dep:`` identifiers, updating descriptions, etc.
-- Maintaining the list of known ecosystems: adding new ecosystems to the list,
-  removing deprecated ones, and updating the canonical location for each entry.
-
-The authors believe that the first authority to govern these efforts should be
-well connected to the Python packaging ecosystem. Hence, we propose to initially
-host these two pieces under the PyPA_ organization. Given the ecosystem
-agnostic nature of these documents, the authors also recognize that the scope
-of these mappings may evolve beyond the context of Python packaging and find
-useful applications in other packaging ecosystems. Thus, this PEP allows the
-central registry to change homes if the designated central authority so
-decides.
-
-The maintenance of mappings for the target ecosystems is explicitly out of scope.
-This is delegated to the maintainers of such target ecosystems, who MAY decide how
-to attend those tasks, including:
-
-- Submitting their mapping documents to the list of known ecosystems and keeping its
-  location up-to-date.
-- Updating their mappings when new entries are added to the central registry.
-- Ensuring that the mapped entries stay relevant across releases and package renames.
-
-
 Details
 -------
 
@@ -1030,6 +997,14 @@ The JSON Schemas are created with `this Pydantic model <https://github.com/jaime
 
 The reference CLI and Python API to consume the different JSON documents and ``[external]`` tables
 can be found in `pyproject-external <https://github.com/jaimergp/pyproject-external>`__.
+
+In contrast with the ecosystem mappings, the central registry and the list of known
+ecosystems MUST be maintained by a central authority. The authors propose to:
+
+- Host the ``external-metadata-mappings`` and ``pyproject-external`` repositories under the PyPA_
+  Github organization (or equivalent, once PEP 772 is voted).
+- Create a maintainers team for these two repositories, seeded with the authors of this PEP and
+  regulated by the governance model introduced in PEP 609 or 772.
 
 Rejected Ideas
 ==============
