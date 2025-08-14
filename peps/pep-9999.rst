@@ -197,10 +197,10 @@ would provide ``dep:virtual/compiler/c``). Entries without ``provides`` content
 or, if populated, only with ``dep:virtual/`` identifiers, are considered
 canonical. The ``provides`` field MUST NOT be present in ``dep:virtual/`` definitions.
 
-Having a central registry enables client-side validation of the ``[external]``
-table of any given project. Tools SHOULD disallow ``dep:`` identifiers
-that are not included in the central registry and SHOULD recommend using the
-canonical form instead of a secondary alias.
+Having a central registry enables the validation of the ``[external]`` table.
+Tools MUST check that the provided identifiers are well formed. They MAY
+disallow ``dep:`` identifiers that are not included in the central registry,
+and SHOULD recommend using the canonical form instead of a secondary alias.
 
 The list of known ecosystems assigns an identifier to each ecosystem and reports the
 canonical location for its mapping. The mappings specify which ecosystem-specific
@@ -1075,6 +1075,25 @@ Such a mapping would allow downstream redistribution efforts to focus on the
 compiled packages and instead delegate pure wheels to Python packaging
 solutions directly.
 
+Strict validation of identifiers
+--------------------------------
+
+With the central registry, tools could choose to reject ``[external]`` metadata
+entries that do not conform to the well-known identifiers. We have decided not to
+enforce this and instead suggest to simply warn about it.
+
+It is expected that as the ``[external]`` metadata tables are adopted by the
+packaging community, the *canonical* identifier list grows to accommodate the
+requirements found in different projects. For example, a new C++ library or a
+new language compiler are introduced.
+
+If validation is made too strict and rejects unknown identifiers, this would
+introduce unnecessary friction in the external metadata adoption, and require
+human interaction to review and accept the newly requested identifiers.
+
+We suggest simply checking that the provided identifiers are well-formed. Future
+work may choose to also enforce that the identifiers are recognized as canonical,
+once the central registry has matured with significant adoption.
 
 Open Issues
 ===========
