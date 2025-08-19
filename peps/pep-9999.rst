@@ -1006,7 +1006,7 @@ Some ecosystems have their own variants of known packages; e.g. Debian's
 is syntactically valid, the central registry should not recognize it as a
 well-known identifier, preferring its ``generic`` counterpart instead. Users
 may still choose to use it, but tools may warn about it and suggest using the
-generic one. This is meant to encourage ecosystem agnostic metadata whenever
+generic one. This is meant to encourage ecosystem-agnostic metadata whenever
 possible to facilitate adoption across platforms and operating systems.
 
 Adding more package metadata to the central registry
@@ -1026,7 +1026,7 @@ The reasons include:
   where that extra metadata can be obtained (e.g. the repository at the URL will likely
   include details about authorship and licensing).
 - These details can also be obtained from the actual target ecosystems. In some
-  cases this might be even preferable; e.g. for licenses, where downstream packaging
+  cases this might even be preferable; e.g., for licenses, where downstream packaging
   can actually affect it by unvendoring dependencies or adjusting optional bits.
 - Those details may change over the lifetime of the project, and keeping them
   up-to-date would increase the maintenance burden on the governance body.
@@ -1085,11 +1085,13 @@ enforce this and instead suggest to simply warn about it.
 It is expected that as the ``[external]`` metadata tables are adopted by the
 packaging community, the *canonical* identifier list grows to accommodate the
 requirements found in different projects. For example, a new C++ library or a
-new language compiler are introduced.
+new compiler are introduced.
 
 If validation is made too strict and rejects unknown identifiers, this would
 introduce unnecessary friction in the external metadata adoption, and require
-human interaction to review and accept the newly requested identifiers.
+human interaction to review and accept the newly requested identifiers in
+a time-critical manner, potentially blocking publication of the package
+that needs a new identifier added to the central registry.
 
 We suggest simply checking that the provided identifiers are well-formed. Future
 work may choose to also enforce that the identifiers are recognized as canonical,
