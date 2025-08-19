@@ -253,10 +253,16 @@ as ``registry.json`` and ``known-ecosystems.json``, respectively.
 
 The list of known ecosystems has two roles:
 
-1. Assigning a short identifier to each ecosystem. This is the identifier
+1. Reporting the canonical URL for its mapping.
+2. Assigning a short identifier to each ecosystem. This is the identifier
    that MUST be used in the mapping filenames mentioned above so they can be
    found in the local filesystem.
-2. Reporting the canonical URL for its mapping.
+   
+For ecosystems corresponding Linux distributions, the identifier MUST be the
+one reported by their `os-release <https://www.freedesktop.org/software/systemd/man/latest/os-release.html>`__
+``ID`` parameter. For other ecosystems, it MUST be decided during the submission to
+the list of known ecosystems document. It MUST only use the characters allowed in
+os-release ``ID`` field, as per this regex ``[a-z0-9\-_.]+``.
 
 
 Some examples from a hypothetical conda-forge mapping (``conda-forge.mapping.json``) would include:
