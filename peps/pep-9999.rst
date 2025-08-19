@@ -552,7 +552,7 @@ Each entry in this list is defined as:
       - ``DepURLField`` (``string`` matching regex ``^dep:.+$``)
       - Take specs from another mapping entry.
       - Either ``specs`` or ``specs_from`` MUST be present.
-    * - ``extra``
+    * - ``extra_metadata``
       - ``dict[NonEmptyString, Any]``
       - Free-form key-value store for arbitrary metadata.
       - False
@@ -1018,7 +1018,7 @@ text description, and one or more URLs to relevant locations).
 
 We have chosen to leave additional details out of the central registry, and instead
 suggest external contributors to maintain their own mappings where they can
-annotate the identifiers with extra metadata via the free-form ``extra`` field.
+annotate the identifiers with extra metadata via the free-form ``extra_metadata`` field.
 
 The reasons include:
 
