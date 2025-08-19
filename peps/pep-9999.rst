@@ -258,11 +258,11 @@ The list of known ecosystems has two roles:
    that MUST be used in the mapping filenames mentioned above so they can be
    found in the local filesystem.
 
-For ecosystems corresponding Linux distributions, the identifier MUST be the
+For ecosystems corresponding to Linux distributions, the identifier MUST be the
 one reported by their `os-release <https://www.freedesktop.org/software/systemd/man/latest/os-release.html>`__
 ``ID`` parameter. For other ecosystems, it MUST be decided during the submission to
 the list of known ecosystems document. It MUST only use the characters allowed in
-os-release ``ID`` field, as per this regex ``[a-z0-9\-_.]+``.
+``os-release``'s ``ID`` field, as per this regex ``[a-z0-9\-_.]+``.
 
 
 Some examples from a hypothetical conda-forge mapping (``conda-forge.mapping.json``) would include:
