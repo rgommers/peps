@@ -198,9 +198,17 @@ or, if populated, only with ``dep:virtual/`` identifiers, are considered
 canonical. The ``provides`` field MUST NOT be present in ``dep:virtual/`` definitions.
 
 Having a central registry enables the validation of the ``[external]`` table.
-Tools MUST check that the provided identifiers are well formed. They MAY
-disallow ``dep:`` identifiers that are not included in the central registry,
-and SHOULD recommend using the canonical form instead of a secondary alias.
+All involved tools MUST check that the provided identifiers are well formed.
+Additionally, some tools MAY check whether the identifiers in use are recognized as
+canonical. More specifically:
+
+- Build backends and installers SHOULD NOT do any validation of names being
+  canonical by default.
+- Uploaders like ``twine`` SHOULD validate if the identifiers are canonical
+  and warn or report an error to the user, with opt-out mechanisms. They
+  SHOULD suggest a canonical replacement, if available.
+- Index servers like PyPI MAY perform the same validation as the uploaders and
+  reject the artifact if necessary.
 
 The list of known ecosystems assigns an identifier to each ecosystem and reports the
 canonical location for its mapping. The mappings specify which ecosystem-specific
@@ -1078,9 +1086,10 @@ solutions directly.
 Strict validation of identifiers
 --------------------------------
 
-With the central registry, tools could choose to reject ``[external]`` metadata
-entries that do not conform to the well-known identifiers. We have decided not to
-enforce this and instead suggest to simply warn about it.
+The central registry provides a list of canonical identifiers, which may tempt
+implementors into ensuring that all supplied identifiers are indeed canonical. We
+have decided to only *recommend* this practice for some tool categories, but in no
+case *require* such checks.
 
 It is expected that as the ``[external]`` metadata tables are adopted by the
 packaging community, the *canonical* identifier list grows to accommodate the
