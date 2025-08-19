@@ -244,7 +244,7 @@ of dictionaries, in which each entry consists of:
 Each mapping MUST have a canonical URL for online retrieval. These mappings
 MAY also be packaged for offline distribution in each platform. The authors
 recommend placing in the standard location for data artifacts in each operating
-system; e.g. ``$XDG_DATA_DIR`` on Linux and others, ``~/Library/Application Support`` on
+system; e.g. ``$XDG_DATA_DIRS`` on Linux and others, ``~/Library/Application Support`` on
 macOS, and ``%LOCALAPPDATA%`` for Windows. The subdirectory identifier MUST
 be ``external-packaging-metadata-mappings``. This data directory SHOULD only
 contain mapping documents named ``{ecosystem-identifier}.mapping.json``.
