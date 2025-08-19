@@ -192,7 +192,7 @@ Specification
 Three schemas are proposed:
 
 1. A central registry of known ``dep:`` identifiers, as introduced in PEP 725.
-2. A list of known ecosystems and the location of their mappings.
+2. A list of known ecosystems and the canonical URL for their mappings.
 3. The ecosystem-specific mappings of ``dep:`` identifiers to their
    corresponding ecosystem specifiers, plus details of their package manager(s).
 
@@ -212,10 +212,9 @@ table of any given project. Tools SHOULD disallow ``dep:`` identifiers
 that are not included in the central registry and SHOULD recommend using the
 canonical form instead of a secondary alias.
 
-The list of known ecosystems assigns an identifier to each ecosystem and reports the
-canonical location for its mapping. The mappings specify which ecosystem-specific
-identifiers provide the canonical entries available in the central registry. Its
-main content is a list of dictionaries, in which each entry consists of:
+The mappings specify which ecosystem-specific identifiers provide the canonical
+entries available in the central registry. A mapping mainly consists of a list
+of dictionaries, in which each entry consists of:
 
 - an ``id`` field with the ``dep:`` canonical identifier.
 
@@ -242,54 +241,83 @@ main content is a list of dictionaries, in which each entry consists of:
   dictionary that maps a string to a URL. This is useful to link to external
   resources that provide more information about the mapped packages.
 
-Some examples from a hypothetical conda-forge mapping would include:
+Each mapping MUST have a canonical URL for online retrieval. These mappings
+MAY also be packaged for offline distribution in each platform. The authors
+recommend placing in the standard location for data artifacts in each operating
+system; e.g. ``$XDG_DATA_DIRS`` on Linux and others, ``~/Library/Application Support`` on
+macOS, and ``%LOCALAPPDATA%`` for Windows. The subdirectory identifier MUST
+be ``external-packaging-metadata-mappings``. This data directory SHOULD only
+contain mapping documents named ``{ecosystem-identifier}.mapping.json``. The central
+registry and known ecosystem documents MAY also be distributed in this directory,
+as ``registry.json`` and ``known-ecosystems.json``, respectively.
+
+The list of known ecosystems has two roles:
+
+1. Reporting the canonical URL for its mapping.
+2. Assigning a short identifier to each ecosystem. This is the identifier
+   that MUST be used in the mapping filenames mentioned above so they can be
+   found in the local filesystem.
+
+For ecosystems corresponding to Linux distributions, the identifier MUST be the
+one reported by their `os-release <https://www.freedesktop.org/software/systemd/man/latest/os-release.html>`__
+``ID`` parameter. For other ecosystems, it MUST be decided during the submission to
+the list of known ecosystems document. It MUST only use the characters allowed in
+``os-release``'s ``ID`` field, as per this regex ``[a-z0-9\-_.]+``.
+
+
+Some examples from a hypothetical conda-forge mapping (``conda-forge.mapping.json``) would include:
 
 .. code-block:: js
 
-  [
-    {
-      "id": "dep:generic/zlib",
-      "description": "zlib data compression library for the next generation systems. From zlib-ng/zlib-ng.",
-      "specs": "zlib-ng",  // Simplest form
-      "urls": {
-        "feedstock": "https://github.com/conda-forge/zlib-ng-feedstock"
-      }
-    },
-    {
-      "id": "dep:generic/libwebp",
-      "description": "WebP image library. libwebp-base ships libraries; libwebp ships the binaries.",
-      "specs": {  // expanded form with single spec per category
-        "build": "libwebp",
-        "host": "libwebp-base",
-        "run": "libwebp"
+  {
+    ...,
+    "mappings": [
+      {
+        "id": "dep:generic/zlib",
+        "description": "zlib data compression library for the next generation systems. From zlib-ng/zlib-ng.",
+        "specs": "zlib-ng",  // Simplest form
+        "urls": {
+          "feedstock": "https://github.com/conda-forge/zlib-ng-feedstock"
+        }
       },
-      "urls": {
-        "feedstock": "https://github.com/conda-forge/libwebp-feedstock"
-      }
-    },
-    {
-      "id": "dep:generic/clang",
-      "description": "Development headers and libraries for Clang",
-      "specs": { // expanded form with specs list
-        "build": [
-          "clang",
-          "clangxx"
-        ],
-        "host": [
-          "clangdev"
-        ],
-        "run": [
-          "clang",
-          "clangxx",
-          "clang-format",
-          "clang-tools"
-        ]
+      {
+        "id": "dep:generic/libwebp",
+        "description": "WebP image library. libwebp-base ships libraries; libwebp ships the binaries.",
+        "specs": {  // expanded form with single spec per category
+          "build": "libwebp",
+          "host": "libwebp-base",
+          "run": "libwebp"
+        },
+        "urls": {
+          "feedstock": "https://github.com/conda-forge/libwebp-feedstock"
+        }
       },
-      "urls": {
-        "feedstock": "https://github.com/conda-forge/clangdev-feedstock"
-      }
-    },
-  ]
+      {
+        "id": "dep:generic/clang",
+        "description": "Development headers and libraries for Clang",
+        "specs": { // expanded form with specs list
+          "build": [
+            "clang",
+            "clangxx"
+          ],
+          "host": [
+            "clangdev"
+          ],
+          "run": [
+            "clang",
+            "clangxx",
+            "clang-format",
+            "clang-tools"
+          ]
+        },
+        "urls": {
+          "feedstock": "https://github.com/conda-forge/clangdev-feedstock"
+        }
+      },
+    ],
+    ...
+  }
+
 
 The mappings MAY also specify another section ``package_managers``, reporting
 which package managers are available in the ecosystem. This field MUST
@@ -858,10 +886,24 @@ There is no impact on backwards compatibility.
 Security Implications
 =====================
 
-TBD.
+This proposal does not impose any security implications on existing projects.
+The proposed schemas, registries and mappings are available resources for downstream
+tooling to use at their own will, in whatever way they find suitable.
 
-.. JRG: Something about arbitrary command execution, untrusted mappings,
-   and superuser permissions being required in some systems.
+We do have some recommendations for future implementors. The mapping schema proposes
+fields to encode instructions for command execution (``install_command``). A tampered
+mapping may change these instructions into something else. Hence, tools should not rely
+on internet connectivity to fetch the mappings from their online sources. Instead:
+
+- they should vendor the relevant documents in the distributed packages,
+- or depend on prepackaged, offline distributions of these documents,
+- or implement best-practices for authenticity verification of the fetched documents.
+
+The install commands have the potential to modify the system configuration of the user.
+When available, tools should prefer creating ephemeral, isolated environments for the
+installation of external dependencies. If the ecosystem lacks that feature natively,
+other solutions like containerization may be used. At the very least, informative messaging
+of the impact of the operation should be provided.
 
 How to Teach This
 =================
