@@ -247,7 +247,9 @@ recommend placing in the standard location for data artifacts in each operating
 system; e.g. ``$XDG_DATA_DIRS`` on Linux and others, ``~/Library/Application Support`` on
 macOS, and ``%LOCALAPPDATA%`` for Windows. The subdirectory identifier MUST
 be ``external-packaging-metadata-mappings``. This data directory SHOULD only
-contain mapping documents named ``{ecosystem-identifier}.mapping.json``.
+contain mapping documents named ``{ecosystem-identifier}.mapping.json``. The central
+registry and known ecosystem documents MAY also be distributed in this directory,
+as ``registry.json`` and ``known-ecosystems.json``, respectively.
 
 The list of known ecosystems has two roles:
 
