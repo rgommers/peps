@@ -1023,9 +1023,9 @@ In contrast with the ecosystem mappings, the central registry and the list of kn
 ecosystems need to be maintained by a central authority. The authors propose to:
 
 - Host the ``external-metadata-mappings`` and ``pyproject-external`` repositories under the PyPA_
-  Github organization (or equivalent, once PEP 772 is voted).
+  Github organization (or equivalent as per :doc:`pep-0772`).
 - Create a maintainers team for these two repositories, seeded with the authors of this PEP and
-  regulated by the governance model introduced in PEP 609 or 772.
+  regulated as per :doc:`pep-0772`.
 
 Copyright
 =========
