@@ -668,10 +668,10 @@ Each entry in this list is defined as a dictionary with these fields:
         strings (as expected by ``subprocess.run``), and an optional
         ``requires_elevation`` boolean (``False`` by default) to indicate whether
         the command must run with elevated permissions.
-        One of the ``command`` string items MUST include a `"{}"` placeholder, which will be
-        replaced by the mapped package identifier(s). ``install`` MUST accept several
-        identifiers in the same command. ``query`` MUST only accept a single identifier
-        per command.
+        Exactly one of the ``command`` items MUST include a ``{}`` placeholder, which will be
+        replaced by the mapped package identifier(s). The ``install`` command MUST support
+        the placeholder being replaced by multiple identifiers, ``query`` will only receive a single
+        identifier per command.
       - True
     * - ``version_operators``
       - ``dict[Literal['and', 'arbitrary', 'compatible', 'equal', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equal', 'separator'],  string]``
