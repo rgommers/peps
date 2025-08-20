@@ -1094,7 +1094,7 @@ case *require* such checks.
 It is expected that as the ``[external]`` metadata tables are adopted by the
 packaging community, the *canonical* identifier list grows to accommodate the
 requirements found in different projects. For example, a new C++ library or a
-new compiler are introduced.
+new language compiler are introduced.
 
 If validation is made too strict and rejects unknown identifiers, this would
 introduce unnecessary friction in the external metadata adoption, and require
