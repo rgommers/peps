@@ -1004,7 +1004,7 @@ While a central authority for the registry is useful, the maintenance burden
 of handling the mappings for multiple ecosystems is unfeasible at the scale of PyPI.
 Hence, we propose that the central authority only governs the central registry and
 the list of known ecosystems, while the maintenance of the mappings themselves is handled
-by the target ecosystems. More details are given in Rationale and Governance.
+by the target ecosystems.
 
 Allowing ecosystem-specific variants of packages
 ------------------------------------------------
