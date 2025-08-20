@@ -998,14 +998,6 @@ The JSON Schemas are created with `this Pydantic model <https://github.com/jaime
 The reference CLI and Python API to consume the different JSON documents and ``[external]`` tables
 can be found in `pyproject-external <https://github.com/jaimergp/pyproject-external>`__.
 
-In contrast with the ecosystem mappings, the central registry and the list of known
-ecosystems MUST be maintained by a central authority. The authors propose to:
-
-- Host the ``external-metadata-mappings`` and ``pyproject-external`` repositories under the PyPA_
-  Github organization (or equivalent, once PEP 772 is voted).
-- Create a maintainers team for these two repositories, seeded with the authors of this PEP and
-  regulated by the governance model introduced in PEP 609 or 772.
-
 Rejected Ideas
 ==============
 
@@ -1023,6 +1015,17 @@ References
 - https://github.com/rgommers/external-deps-build
 - https://github.com/jaimergp/external-metadata-mappings
 - https://github.com/conda/grayskull/pull/518
+
+Appendix A: Operational suggestions
+===================================
+
+In contrast with the ecosystem mappings, the central registry and the list of known
+ecosystems need to be maintained by a central authority. The authors propose to:
+
+- Host the ``external-metadata-mappings`` and ``pyproject-external`` repositories under the PyPA_
+  Github organization (or equivalent, once PEP 772 is voted).
+- Create a maintainers team for these two repositories, seeded with the authors of this PEP and
+  regulated by the governance model introduced in PEP 609 or 772.
 
 Copyright
 =========
