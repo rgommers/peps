@@ -112,17 +112,23 @@ but also by end-users themselves who want to install PyPI packages with their sy
 package manager of choice (`example StackOverflow question <https://unix.stackexchange.com/q/761371>`__).
 
 
-Maintenance costs of name mappings
-----------------------------------
+Governance and maintenance costs of name mappings
+-------------------------------------------------
 
 The maintenance cost of external dependency mappings to a large number of packaging
 ecosystems is potentially high. We choose to define the registry in such
-a way that these mappings can be maintained by the target packaging ecosystems
-themselves. Hence this system is opt-in for a given ecosystem,
-and the associated maintenance costs are distributed. Some ecosystems
-have such a name mapping already, because it's required for tools like pyp2rpm_
-and Grayskull_ to work. In those cases, the additional maintenance costs of
-connecting those mappings to a central registry are likely limited.
+a way that:
+
+- A central authority maintains the list of recognized ``dep:`` identifiers and the
+  known ecosystem mappings.
+- The mappings themselves are maintained by the target packaging ecosystems.
+
+Hence this system is opt-in for a given ecosystem, and the associated
+maintenance costs are distributed. Some ecosystems have such a name mapping
+already, because it's required for tools like pyp2rpm_ and Grayskull_ to work.
+In those cases, the additional maintenance costs of connecting those mappings
+to a central registry are likely limited.
+
 
 Generating package manager-specific install commands
 ----------------------------------------------------
@@ -1159,6 +1165,17 @@ References
 - https://github.com/jaimergp/external-metadata-mappings
 - https://github.com/conda/grayskull/pull/518
 
+Appendix A: Operational suggestions
+===================================
+
+In contrast with the ecosystem mappings, the central registry and the list of known
+ecosystems need to be maintained by a central authority. The authors propose to:
+
+- Host the ``external-metadata-mappings`` and ``pyproject-external`` repositories under the PyPA_
+  GitHub organization (or equivalent as per :doc:`pep-0772`).
+- Create a maintainers team for these two repositories, seeded with the authors of this PEP and
+  regulated as per :doc:`pep-0772`.
+
 Copyright
 =========
 
@@ -1184,7 +1201,7 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _Python Packaging User Guide: https://packaging.python.org
 .. _pyOpenSci Python Open Source Package Development Guide: https://www.pyopensci.org/python-package-guide/
 .. _Scikit-HEP packaging guide: https://scikit-hep.org/developer/packaging
-
+.. _PyPA: https://github.com/pypa
 
 ..
    Local Variables:
