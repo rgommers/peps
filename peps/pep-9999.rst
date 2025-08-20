@@ -159,6 +159,12 @@ install command for all external dependencies"*. This may be done as a
 standalone tool, or as a new subcommand in any Python development workflow tool
 (e.g., Pip, Poetry, Hatch, PDM, uv).
 
+To this end, each ecosystem mapping can provide a list of package managers
+known to be compatible, with templated instructions on how to install and query
+packages. The provided install command templates are paired with query command templates
+so those tools can check whether the needed packages are already present without
+having to attempt an install operation (which might be expensive and have unintended
+side effects like version upgrades).
 
 Registry design
 ---------------
@@ -320,13 +326,12 @@ Some examples from a hypothetical conda-forge mapping (``conda-forge.mapping.jso
 
 
 The mappings MAY also specify another section ``package_managers``, reporting
-which package managers are available in the ecosystem. This field MUST
+which package managers are available in the ecosystem and how to use them. This field MUST
 take a list of dictionaries, with each of them reporting the following fields:
 
 - ``name`` (string), usually the name of the package manager executable.
-- ``install_command`` (list of strings), the command to run to install the mapped package(s).
-- ``requires_elevation`` (bool): whether the associated commands require
-  superuser permissions to run.
+- ``commands`` (list of dictionaries), the commands to run to install the mapped package(s), or
+  check whether they are already installed.
 - ``version_operators``: a mapping of PEP 440 operator names to the relevant
   syntax for this package manager.
 
@@ -621,18 +626,19 @@ Each entry in this list is defined as a dictionary with these fields:
       - ``string``
       - Short identifier for this package manager (usually the command name)
       - True
-    * - ``install_command``
-      - ``list[string]``
-      - Command that must be used to install the given package(s). Each
-        argument must be provided as a separate string, as in `subprocess.run`.
-        Use `"{}"` as a placeholder (that is, it must be its own list item) where
-        the package specifiers must be injected, if needed. If `"{}"` is not present,
-        they will be added at the end.
+    * - ``commands``
+      - ``dict[Literal['install', 'query'], dict[Literal['command', 'requires_elevation'], list[str] | bool]]``
+      - Commands used to install or query the given package(s).
+        Only two keys are allowed: ``install`` and ``query``. Their value
+        is a dictionary with a required key ``command`` that takes a list of
+        strings (as expected by ``subprocess.run``), and an optional
+        ``requires_elevation`` boolean (``False`` by default) to indicate whether
+        the command must run with elevated permissions.
+        One of the ``command`` string items MUST include a `"{}"` placeholder, which will be
+        replaced by the mapped package identifier(s). ``install`` MUST accept several
+        identifiers in the same command. ``query`` MUST only accept a single identifier
+        per command.
       - True
-    * - ``requires_elevation``
-      - ``bool``
-      - Whether the install command requires elevated permissions to run.
-      - False
     * - ``version_operators``
       - ``dict[Literal['and', 'arbitrary', 'compatible', 'equal', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equal', 'separator'],  string]``
       - Mapping of PEP440 version comparison operators to the syntax used in this
@@ -834,7 +840,15 @@ The ``pyproject-external`` Python API also allows users to do these operations p
     >>> external.to_dict(mapped_for=ecosystem, package_manager=package_manager)
     {'external': {'build_requires': ['c-compiler', 'cxx-compiler', 'python']}}
     >>> external.install_command(ecosystem, package_manager=package_manager)
+    # {"command": ["pixi", "add", "{}"]}
     ['pixi', 'add', 'c-compiler', 'cxx-compiler', 'python']
+    >>> external.query_commands(ecosystem, package_manager=package_manager)
+    # {"command": ["pixi", "list", "^{}$"]}
+    [
+      ['pixi', 'list', '^c-compiler$'],
+      ['pixi', 'list', '^cxx-compiler$'],
+      ['pixi', 'list', '^python$'],
+    ]
 
 Grayskull
 ^^^^^^^^^
@@ -890,10 +904,11 @@ This proposal does not impose any security implications on existing projects.
 The proposed schemas, registries and mappings are available resources for downstream
 tooling to use at their own will, in whatever way they find suitable.
 
-We do have some recommendations for future implementors. The mapping schema proposes
-fields to encode instructions for command execution (``install_command``). A tampered
-mapping may change these instructions into something else. Hence, tools should not rely
-on internet connectivity to fetch the mappings from their online sources. Instead:
+We do have some recommendations for future implementors. The mapping schema
+proposes fields to encode instructions for command execution
+(``package_managers[].commands``). A tampered mapping may change these
+instructions into something else. Hence, tools should not rely on internet
+connectivity to fetch the mappings from their online sources. Instead:
 
 - they should vendor the relevant documents in the distributed packages,
 - or depend on prepackaged, offline distributions of these documents,
