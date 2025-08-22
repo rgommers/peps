@@ -2,14 +2,15 @@ PEP: 9999
 Title: A package dependency name mapping mechanism
 Author: Pradyun Gedam <pradyunsg@gmail.com>,
         Ralf Gommers <ralf.gommers@gmail.com>,
+        Michał Górny <mgorny@quansight.com>,
         Jaime Rodríguez-Guerra <jrodriguez@quansight.com>,
         Michael Sarahan <msarahan@gmail.com>
 Discussions-To:
 Status: Draft
 Type: Standards Track
 Topic: Packaging
-Created: 17-Aug-2023
-Post-History: 17-Aug-2023,
+Created: 22-Aug-2025
+Post-History: 22-Aug-2025,
 Resolution:
 
 
