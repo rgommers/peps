@@ -261,7 +261,7 @@ take a list of dictionaries, with each of them reporting the following fields:
   check whether they are already installed.
 - ``specifier_syntax``: instructions on how to map a subset of PEP 440 specifiers to
   the target package manager. Three levels of support are offered: name-only, exact-version-only,
-  and full version-ranges compatibility (with per-operator translations).
+  and version-range compatibility (with per-operator translations).
 
 Each mapping MUST have a canonical URL for online retrieval. These mappings
 MAY also be packaged for offline distribution in each platform. The authors
@@ -711,16 +711,16 @@ Each entry in this list is defined as a dictionary with these fields:
         ``version_ranges`` is a dictionary where: the key ``syntax`` takes a
         list of strings that MUST include the ``{ranges}`` placeholder (to be
         replaced by the maybe-joined version constraints, to be determined by
-        the value of ``and``) and also accept the ``{name}`` one; the keys
+        the value of ``and``) and MAY include the ``{name}`` placeholder; the keys
         ``equal``, ``greater_than``, ``greater_than_equal``, ``less_than``,
         ``less_than_equal``, and ``not_equal`` take a string that MUST include
-        the ``{name}`` and ``{version}`` placeholders, or ``None`` to indicate
-        that that operator is not supported; and the key ``{and}`` takes a
-        string or ``None`` (if a string is used, the different version
-        constraints will be ``join``-ed using that string; if ``None`` the
-        different constraints will be "exploded" into several constraints using
+        the ``{version}`` placeholder, and MAY include ``{name}``, or ``None`` to indicate
+        that the respective operator is not supported; and the key ``{and}`` takes a
+        string used to join multiple version constraints in a single token, or ``None``
+        if only a single constraint can be used per token. In the latter case, the
+        different constraints will be "exploded" into several tokens using
         the ``syntax`` template). ``exact_version`` and ``version_ranges`` MAY
-        be set to ``None`` to indicate that this type of specifiers are not
+        be set to ``None`` to indicate that the respective types of specifiers are not
         supported by the package manager.
       - True
 
