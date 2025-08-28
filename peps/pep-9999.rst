@@ -1111,12 +1111,13 @@ A reference implementation should include three components:
 3. An implementation of (2), providing mappings from the contents of the central
    registry to the ecosystem-specific package names.
 
-For (1), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json.
-An example registry can be found at https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json.
-For (2), the JSON Schema is defined at https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json.
-For (3), a collection of example mappings for a sample of packages can be found at https://github.com/jaimergp/external-metadata-mappings/tree/main/data.
-
-The JSON Schemas are created with `this Pydantic model <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/schema.py>`__.
+For (1), the JSON Schema is defined at `central-registry.schema.json <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/central-registry.schema.json>`__.
+An example registry can be found at `registry.json <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json>`__.
+For (2), the JSON Schema is defined at `external-mapping.schema.json <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/external-mapping.schema.json>`__.
+A collection of example mappings for a sample of packages can be found at `external-metadata-mappings <https://github.com/jaimergp/external-metadata-mappings/tree/main/data>`__.
+For (3), the JSON Schema is defined at `known-ecosystems.schema.json <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/known-ecosystems.schema.json>`__.
+An example list can be found at `known-ecosystems.json <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/known-ecosystems.json>`__.
+The JSON Schemas are created with `these Pydantic models <https://github.com/jaimergp/external-metadata-mappings/blob/main/schemas/schema.py>`__.
 
 The reference CLI and Python API to consume the different JSON documents and ``[external]`` tables
 can be found in `pyproject-external <https://github.com/jaimergp/pyproject-external>`__.
@@ -1176,10 +1177,10 @@ Mapping PyPI projects to repackaged counterparts in target ecosystems
 It is common that other ecosystems redistribute Python projects with their own
 packaging system. While this is required for packages with compiled extensions, it
 is theoretically unnecessary for pure Python wheels; the only need for this seems to
-be metadata translation. See https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68,
-https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103 and
-https://github.com/spack/spack/issues/28282#issuecomment-1562178367 for examples of
-discussions in this direction.
+be metadata translation. See  `Wanting a singular packaging tool/vision #68 <https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68>`__,
+`Wanting a singular packaging tool/vision #103 <https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103`__
+and `spack/spack#28282 <https://github.com/spack/spack/issues/28282#issuecomment-1562178367>`__
+for examples of discussions in this direction.
 
 The proposals in this PEP do not consider PyPI -> *ecosystem* mappings, but
 the same schemas can be repurposed to that end. After all, it is trivial to build a PURL or
