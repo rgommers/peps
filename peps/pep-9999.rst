@@ -1061,7 +1061,7 @@ on an ongoing basis.
 
 
 Central DepURL registry maintainers
-------------------------------------------------
+-----------------------------------
 
 Central DepURL registry maintainers curate the collection of
 DepURLs. These contributors need to be able to refer to clearly
@@ -1178,7 +1178,7 @@ It is common that other ecosystems redistribute Python projects with their own
 packaging system. While this is required for packages with compiled extensions, it
 is theoretically unnecessary for pure Python wheels; the only need for this seems to
 be metadata translation. See  `Wanting a singular packaging tool/vision #68 <https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/68>`__,
-`Wanting a singular packaging tool/vision #103 <https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103`__
+`Wanting a singular packaging tool/vision #103 <https://discuss.python.org/t/wanting-a-singular-packaging-tool-vision/21141/103>`__,
 and `spack/spack#28282 <https://github.com/spack/spack/issues/28282#issuecomment-1562178367>`__
 for examples of discussions in this direction.
 
