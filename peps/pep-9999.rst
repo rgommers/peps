@@ -530,8 +530,6 @@ Each entry in this list is defined as:
 .. list-table::
     :widths: 25 75
 
-    * - Title
-      - Package Managers
     * - Type
       - ``array``
     * - Description
@@ -740,10 +738,6 @@ for brevity, could look like:
       }
     ]
   }
-
-
-Examples
---------
 
 The following repository provides examples of how these schemas *could* look like in real cases.
 They are not meant to be prescriptive, but just illustrative of how to apply these schemas:
