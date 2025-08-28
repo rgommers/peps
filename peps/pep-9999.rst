@@ -259,8 +259,9 @@ take a list of dictionaries, with each of them reporting the following fields:
 - ``name`` (string), unique identifier for this package manager. Usually, the executable name.
 - ``commands`` (list of dictionaries), the commands to run to install the mapped package(s) and
   check whether they are already installed.
-- ``version_operators``: a mapping of PEP 440 operator names to the relevant
-  syntax for this package manager.
+- ``specifier_syntax``: instructions on how to map a subset of PEP 440 specifiers to
+  the target package manager. Three levels of support are offered: name-only, exact-version-only,
+  and full version-ranges compatibility (with per-operator translations).
 
 Each mapping MUST have a canonical URL for online retrieval. These mappings
 MAY also be packaged for offline distribution in each platform. The authors
@@ -345,9 +346,10 @@ For example, a hypothetical conda-forge mapping (``conda-forge.mapping.json``) w
             "command": [
               "conda",
               "install",
-              "--yes",
               "{}"
-            ]
+            ],
+            "multiple_specifiers": "always",
+            "requires_elevation": false,
           },
           "query": {
             "command": [
@@ -355,20 +357,30 @@ For example, a hypothetical conda-forge mapping (``conda-forge.mapping.json``) w
               "list",
               "-f",
               "{}"
-            ]
+            ],
+            "multiple_specifiers": "never",
+            "requires_elevation": false,
           }
         },
-        "version_operators": {
-          "and": ",",
-          "arbitrary": "==",
-          "compatible": "~=",
-          "equal": "=",
-          "greater_than": ">",
-          "greater_than_equal": ">=",
-          "less_than": "<",
-          "less_than_equal": "<=",
-          "not_equal": "!=",
-          "separator": ""
+        "specifier_syntax": {
+          "exact_version": [
+            "{name}=={version}"
+          ],
+          "name_only": [
+            "{name}"
+          ],
+          "version_ranges": {
+            "and": ",",
+            "equal": "={version}",
+            "greater_than": ">{version}",
+            "greater_than_equal": ">={version}",
+            "less_than": "<{version}",
+            "less_than_equal": "<={version}",
+            "not_equal": "!={version}",
+            "syntax": [
+              "{name}{ranges}"
+            ]
+          }
         }
       }
     ]
@@ -670,35 +682,54 @@ Each entry in this list is defined as a dictionary with these fields:
       - Short identifier for this package manager (usually the command name)
       - True
     * - ``commands``
-      - ``dict[Literal['install', 'query'], dict[Literal['command', 'requires_elevation'], list[str] | bool]]``
+      - ``dict[Literal['install', 'query'], dict[Literal['command', 'requires_elevation', 'multiple_specifiers'], list[str] | bool | Literal['always', 'name-only', 'never']]]``
       - Commands used to install or query the given package(s).
-        Only two keys are allowed: ``install`` and ``query``. Their value
-        is a dictionary with a required key ``command`` that takes a list of
-        strings (as expected by ``subprocess.run``), and an optional
-        ``requires_elevation`` boolean (``False`` by default) to indicate whether
-        the command must run with elevated permissions.
-        Exactly one of the ``command`` items MUST include a ``{}`` placeholder, which will be
-        replaced by the mapped package identifier(s). The ``install`` command MUST support
-        the placeholder being replaced by multiple identifiers, ``query`` will only receive a single
-        identifier per command.
+        Only two keys are allowed: ``install`` and ``query``. Their value is a
+        dictionary with a required key ``command`` that takes a list of strings
+        (as expected by ``subprocess.run``), an optional ``requires_elevation``
+        boolean (``False`` by default) to indicate whether the command must run
+        with elevated permissions, and an enum ``multiple_specifiers`` that
+        determines whether the command accepts multiple package specifiers at
+        the same time, accepting ``always`` (default in ``install``),
+        ``name-only`` (the command only accepts multiple specifiers if they do
+        not contain version constraints) or ``never`` (default in ``query``).
+        Exactly one of the ``command`` items MUST include a ``{}`` placeholder,
+        which will be replaced by the mapped package identifier(s). The
+        ``install`` command MUST support the placeholder being replaced by
+        multiple identifiers, ``query`` will only receive a single identifier
+        per command.
       - True
-    * - ``version_operators``
-      - ``dict[Literal['and', 'arbitrary', 'compatible', 'equal', 'greater_than_equal', 'greater_than', 'less_than_equal', 'less_than', 'not_equal', 'separator'],  string]``
-      - Mapping of PEP440 version comparison operators to the syntax used in this
-        package manager. If omitted, PEP 440 operators are used. If set to an empty
-        dictionary, it means that the package manager (or ecosystem) doesn't support
-        the notion of requesting particular package versions. The keys are ``and``,
-        ``arbitrary``, ``compatible``, ``equal``, ``greater_than_equal``,
-        ``greater_than``, ``less_than_equal``, ``less_than``, ``not_equal``, and
-        ``separator``. Empty strings can be used as a value if that particular operator
-        is not supported.
-      - False
+    * - ``specifier_syntax``
+      - ``dict[Literal['name_only', 'exact_version', 'version_ranges'], None | list[str] | dict[Literal['and', 'equal', 'greater_than', 'greater_than_equal', 'less_than', 'less_than_equal', 'not_equal', 'syntax'], None | str | list[str]]
+      - Mapping of allowed PEP440 version comparison operators to the syntax
+        used in this package manager. ``name_only`` takes a list of strings as
+        the syntax used for specifiers that do not contain any version
+        information; it MUST include the placeholder ``{name}``.
+        ``exact_version`` takes a list of strings as the syntax used for
+        specifiers that only express an exact version constraints; it must
+        include the placeholders ``{name}`` and ``{version}``.
+        ``version_ranges`` is a dictionary where: the key ``syntax`` takes a
+        list of strings that MUST include the ``{ranges}`` placeholder (to be
+        replaced by the maybe-joined version constraints, to be determined by
+        the value of ``and``) and also accept the ``{name}`` one; the keys
+        ``equal``, ``greater_than``, ``greater_than_equal``, ``less_than``,
+        ``less_than_equal``, and ``not_equal`` take a string that MUST include
+        the ``{name}`` and ``{version}`` placeholders, or ``None`` to indicate
+        that that operator is not supported; and the key ``{and}`` takes a
+        string or ``None`` (if a string is used, the different version
+        constraints will be ``join``-ed using that string; if ``None`` the
+        different constraints will be "exploded" into several constraints using
+        the ``syntax`` template). ``exact_version`` and ``version_ranges`` MAY
+        be set to ``None`` to indicate that this type of specifiers are not
+        supported by the package manager.
+      - True
 
 
 Examples
 --------
 
-The following repository provides examples of how these schemas would look like in real cases:
+The following repository provides examples of how these schemas *could* look like in real cases.
+They are not meant to be prescriptive, but just illustrative of how to apply these schemas:
 
 - `Central registry <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/registry.json>`__.
 - `Known ecosystems <https://github.com/jaimergp/external-metadata-mappings/blob/main/data/known-ecosystems.json>`__.
@@ -886,11 +917,11 @@ The ``pyproject-external`` Python API also allows users to do these operations p
     # {"command": ["pixi", "add", "{}"]}
     ['pixi', 'add', 'c-compiler', 'cxx-compiler', 'python']
     >>> external.query_commands(ecosystem, package_manager=package_manager)
-    # {"command": ["pixi", "list", "^{}$"]}
+    # {"command": ["pixi", "list", "{}"]}
     [
-      ['pixi', 'list', '^c-compiler$'],
-      ['pixi', 'list', '^cxx-compiler$'],
-      ['pixi', 'list', '^python$'],
+      ['pixi', 'list', 'c-compiler'],
+      ['pixi', 'list', 'cxx-compiler'],
+      ['pixi', 'list', 'python'],
     ]
 
 Grayskull
