@@ -997,8 +997,8 @@ How to Teach This
 
 There are at least four audiences that may need to get familiar with the contents of this PEP:
 
-1. Central registry maintainers, who are responsible for curating the list of well-known DepURLs
-   and mapped ecosystems.
+1. Central registry maintainers, who are responsible for curating the list of
+   well-known DepURLs and mapped ecosystems.
 2. Packaging ecosystem maintainers, who are responsible for keeping the
    mapping for their ecosystem up-to-date.
 3. Maintainers of Python projects that require external dependencies.
@@ -1007,57 +1007,42 @@ There are at least four audiences that may need to get familiar with the content
 Central DepURL registry maintainers
 -----------------------------------
 
-Central DepURL registry maintainers curate the collection of
-DepURLs and the known ecosystems. These contributors need to be able to refer to clearly
-defined rules for when a new DepURL can be defined. It is
-undesirable to be loose with canonical DepURL definitions, because
-each definition implies maintenance in the mappings in many other places.
-
-The ``provides`` key mechanism offer ways to maintain aliases, so hopefully a
-compromise of flexibility and strictness can be found easily. Particular attention
-must be put to deciding which of the aliases will be the canonical form, though,
-especially when it comes to dependencies where a number of synonyms are commonly
-used. This does not apply to ``dep:virtual/*`` identifiers, where a single canonical
-form is proposed and no additional aliases are allowed.
-
-Having client-side validation when the Python project is being packaged and/or uploaded
-to PyPI may help keep the maintenance efforts contained, since end-users can be pointed
-to the recommended identifiers.
+Central DepURL registry maintainers curate the collection of DepURLs and the
+known ecosystems. These contributors need to be able to refer to clearly
+defined rules for when a new DepURL can be defined. It is undesirable to be
+loose with canonical DepURL definitions, because each definition added implies
+maintenance in the mappings in the target ecosystems.
 
 Package ecosystem maintainers usage
 -----------------------------------
 
-Any packages that express a DepURL that does not have a mapping in a given
-package ecosystem will not be able to provide tailored error messages and other
-UX affordances for end users. It is thus recommended that each package
-ecosystem maintain their mappings up-to-date with the central registry. Key to
-this will be automation. Some ideas for opt-in automation are:
+Missing mapping entries will result in the absence tailored error messages and
+other UX affordances for end users of the impacted ecosystems. It is thus
+recommended that each package ecosystem maintain their mappings up-to-date with
+the central registry. Key to this will be automation. Some ideas for opt-in
+automation are:
 
-- Alert mapping maintainers whenever a new DepURL is added to the registry (maybe noisy if too frequent).
-- Provide tools that allow maintainers to diff their mappings to the registry contents to
-  quickly identify missing entries.
-- Provide automated tooling that submits PRs to known mapping locations, such that maintainers
-  need only fill in the ecosystem package name.
+- Alert mapping maintainers whenever a new DepURL is added to the registry
+  (maybe noisy if too frequent).
+- Provide tools that allow maintainers to diff their mappings to the registry
+  contents to quickly identify missing entries.
+- Provide automated tooling that submits PRs to known mapping locations, such
+  that maintainers need only fill in the ecosystem package name.
 
-This maintenance is likely to involve a lot of work to establish the initial mapping, but ideally become small
-on an ongoing basis.
+This maintenance is likely to involve a lot of work to establish the initial
+mapping, but ideally become small on an ongoing basis.
 
 Maintainers of Python projects
 ------------------------------
 
 A package maintainer's responsibility is to decide the DepURL that best
-represents the external dependency that their package needs. Their task
-consists of:
+represents the external dependency that their package needs. This is covered
+in :doc:`pep-0725`; the interactive mappings browser demo located at
+`external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__
+may come handy.
 
-1. Understanding the nature of their dependency. Do they only need runtime
-   libraries, or do they need development packages for build-time concerns?
-   They should refer to :doc:`pep-0725` for more details.
-2. Looking up the DepURL in the central registry, or via a package name in
-   suitable ecosystem-specific mapping. A prototype interactive mappings browser
-   that may come helpful in these cases can be located at
-   `external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__.
-3. If no DepURL is available, consider submitting a request in the central registry.
-
+If no suitable DepURL is available for a given dependency, maintainers may
+consider submitting a request in the central registry.
 
 End user package consumers
 --------------------------
@@ -1067,7 +1052,7 @@ true if the user only relies on wheels, since the only impact will be driven by
 external runtime dependencies (expected to be rare), and even in those cases
 they need to opt-in by installing a compatible tool.
 
-If they do opt-in, in an ideal case these package install commands can be done transparently,
+If they do opt-in, in an ideal case these external commands can be executed transparently,
 and the user experience remains unchanged. There are several foreseeable issues that will arise,
 though:
 
