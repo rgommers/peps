@@ -700,7 +700,7 @@ Each entry in this list is defined as a dictionary with these fields:
         per command.
       - True
     * - ``specifier_syntax``
-      - ``dict[Literal['name_only', 'exact_version', 'version_ranges'], None | list[str] | dict[Literal['and', 'equal', 'greater_than', 'greater_than_equal', 'less_than', 'less_than_equal', 'not_equal', 'syntax'], None | str | list[str]]
+      - ``dict[Literal['name_only', 'exact_version', 'version_ranges'], None | list[str] | dict[Literal['and', 'equal', 'greater_than', 'greater_than_equal', 'less_than', 'less_than_equal', 'not_equal', 'syntax'], None | str | list[str]]``
       - Mapping of allowed PEP440 version comparison operators to the syntax
         used in this package manager. ``name_only`` takes a list of strings as
         the syntax used for specifiers that do not contain any version
