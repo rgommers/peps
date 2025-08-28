@@ -1010,21 +1010,20 @@ Central DepURL registry maintainers
 Central DepURL registry maintainers curate the collection of DepURLs and the
 known ecosystems. These contributors need to be able to refer to clearly
 defined rules for when a new DepURL can be defined. It is undesirable to be
-loose with canonical DepURL definitions, because each definition added implies
-maintenance in the mappings in the target ecosystems.
+loose with canonical DepURL definitions, because each definition added increases
+maintenance effort in the mappings in the target ecosystems.
 
 Package ecosystem maintainers usage
 -----------------------------------
 
 Missing mapping entries will result in the absence tailored error messages and
 other UX affordances for end users of the impacted ecosystems. It is thus
-recommended that each package ecosystem maintain their mappings up-to-date with
-the central registry. Key to this will be automation, like linting scripts
+recommended that each package ecosystem keeps their mappings up-to-date with
+the central registry. The key to this will be automation, like linting scripts
 (see example at `external-metadata-mappings <https://github.com/jaimergp/external-metadata-mappings/blob/main/scripts/lint-mapping-entries.py>`__),
 or periodic notifications via issues or draft submissions.
 
-This maintenance is likely to involve a lot of work to establish the initial
-mapping, but ideally become small on an ongoing basis.
+Establishing the initial mapping is likely to involve a lot of work, but ideally the maintenance on an ongoing basis effort should require smaller effort.
 
 Maintainers of Python projects
 ------------------------------
@@ -1041,7 +1040,7 @@ consider submitting a request in the central registry.
 End user package consumers
 --------------------------
 
-There will be no change in user experience by default. This is particularly
+There will be no change in the user experience by default. This is particularly
 true if the user only relies on wheels, since the only impact will be driven by
 external runtime dependencies (expected to be rare), and even in those cases
 they need to opt-in by installing a compatible tool.
