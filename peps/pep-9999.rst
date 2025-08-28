@@ -1019,15 +1019,9 @@ Package ecosystem maintainers usage
 Missing mapping entries will result in the absence tailored error messages and
 other UX affordances for end users of the impacted ecosystems. It is thus
 recommended that each package ecosystem maintain their mappings up-to-date with
-the central registry. Key to this will be automation. Some ideas for opt-in
-automation are:
-
-- Alert mapping maintainers whenever a new DepURL is added to the registry
-  (maybe noisy if too frequent).
-- Provide tools that allow maintainers to diff their mappings to the registry
-  contents to quickly identify missing entries.
-- Provide automated tooling that submits PRs to known mapping locations, such
-  that maintainers need only fill in the ecosystem package name.
+the central registry. Key to this will be automation, like linting scripts
+(see example at `external-metadata-mappings <https://github.com/jaimergp/external-metadata-mappings/blob/main/scripts/lint-mapping-entries.py>`__),
+or periodic notifications via issues or draft submissions.
 
 This maintenance is likely to involve a lot of work to establish the initial
 mapping, but ideally become small on an ongoing basis.
