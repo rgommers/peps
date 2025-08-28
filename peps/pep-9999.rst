@@ -559,17 +559,21 @@ Each entry in this list is defined as a dictionary with these fields:
         with:
 
         - a required key ``command`` that takes a list of strings
-          (as expected by ``subprocess.run``),
+          (as expected by ``subprocess.run``).
 
-        - an optional ``requires_elevation``
-          boolean (``False`` by default) to indicate whether the command must run
-          with elevated permissions,
+        - an optional ``requires_elevation`` boolean (``False`` by default)
+          to indicate whether the command must run with elevated permissions (
+          e.g. administrator on Windows, superuser on Linux and macOS).
 
-        - and an enum ``multiple_specifiers`` that
-          determines whether the command accepts multiple package specifiers at
-          the same time, accepting: ``always`` (default in ``install``),
-          ``name-only`` (the command only accepts multiple specifiers if they do
-          not contain version constraints) or ``never`` (default in ``query``).
+        - an enum ``multiple_specifiers`` that determines whether the command
+          accepts multiple package specifiers at the same time, accepting one of:
+
+            - ``always``, default in ``install``.
+
+            - ``name-only``, the command only accepts multiple specifiers if they do
+              not contain version constraints.
+
+            -  ``never``, default in ``query``.
 
         Exactly one of the ``command`` items MUST include a ``{}`` placeholder,
         which will be replaced by the mapped package identifier(s). The
@@ -582,9 +586,9 @@ Each entry in this list is defined as a dictionary with these fields:
       - Mapping of allowed PEP440 version comparison operators to the syntax
         used in this package manager. Three top-level keys are accepted:
 
-        - ``name_only`` takes a list of strings as
-          the syntax used for specifiers that do not contain any version
-          information; it MUST include the placeholder ``{name}``.
+        - ``name_only`` takes a list of strings as the syntax used for specifiers
+          that do not contain any version information; it MUST include the placeholder
+          ``{name}``.
 
         - ``exact_version`` takes a list of strings as the syntax used for
           specifiers that only express an exact version constraints; it must
@@ -601,7 +605,7 @@ Each entry in this list is defined as a dictionary with these fields:
             ``less_than``, ``less_than_equal``, and ``not_equal`` take a string
             that MUST include the ``{version}`` placeholder, and MAY include
             ``{name}``, or ``None`` to indicate that the respective operator is
-            not supported;
+            not supported.
 
           - the key ``{and}`` takes a string used to join multiple version
             constraints in a single token, or ``None`` if only a single
