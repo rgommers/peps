@@ -1046,17 +1046,11 @@ true if the user only relies on wheels, since the only impact will be driven by
 external runtime dependencies (expected to be rare), and even in those cases
 they need to opt-in by installing a compatible tool.
 
-If they do opt-in, in an ideal case these external commands can be executed transparently,
-and the user experience remains unchanged. There are several foreseeable issues that will arise,
-though:
-
-* A mapping does not exist for the user's desired package ecosystem.
-* A user does not have permissions to run the install commands provided by our
-  tool (e.g. system Python users).
-
-These issues might impact the user experience with untailored error messages for the chosen
-ecosystem, permission errors reports, and so on. They may choose to help remediate this by
-reporting missing entries in their target ecosystem, or even creating a new one if absent.
+Users that do opt-in may find missing entries in for their target ecosystems, and
+in those cases they may choose to collaborate by reporting the missing entries,
+submitting a fix to the affected mapping or, if totally absent, even deciding
+to maintain a new one on their own. To that end, they should get familiar with
+the responsibilties of mapping maintainers (discussed above).
 
 Reference Implementation
 ========================
