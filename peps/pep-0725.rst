@@ -995,11 +995,11 @@ Allowing use of ecosystem-specific version comparison semantics
 ---------------------------------------------------------------
 
 There are cases, in particular when dealing with pre-releases, where
-PEP 440 semantics for version comparisons doesn't quite work. For example,
-``1.2.3a`` may come after rather than before ``1.2.3`` for a package.
+PEP 440 semantics for version comparisons don't quite work. For example,
+``1.2.3a`` may indicate a release subsequent to ``1.2.3`` rather than an alpha version.
 To handle such cases correctly, it would be necessary to allow arbitrary
 versioning schemes. The authors of this PEP consider the added value of
-allowing that not justified by the additional complexity. If desired,
+allowing that is not justified by the additional complexity. If desired,
 a package author can use either a code comment or the ``qualifier`` field of a
 DepURL (see the Versioning section under Rationale) to capture this level of
 detail.
