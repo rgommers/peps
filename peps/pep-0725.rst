@@ -462,16 +462,12 @@ required, other components are optional. Component definitions:
 - ``name`` (required): MUST be a name that parses as a valid `PURL`_ ``name``.
   Tools MAY warn or error if a name is not present in the DepURL central
   registry (:pep:`700`).
-- ``version`` (optional): MUST be one of:
-
-  - A regular `version specifier`_ (PEP 440 semantics) as a single version or
-    version range, with the restriction that only the following operators may
-    be used: ``>=``, ``>``, ``<``, ``<=``, ``==``, ``,``.
-  - A `PURL`_ percent-encoded version string.
-
+- ``version`` (optional): MUST be a regular `version specifier`_ (PEP 440
+  semantics) as a single version or version range, with the restriction that
+  only the following operators may be used: ``>=``, ``>``, ``<``, ``<=``,
+  ``==``, ``,``.
 - ``qualifiers`` (optional): MUST parse as a valid `PURL`_ ``qualifier``.
 - ``subpath`` (optional): MUST parse as a valid `PURL`_ ``subpath``.
-
 
 External dependency specifiers
 ------------------------------
@@ -528,7 +524,7 @@ to be present on the system already.
 ''''''''''''''''''''''''''''''''''''''''''''''
 
 - Format: Array of external dependency specifiers (``build-requires``) and a
-  table with values of arrays of external dependency strings
+  table with values of arrays of external dependency specifiers
   (``optional-build-requires``)
 - `Core metadata`_: N/A
 
@@ -536,34 +532,35 @@ The (optional) external build requirements needed to build the project.
 
 For ``build-requires``, it is a key whose value is an array of strings. Each
 string represents a build requirement of the project and MUST be formatted as
-a valid external dependency string.
+a valid external dependency specifier.
 
 For ``optional-build-requires``, it is a table where each key specifies an
 extra set of build requirements and whose value is an array of strings. The
-strings of the arrays MUST be valid external dependency strings.
+strings of the arrays MUST be valid external dependency specifiers.
 
 ``host-requires``/``optional-host-requires``
 ''''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of external dependency strings (``host-requires``) and a table
-  with values of arrays of external dependency strings (``optional-host-requires``) -
+- Format: Array of external dependency specifiers (``host-requires``) and a
+  table with values of arrays of external dependency specifiers
+  (``optional-host-requires``) -
   `Core metadata`_: N/A
 
 The (optional) external host requirements needed to build the project.
 
 For ``host-requires``, it is a key whose value is an array of strings. Each
 string represents a host requirement of the project and MUST be formatted as
-a valid external dependency string.
+a valid external dependency specifier.
 
 For ``optional-host-requires``, it is a table where each key specifies an
 extra set of host requirements and whose value is an array of strings. The
-strings of the arrays MUST be valid external dependency strings.
+strings of the arrays MUST be valid external dependency specifiers.
 
 ``dependencies``/``optional-dependencies``
 ''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of external dependency strings (``dependencies``) and a table
-  with values of arrays of external dependency strings
+- Format: Array of external dependency specifiers (``dependencies``) and a
+  table with values of arrays of external dependency specifiers
   (``optional-dependencies``)
 - `Core metadata`_: ``Requires-External-Dep``, ``Provides-External-Extra``
 
@@ -571,12 +568,12 @@ The (optional) runtime dependencies of the project.
 
 For ``dependencies``, it is a key whose value is an array of strings. Each
 string represents a dependency of the project and MUST be formatted as a valid
-external dependency string. Each string must be added to `Core Metadata`_ as a
-``Requires-External-Dep`` field.
+external dependency specifier. Each string must be added to `Core Metadata`_ as
+a ``Requires-External-Dep`` field.
 
 For ``optional-dependencies``, it is a table where each key specifies an *extra*
 and whose value is an array of strings. The strings of the arrays MUST be valid
-external dependency strings. For each ``optional-dependencies`` group:
+external dependency specifiers. For each ``optional-dependencies`` group:
 
 - The name of the group MUST be added to `Core Metadata`_ as a
   ``Provides-External-Extra`` field.
@@ -588,7 +585,7 @@ external dependency strings. For each ``optional-dependencies`` group:
 '''''''''''''''''''''
 
 - Format: A table where each key is the name of the group, and the values are
-  arrays of external dependency strings, tables, or a mix of both.
+  arrays of external dependency specifiers, tables, or a mix of both.
 - `Core metadata`_: N/A
 
 PEP 735 -style dependency groups, but using external dependency specifiers
@@ -994,6 +991,18 @@ Tightening up the semantics would be backwards incompatible, and leaving it as i
 unsatisfactory. The ``dep:`` URLs would need
 to be decomposed to fit in this syntax.
 
+Allowing use of ecosystem-specific version comparison semantics
+---------------------------------------------------------------
+
+There are cases, in particular when dealing with pre-releases, where
+PEP 440 semantics for version comparisons doesn't quite work. For example,
+``1.2.3a`` may come after rather than before ``1.2.3`` for a package.
+To handle such cases correctly, it would be necessary to allow arbitrary
+versioning schemes. The authors of this PEP consider the added value of
+allowing that not justified by the additional complexity. If desired,
+a package author can use either a code comment or the ``qualifier`` field of a
+DepURL (see the Versioning section under Rationale) to capture this level of
+detail.
 
 Open Issues
 ===========
