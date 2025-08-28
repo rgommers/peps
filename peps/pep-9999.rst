@@ -1001,7 +1001,8 @@ There are at least three audiences that may need to get familiar with the conten
    and mapped ecosystems.
 2. Packaging ecosystem maintainers, who are responsible for keeping the
    mapping for their ecosystem up-to-date.
-3. End users of packages that have external dependency metadata.
+3. Maintainers of Python projects that require external dependencies.
+4. End users of packages that have external dependency metadata.
 
 Central DepURL registry maintainers
 -----------------------------------
@@ -1041,14 +1042,30 @@ this will be automation. Some ideas for opt-in automation are:
 This maintenance is likely to involve a lot of work to establish the initial mapping, but ideally become small
 on an ongoing basis.
 
+Maintainers of Python projects
+------------------------------
+
+A package maintainer's responsibility is to decide the DepURL that best
+represents the external dependency that their package needs. Their task
+consists of:
+
+1. Understanding the nature of their dependency. Do they only need runtime
+   libraries, or do they need development packages for build-time concerns?
+   They should refer to :doc:`pep-0725` for more details.
+2. Looking up the DepURL in the central registry, or via a package name in
+   suitable ecosystem-specific mapping. A prototype interactive mappings browser
+   that may come helpful in these cases can be located at
+   `external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__.
+3. If no DepURL is available, consider submitting a request in the central registry.
+
 
 End user package consumers
 --------------------------
 
-There will be no change in user experience by default. End users do not need to know about
-this mechanism unless they opt in, which they may want to do to, for example, reduce their
-bandwidth and disk space usage. This is particularly true if the user only relies on wheels,
-since the only impact will be driven by external runtime dependencies (expected to be rare).
+There will be no change in user experience by default. This is particularly
+true if the user only relies on wheels, since the only impact will be driven by
+external runtime dependencies (expected to be rare), and even in those cases
+they need to opt-in by installing a compatible tool.
 
 If they do opt-in, in an ideal case these package install commands can be done transparently,
 and the user experience remains unchanged. There are several foreseeable issues that will arise,
@@ -1059,7 +1076,8 @@ though:
   tool (e.g. system Python users).
 
 These issues might impact the user experience with untailored error messages for the chosen
-ecosystem, permission errors reports, and so on.
+ecosystem, permission errors reports, and so on. They may choose to help remediate this by
+reporting missing entries in their target ecosystem, or even creating a new one if absent.
 
 Reference Implementation
 ========================
