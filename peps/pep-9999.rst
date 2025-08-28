@@ -995,7 +995,7 @@ of the impact of the operation should be provided.
 How to Teach This
 =================
 
-There are at least three audiences that may need to get familiar with the contents of this PEP:
+There are at least four audiences that may need to get familiar with the contents of this PEP:
 
 1. Central registry maintainers, who are responsible for curating the list of well-known DepURLs
    and mapped ecosystems.
