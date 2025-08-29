@@ -299,6 +299,10 @@ Some examples:
 - ``dep:virtual/interface/lapack@>=3.7.1``: any package implementing the
   LAPACK interface for version greater or equal than ``3.7.1``.
 
+The versioning scheme for particular virtual packages, in case that isn't
+unambiguously defined by an upstream project or standard, will be defined in
+the Central Registry (see :pep:`700`).
+
 Environment markers
 '''''''''''''''''''
 
@@ -1024,29 +1028,7 @@ detail.
 Open Issues
 ===========
 
-Versioning of virtual dependencies
------------------------------------
-
-While virtual dependencies can be versioned with the same syntax, it must be better
-specified however what the version scheme is, because this is not as clear for
-virtual types as it is for PURL types (e.g., there can be multiple implementations,
-and virtual interfaces may not be unambiguously versioned). E.g.:
-
-- OpenMP: has regular ``MAJOR.MINOR`` versions of its standard, so would look
-  like ``>=4.5``.
-- BLAS/LAPACK: should use the versioning used by `Reference LAPACK`_, which
-  defines what the standard APIs are. Uses ``MAJOR.MINOR.MICRO``, so would look
-  like ``>=3.10.0``.
-- Compilers: these implement language standards. For C, C++ and Fortran these
-  are versioned by year. In order for versions to sort correctly, we choose to
-  use the full year (four digits). So "at least C99" would be ``>=1999``, and
-  selecting C++14 or Fortran 77 would be ``==2014`` or ``==1977`` respectively.
-  Other languages may use different versioning schemes. These should be
-  described somewhere before they are used in ``pyproject.toml``.
-
-A logistical challenge is where to describe the versioning - given that this
-will evolve over time, this PEP itself is not the right location for it.
-Instead, this PEP should point at that (to be created) location.
+None at this time.
 
 
 References
