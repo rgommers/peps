@@ -70,8 +70,7 @@ Dependabot_ and libraries.io_.
 Software bill of materials (SBOM) generation tools may also be able to use this
 information, e.g. for flagging that external dependencies listed in
 ``pyproject.toml`` but not contained in wheel metadata are likely vendored
-within the wheel. :pep:`770` ("Improving measurability of Python packages with
-Software Bill-of-Materials"), which standardizes how SBOMs are included in
+within the wheel. :pep:`770`, which standardizes how SBOMs are included in
 wheels, contains an instructive section on how that PEP differs from this one.
 
 Packages with external dependencies are typically hard to build from source,
@@ -89,7 +88,8 @@ information will improve this situation.
 This PEP is not trying to specify how the external dependencies should be used,
 nor a mechanism to implement a name mapping from names of individual packages
 that are canonical for Python projects published on PyPI to those of other
-packaging ecosystems. Those topics should be addressed in separate PEPs.
+packaging ecosystems. Canonical names and a name mapping mechanism are addressed
+in :pep:`700`.
 
 
 Rationale
