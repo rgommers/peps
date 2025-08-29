@@ -445,6 +445,39 @@ Specification
 If metadata is improperly specified then tools MUST raise an error to notify
 the user about their mistake.
 
+DepURL
+------
+
+A DepURL implements a scheme for identifying packages that is meant to be
+portable across packaging ecosystems. Its design is::
+
+    dep:type/namespace/name@version?qualifiers#subpath
+
+``dep:`` is a fixed string, and always present. ``type`` and ``name`` are
+required, other components are optional.  All components apply for both PURL
+and virtual ``type``'s, and have these requirements:
+
+- ``type`` (required): MUST be either a `PURL`_ ``type``, or ``virtual``.
+- ``namespace`` (optional): MUST be a `PURL`_ ``namespace``, or a namespace in
+  the DepURL central registry (see :pep:`700`). FIXME: PEP number
+- ``name`` (required): MUST be a name that parses as a valid `PURL`_ ``name``.
+  Tools MAY warn or error if a name is not present in the DepURL central
+  registry (see :pep:`700`).
+- ``version`` (optional): MUST be a regular `version specifier`_ (PEP 440
+  semantics) as a single version or version range, with the restriction that
+  only the following operators may be used: ``>=``, ``>``, ``<``, ``<=``,
+  ``==``, ``,``.
+- ``qualifiers`` (optional): MUST parse as a valid `PURL`_ ``qualifier``.
+- ``subpath`` (optional): MUST parse as a valid `PURL`_ ``subpath``.
+
+External dependency specifiers
+------------------------------
+
+External dependency specifiers MUST contain a DepURL, and MAY contain
+environment markers with the same syntax as used in regular `dependency
+specifiers`_ (as originally specified in :pep:`508`).
+
+
 Changes in Core Metadata
 ------------------------
 
@@ -459,7 +492,8 @@ Additions
 
 Two new fields are added to Core Metadata:
 
-- ``Requires-External-Dep``. An external requirement expressed as a ``dep:`` URL.
+- ``Requires-External-Dep``. An external requirement expressed as an external
+  dependency specifier string.
 - ``Provides-External-Extra``. An *extra* group that carries external dependencies
   (as found in ``Requires-External-Dep``) only.
 
@@ -490,77 +524,80 @@ to be present on the system already.
 ``build-requires``/``optional-build-requires``
 ''''''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of ``dep:`` strings (``build-requires``) and a table
-  with values of arrays of ``dep:`` strings (``optional-build-requires``)
+- Format: Array of external dependency specifiers (``build-requires``) and a
+  table with values of arrays of external dependency specifiers
+  (``optional-build-requires``)
 - `Core metadata`_: N/A
 
 The (optional) external build requirements needed to build the project.
 
 For ``build-requires``, it is a key whose value is an array of strings. Each
 string represents a build requirement of the project and MUST be formatted as
-a valid ``dep:`` string.
+a valid external dependency specifier.
 
 For ``optional-build-requires``, it is a table where each key specifies an
 extra set of build requirements and whose value is an array of strings. The
-strings of the arrays MUST be valid ``dep:`` strings.
+strings of the arrays MUST be valid external dependency specifiers.
 
 ``host-requires``/``optional-host-requires``
 ''''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of ``dep:`` strings (``host-requires``) and a table
-  with values of arrays of ``dep:`` strings (``optional-host-requires``)
-- `Core metadata`_: N/A
+- Format: Array of external dependency specifiers (``host-requires``) and a
+  table with values of arrays of external dependency specifiers
+  (``optional-host-requires``) -
+  `Core metadata`_: N/A
 
 The (optional) external host requirements needed to build the project.
 
 For ``host-requires``, it is a key whose value is an array of strings. Each
 string represents a host requirement of the project and MUST be formatted as
-a valid ``dep:`` string.
+a valid external dependency specifier.
 
 For ``optional-host-requires``, it is a table where each key specifies an
 extra set of host requirements and whose value is an array of strings. The
-strings of the arrays MUST be valid ``dep:`` strings.
+strings of the arrays MUST be valid external dependency specifiers.
 
 ``dependencies``/``optional-dependencies``
 ''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of ``dep:`` strings (``dependencies``) and a table
-  with values of arrays of ``dep:`` strings (``optional-dependencies``)
+- Format: Array of external dependency specifiers (``dependencies``) and a
+  table with values of arrays of external dependency specifiers
+  (``optional-dependencies``)
 - `Core metadata`_: ``Requires-External-Dep``, ``Provides-External-Extra``
 
 The (optional) runtime dependencies of the project.
 
 For ``dependencies``, it is a key whose value is an array of strings. Each
-string represents a dependency of the project and MUST be formatted as either a
-valid ``dep:`` string. Each string must be added to `Core Metadata`_ as a
-``Requires-External-Dep`` field.
+string represents a dependency of the project and MUST be formatted as a valid
+external dependency specifier. Each string must be added to `Core Metadata`_ as
+a ``Requires-External-Dep`` field.
 
 For ``optional-dependencies``, it is a table where each key specifies an *extra*
 and whose value is an array of strings. The strings of the arrays MUST be valid
-``dep:`` strings. For each ``optional-dependencies`` group:
+external dependency specifiers. For each ``optional-dependencies`` group:
 
 - The name of the group MUST be added to `Core Metadata`_ as a
   ``Provides-External-Extra`` field.
-- The ``dep:`` URLs in that group MUST be added to `Core Metadata`_ as a
-  ``Requires-External-Dep`` field, with the corresponding ``; extra == 'name'``
-  environment marker.
+- The external dependency specifiers in that group MUST be added to `Core
+  Metadata`_ as a ``Requires-External-Dep`` field, with the corresponding ``;
+  extra == 'name'`` environment marker.
 
 ``dependency-groups``
 '''''''''''''''''''''
 
 - Format: A table where each key is the name of the group, and the values are
-  arrays of ``dep:`` strings, tables, or a mix of both.
+  arrays of external dependency specifiers, tables, or a mix of both.
 - `Core metadata`_: N/A
 
-PEP 735 -style dependency groups, but using ``dep:`` URLs instead of PEP 508 strings as
-dependency specifiers. Every other detail (e.g. group inclusion, name normalization)
-follows the official `Dependency Groups specification
-<https://packaging.python.org/en/latest/specifications/dependency-groups/>`__.
+PEP 735 -style dependency groups, but using external dependency specifiers
+instead of PEP 508 strings. Every other detail (e.g. group inclusion, name
+normalization) follows the official `dependency groups specification`_.
 
 Examples
 --------
 
-These examples show what the ``[external]`` content for a number of packages is
+These examples show what the ``[external]`` table content for a number of
+packages, and the corresponding ``PKG-INFO``/``METADATA`` content (if any) is
 expected to be.
 
 cryptography 39.0
@@ -581,6 +618,8 @@ cryptography 39.0
       "dep:generic/libffi",
     ]
 
+``PKG-INFO`` / ``METADATA`` content: N/A.
+
 SciPy 1.10
 ''''''''''
 
@@ -600,6 +639,8 @@ SciPy 1.10
       "dep:virtual/interface/blas",
       "dep:virtual/interface/lapack@>=3.7.1",
     ]
+
+``PKG-INFO`` / ``METADATA`` content: N/A.
 
 Pillow 10.1.0
 '''''''''''''
@@ -630,6 +671,7 @@ Pillow 10.1.0
       "dep:generic/tk",
     ]
 
+``PKG-INFO`` / ``METADATA`` content: N/A.
 
 NAVis 1.4.0
 '''''''''''
@@ -714,11 +756,21 @@ PyEnchant 3.2.2
 
     [external]
     dependencies = [
-      # libenchant is needed on all platforms but only vendored into wheels on
-      # Windows, so on Windows the build backend should remove this external
-      # dependency from wheel metadata.
-      "dep:github/AbiWord/enchant",
+      # libenchant is needed on all platforms but vendored into wheels
+      # distributed on PyPI for Windows. Hence choose to encode that in
+      # the metadata. Note: there is no completely unambiguous way to do
+      # this; another choice is to leave out the environment marker in the
+      # source distribution and either live with the unnecessary ``METADATA``
+      # entry in the distributed Windows wheels, or to apply a patch to this
+      # metadata when building those wheels.
+      "dep:github/AbiWord/enchant; platform_system!='Windows'",
     ]
+
+``PKG-INFO`` / ``METADATA`` content:
+
+.. code::
+
+  Requires-External-Dep: dep:github/AbiWord/enchant; platform_system!="Windows"
 
 With dependency groups
 ''''''''''''''''''''''
@@ -733,6 +785,7 @@ With dependency groups
       "dep:generic/valgrind",
     ]
 
+``PKG-INFO`` / ``METADATA`` content: N/A.
 
 Backwards Compatibility
 =======================
@@ -939,6 +992,18 @@ Tightening up the semantics would be backwards incompatible, and leaving it as i
 unsatisfactory. The ``dep:`` URLs would need
 to be decomposed to fit in this syntax.
 
+Allowing use of ecosystem-specific version comparison semantics
+---------------------------------------------------------------
+
+There are cases, in particular when dealing with pre-releases, where
+PEP 440 semantics for version comparisons don't quite work. For example,
+``1.2.3a`` may indicate a release subsequent to ``1.2.3`` rather than an alpha version.
+To handle such cases correctly, it would be necessary to allow arbitrary
+versioning schemes. The authors of this PEP consider the added value of
+allowing that is not justified by the additional complexity. If desired,
+a package author can use either a code comment or the ``qualifier`` field of a
+DepURL (see the Versioning section under Rationale) to capture this level of
+detail.
 
 Open Issues
 ===========
@@ -1017,6 +1082,9 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _setuptools metadata: https://setuptools.readthedocs.io/en/latest/setuptools.html#metadata
 .. _SPDX: https://spdx.dev/
 .. _PURL: https://github.com/package-url/purl-spec/
+.. _version specifier: https://packaging.python.org/en/latest/specifications/version-specifiers/
+.. _dependencies specifier: https://packaging.python.org/en/latest/specifications/dependency-specifiers/
+.. _dependency groups specification: https://packaging.python.org/en/latest/specifications/dependency-groups/
 .. _packageurl-python: https://pypi.org/project/packageurl-python/
 .. _vers: https://github.com/package-url/purl-spec/blob/version-range-spec/VERSION-RANGE-SPEC.rst
 .. _vers implementation for PURL: https://github.com/package-url/purl-spec/pull/139
