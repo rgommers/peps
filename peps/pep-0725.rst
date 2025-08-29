@@ -454,14 +454,15 @@ portable across packaging ecosystems. Its design is::
     dep:type/namespace/name@version?qualifiers#subpath
 
 ``dep:`` is a fixed string, and always present. ``type`` and ``name`` are
-required, other components are optional. Component definitions:
+required, other components are optional.  All components apply for both PURL
+and virtual ``type``'s, and have these requirements:
 
 - ``type`` (required): MUST be either a `PURL`_ ``type``, or ``virtual``.
 - ``namespace`` (optional): MUST be a `PURL`_ ``namespace``, or a namespace in
   the DepURL central registry (see :pep:`700`). FIXME: PEP number
 - ``name`` (required): MUST be a name that parses as a valid `PURL`_ ``name``.
   Tools MAY warn or error if a name is not present in the DepURL central
-  registry (:pep:`700`).
+  registry (see :pep:`700`).
 - ``version`` (optional): MUST be a regular `version specifier`_ (PEP 440
   semantics) as a single version or version range, with the restriction that
   only the following operators may be used: ``>=``, ``>``, ``<``, ``<=``,
