@@ -121,7 +121,7 @@ details of their implementation vary.
 Cross compilation
 -----------------
 
-Cross compilation is not yet (as of August 2025) well-supported by stdlib
+Cross compilation is not yet (as of September 2025) well-supported by stdlib
 modules and ``pyproject.toml`` metadata. It is however important when
 translating external dependencies to those of other packaging systems (with
 tools like ``pyp2spec``). Introducing support for cross compilation immediately
@@ -221,7 +221,7 @@ As an example, a DepURL for the ``requests`` package on PyPI would be::
 
 Adopting PURL-compatible strings to specify external dependencies in
 ``pyproject.toml`` solves a number of problems at once, and there are already
-implementations of the specification in Python and multiple languages. PURL is
+implementations of the specification in Python and multiple other languages. PURL is
 also already supported by dependency-related tooling like SPDX (see
 `External Repository Identifiers in the SPDX 2.3 spec <https://spdx.github.io/spdx-spec/v2.3/external-repository-identifiers/#f35-purl>`__),
 the `Open Source Vulnerability format <https://ossf.github.io/osv-schema/#affectedpackage-field>`__,
