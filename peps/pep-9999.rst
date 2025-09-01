@@ -212,6 +212,12 @@ canonical. More specifically:
 - Index servers like PyPI MAY perform the same validation as the uploaders and
   reject the artifact if necessary.
 
+This registry SHOULD also centralize authoritative decisions about its
+contents, such as which entry of a collection of aliases is preferred as
+canonical, or which versioning scheme applies to virtual DepURLs (see Appendix
+B). The corresponding answers are not given in this PEP; instead we delegate
+that responsibility to the central registry maintainers.
+
 Mappings
 --------
 
@@ -1256,6 +1262,27 @@ ecosystems need to be maintained by a central authority. The authors propose to:
 - Create a maintainers team for these two repositories, seeded with the authors of this PEP and
   regulated as per :doc:`pep-0772`.
 
+Appendix B: Virtual versioning proposal
+=======================================
+
+While virtual dependencies can be versioned with the same syntax as non-virtual
+dependencies, its meaning can be ambiguous (e.g. there can be multiple
+implementations, and virtual interfaces may not be unambiguously versioned).
+Below we provide some suggestions for the central registry maintainers to
+consider when standardizing such meaning:
+
+- OpenMP: has regular ``MAJOR.MINOR`` versions of its standard, so would look
+  like ``>=4.5``.
+- BLAS/LAPACK: should use the versioning used by `Reference LAPACK`_, which
+  defines what the standard APIs are. Uses ``MAJOR.MINOR.MICRO``, so would look
+  like ``>=3.10.0``.
+- Compilers: these implement language standards. For C, C++ and Fortran these
+  are versioned by year. In order for versions to sort correctly, we recommend
+  using the full year (four digits). So "at least C99" would be ``>=1999``, and
+  selecting C++14 or Fortran 77 would be ``==2014`` or ``==1977`` respectively.
+  Other languages may use different versioning schemes. These should be
+  described somewhere before they are used in ``pyproject.toml``.
+
 Copyright
 =========
 
@@ -1282,6 +1309,7 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _pyOpenSci Python Open Source Package Development Guide: https://www.pyopensci.org/python-package-guide/
 .. _Scikit-HEP packaging guide: https://scikit-hep.org/developer/packaging
 .. _PyPA: https://github.com/pypa
+.. _Reference LAPACK: https://github.com/Reference-LAPACK/lapack
 
 ..
    Local Variables:
