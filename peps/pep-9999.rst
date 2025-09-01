@@ -1277,8 +1277,8 @@ consider when standardizing such meaning:
   defines what the standard APIs are. Uses ``MAJOR.MINOR.MICRO``, so would look
   like ``>=3.10.0``.
 - Compilers: these implement language standards. For C, C++ and Fortran these
-  are versioned by year. In order for versions to sort correctly, we choose to
-  use the full year (four digits). So "at least C99" would be ``>=1999``, and
+  are versioned by year. In order for versions to sort correctly, we recommend
+  using the full year (four digits). So "at least C99" would be ``>=1999``, and
   selecting C++14 or Fortran 77 would be ``==2014`` or ``==1977`` respectively.
   Other languages may use different versioning schemes. These should be
   described somewhere before they are used in ``pyproject.toml``.
