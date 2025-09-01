@@ -1013,6 +1013,10 @@ defined rules for when a new DepURL can be defined. It is undesirable to be
 loose with canonical DepURL definitions, because each definition added implies
 maintenance in the mappings in the target ecosystems.
 
+The central registry maintainers should agree on the ground rules and write them
+down as part of the repository documentation, perhaps supported by additional
+affordances like issue and pull request templates, or linting tools.
+
 Package ecosystem maintainers usage
 -----------------------------------
 
@@ -1026,6 +1030,10 @@ or periodic notifications via issues or draft submissions.
 This maintenance is likely to involve a lot of work to establish the initial
 mapping, but ideally become small on an ongoing basis.
 
+As best practices are discovered and agreed on, they should get documented
+in the central registry repository as learning materials for the mapping
+maintainers.
+
 Maintainers of Python projects
 ------------------------------
 
@@ -1033,10 +1041,12 @@ A package maintainer's responsibility is to decide the DepURL that best
 represents the external dependency that their package needs. This is covered
 in :doc:`pep-0725`; the interactive mappings browser demo located at
 `external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__
-may come handy.
+may come handy. The central registry documentation may include examples and
+frequently asked questions to guide newcomers with their decisions.
 
 If no suitable DepURL is available for a given dependency, maintainers may
-consider submitting a request in the central registry.
+consider submitting a request in the central registry. Instructions on how to do
+this should be provided as part of the central registry documentation.
 
 End user package consumers
 --------------------------
@@ -1046,8 +1056,12 @@ true if the user only relies on wheels, since the only impact will be driven by
 external runtime dependencies (expected to be rare), and even in those cases
 they need to opt-in by installing a compatible tool.
 
-Users that do opt-in may find missing entries in for their target ecosystems, and
-in those cases they may choose to collaborate by reporting the missing entries,
+Users that do opt-in may find missing entries in for their target ecosystems, for
+which they should obtain informative error messages that point to the relevant
+documentation sections. This will allow them to get acquainted with the nature
+of the issue and its potential solutions.
+
+We hope that this results in a subset of them reporting the missing entries,
 submitting a fix to the affected mapping or, if totally absent, even deciding
 to maintain a new one on their own. To that end, they should get familiar with
 the responsibilties of mapping maintainers (discussed above).
