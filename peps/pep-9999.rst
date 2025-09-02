@@ -562,8 +562,8 @@ Each entry in this list is defined as a dictionary with these fields:
           (as expected by ``subprocess.run``).
 
         - an optional ``requires_elevation`` boolean (``False`` by default)
-          to indicate whether the command must run with elevated permissions (
-          e.g. administrator on Windows, superuser on Linux and macOS).
+          to indicate whether the command must run with elevated permissions
+          (e.g. administrator on Windows, superuser on Linux and macOS).
 
         - an enum ``multiple_specifiers`` that determines whether the command
           accepts multiple package specifiers at the same time, accepting one of:
@@ -603,9 +603,9 @@ Each entry in this list is defined as a dictionary with these fields:
 
           - the keys ``equal``, ``greater_than``, ``greater_than_equal``,
             ``less_than``, ``less_than_equal``, and ``not_equal`` take a string
-            that MUST include the ``{version}`` placeholder, and MAY include
-            ``{name}``, or ``None`` to indicate that the respective operator is
-            not supported.
+            if the operator is supported, ``None`` otherwise. In the former case,
+            the value MUST include the ``{version}`` placeholder, and MAY include
+            ``{name}``.
 
           - the key ``{and}`` takes a string used to join multiple version
             constraints in a single token, or ``None`` if only a single
