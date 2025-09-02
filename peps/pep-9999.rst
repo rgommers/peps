@@ -1001,109 +1001,75 @@ of the impact of the operation should be provided.
 How to Teach This
 =================
 
-There are at least four audiences that need to learn a workflow here.
+There are at least four audiences that may need to get familiar with the contents of this PEP:
 
-1. Python package maintainers wishing to express an external dependency.
+1. Central registry maintainers, who are responsible for curating the list of
+   well-known DepURLs and mapped ecosystems.
 2. Packaging ecosystem maintainers, who are responsible for keeping the
-   mapping for their ecosystem current.
-3. Core registry maintainers, who are responsible for curating the central
-   repository of DepURLs and their descriptions.
+   mapping for their ecosystem up-to-date.
+3. Maintainers of Python projects that require external dependencies.
 4. End users of packages that have external dependency metadata.
-
-Python package maintainer usage
--------------------------------
-
-A package maintainer's responsibility is to decide the DepURL that best
-represents the external dependency that their package needs. Their task
-consists of:
-
-1. Understanding the nature of their dependency. Do they only need runtime
-   libraries, or do they need development packages for build-time concerns?
-   This understanding feeds into PEP 725, which specifies the expression of
-   these dependencies in metadata.
-2. Looking up the DepURL. This can either mean knowing the name of the package
-   in their package ecosystem, and then inverse-mapping that to the DepURL, or
-   it can mean looking up the DepURL directly.
-3. When a package maintainer does not find an appropriate mapping, they should look
-   for a fitting DepURL. It can be the case that although a DepURL is registered, not every
-   package ecosystem has a corresponding mapping. If no appropriate DepURL exists,
-   the package maintainer may consider submitting a new DepURL to the central registry.
-
-A prototype interactive mappings browser that showcases this workflow is available at
-`external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__.
-
-An overall workflow diagram might look like this:
-
-.. mermaid::
-
-   flowchart TD
-     A[Python package author with new external dependency] --> |Looks in| B(DepURL/description collection)
-     B --> | Find DepURL OK | E(Add DepURL to pyproject.toml)
-     A --> | Looks in | C(Ecosystem mapping file)
-     C --> | Finds familiar ecosystem package name | D(Inverse map ecosystem package name to DepURL)
-     D --> | Mapping exists | E
-     B --> | DepURL not found | F(Submit identifier proposal to DepURL/description collection)
-     F --> | Accepted | G(Mapping maintainers notified of missing DepURL mappings)
-     D --> | Mapping missing. User looks in DepURL collection. | B
-     B --> | Was mapping missing? | H(User may contribute entry to mapping)
-
-Package ecosystem maintainers usage
------------------------------------
-
-Any packages that express a DepURL that does not have a mapping in a given package
-ecosystem might not be able to provide tailored error messages and other UX affordances for end users.
-It is thus recommended that each package ecosystem maintain their mappings. Key to this will
-be automation. Some ideas for opt-in automation are:
-
-- Alert mapping maintainers whenever a new DepURL is added to the registry (maybe noisy).
-- Provide tools that allow maintainers to diff their mappings to the registry contents to
-  quickly identify missing entries.
-- Provide automated tooling that submits PRs to known mapping locations, such that maintainers
-  need only fill in the ecosystem package name.
-- Provide status for each DepURL, to readily identify which DepURLs need attention.
-
-This maintenance is likely to involve a lot of work to establish the initial mapping, but ideally become small
-on an ongoing basis.
-
 
 Central DepURL registry maintainers
 -----------------------------------
 
-Central DepURL registry maintainers curate the collection of
-DepURLs. These contributors need to be able to refer to clearly
-defined rules for when a new DepURL can be defined. It is
-undesirable to be loose with canonical DepURL definitions, because
-each definition implies maintenance in the mappings in many other places.
+Central DepURL registry maintainers curate the collection of DepURLs and the
+known ecosystems. These contributors need to be able to refer to clearly
+defined rules for when a new DepURL can be defined. It is undesirable to be
+loose with canonical DepURL definitions, because each definition added increases
+maintenance effort in the mappings in the target ecosystems.
 
-The ``provides`` key mechanism offer ways to maintain aliases, so hopefully a
-compromise of flexibility and strictness can be found easily. Particular attention
-must be put to deciding which of the aliases will be the canonical form, though,
-especially when it comes to dependencies where a number of synonyms are commonly
-used. This does not apply to ``dep:virtual/*`` identifiers, where a single canonical
-form is proposed and no additional aliases are allowed.
+The central registry maintainers should agree on the ground rules and write them
+down as part of the repository documentation, perhaps supported by additional
+affordances like issue and pull request templates, or linting tools.
 
-Having client-side validation when the Python project is being packaged and/or uploaded
-to PyPI may help keep the maintenance efforts contained, since end-users can be pointed
-to the recommended identifiers.
+Package ecosystem maintainers usage
+-----------------------------------
+
+Missing mapping entries will result in the absence tailored error messages and
+other UX affordances for end users of the impacted ecosystems. It is thus
+recommended that each package ecosystem keeps their mappings up-to-date with
+the central registry. The key to this will be automation, like linting scripts
+(see example at `external-metadata-mappings <https://github.com/jaimergp/external-metadata-mappings/blob/main/scripts/lint-mapping-entries.py>`__),
+or periodic notifications via issues or draft submissions.
+
+Establishing the initial mapping is likely to involve a lot of work, but ideally the maintenance on an ongoing basis effort should require smaller effort.
+
+As best practices are discovered and agreed on, they should get documented
+in the central registry repository as learning materials for the mapping
+maintainers.
+
+Maintainers of Python projects
+------------------------------
+
+A package maintainer's responsibility is to decide the DepURL that best
+represents the external dependency that their package needs. This is covered
+in :doc:`pep-0725`; the interactive mappings browser demo located at
+`external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__
+may come handy. The central registry documentation may include examples and
+frequently asked questions to guide newcomers with their decisions.
+
+If no suitable DepURL is available for a given dependency, maintainers may
+consider submitting a request in the central registry. Instructions on how to do
+this should be provided as part of the central registry documentation.
 
 End user package consumers
 --------------------------
 
-There will be no change in user experience by default. End users do not need to know about
-this mechanism unless they opt in, which they may want to do to, for example, reduce their
-bandwidth and disk space usage. This is particularly true if the user only relies on wheels,
-since the only impact will be driven by external runtime dependencies.
+There will be no change in the user experience by default. This is particularly
+true if the user only relies on wheels, since the only impact will be driven by
+external runtime dependencies (expected to be rare), and even in those cases
+they need to opt-in by installing a compatible tool.
 
-If they do opt-in, in an ideal case these package install commands can be done transparently,
-and the user experience remains unchanged. There are several foreseeable issues that will arise,
-though:
+Users that do opt-in may find missing entries in for their target ecosystems, for
+which they should obtain informative error messages that point to the relevant
+documentation sections. This will allow them to get acquainted with the nature
+of the issue and its potential solutions.
 
-* A mapping does not exist for the user's desired package ecosystem.
-* A user does not have permissions to run the install commands provided by our
-  tool (e.g. system Python users).
-
-These issues might impact the user experience with untailored error messages for the chosen
-ecosystem, permission errors reports, and so on.
+We hope that this results in a subset of them reporting the missing entries,
+submitting a fix to the affected mapping or, if totally absent, even deciding
+to maintain a new one on their own. To that end, they should get familiar with
+the responsibilties of mapping maintainers (discussed above).
 
 Reference Implementation
 ========================
