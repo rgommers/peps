@@ -583,23 +583,25 @@ Each entry in this list is defined as a dictionary with these fields:
       - True
     * - ``specifier_syntax``
       - ``dict[Literal['name_only', 'exact_version', 'version_ranges'], None | list[str] | dict[Literal['and', 'equal', 'greater_than', 'greater_than_equal', 'less_than', 'less_than_equal', 'not_equal', 'syntax'], None | str | list[str]]``
-      - Mapping of allowed PEP440 version comparison operators to the syntax
-        used in this package manager. Three top-level keys are accepted:
+      - Mapping of allowed PEP440 version specifiers to the syntax used in this
+        package manager. Three top-level keys are expected and required:
 
-        - ``name_only`` takes a list of strings as the syntax used for specifiers
+        - ``name_only`` MUST take a list of strings as the syntax used for specifiers
           that do not contain any version information; it MUST include the placeholder
           ``{name}``.
 
-        - ``exact_version`` takes a list of strings as the syntax used for
-          specifiers that only express an exact version constraints; it must
-          include the placeholders ``{name}`` and ``{version}``.
+        - ``exact_version`` MUST be ``None`` or a list of strings that describe
+          the syntax used for specifiers that only express exact version
+          constraints; the placeholders ``{name}`` and ``{version}`` MUST be
+          present in at least one string each.
 
-        - ``version_ranges`` is a dictionary with the following required keys:
+        - ``version_ranges`` MUST be ``None`` or a dictionary with the
+          following required keys:
 
-          - the key ``syntax`` takes a list of strings that MUST include the
-            ``{ranges}`` placeholder (to be replaced by the maybe-joined
-            version constraints, to be determined by the value of ``and``) and
-            MAY include the ``{name}`` placeholder.
+          - the key ``syntax`` takes a list of strings where at least one MUST
+            include the ``{ranges}`` placeholder (to be replaced by the
+            maybe-joined version constraints, as determined by the value of
+            ``and``). They MAY also include the ``{name}`` placeholder.
 
           - the keys ``equal``, ``greater_than``, ``greater_than_equal``,
             ``less_than``, ``less_than_equal``, and ``not_equal`` take a string
@@ -611,11 +613,11 @@ Each entry in this list is defined as a dictionary with these fields:
             constraints in a single token, or ``None`` if only a single
             constraint can be used per token. In the latter case, the different
             constraints will be "exploded" into several tokens using the
-            ``syntax`` template).
+            ``syntax`` template.
 
-          ``exact_version`` and ``version_ranges`` MAY
-          be set to ``None`` to indicate that the respective types of
-          specifiers are not supported by the package manager.
+          When ``exact_version`` or ``version_ranges`` are set to ``None``, it
+          indicates that the respective types of specifiers are not supported
+          by the package manager.
 
       - True
 
