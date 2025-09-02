@@ -592,8 +592,9 @@ Each entry in this list is defined as a dictionary with these fields:
 
         - ``exact_version`` MUST be ``None`` or a list of strings that describe
           the syntax used for specifiers that only express exact version
-          constraints; in the latter case, each of the placeholders ``{name}``
-          and ``{version}`` MUST be present in at least one of the strings.
+          constraints; in the latter case, the placeholders ``{name}``
+          and ``{version}`` MUST be present in at least one of the strings
+          (although not necessary the same string for both).
 
         - ``version_ranges`` MUST be ``None`` or a dictionary with the
           following required keys:
