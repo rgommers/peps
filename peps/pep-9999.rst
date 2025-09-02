@@ -594,7 +594,7 @@ Each entry in this list is defined as a dictionary with these fields:
           specifiers that only express an exact version constraints; it must
           include the placeholders ``{name}`` and ``{version}``.
 
-        - ``version_ranges`` is a dictionary where:
+        - ``version_ranges`` is a dictionary with the following required keys:
 
           - the key ``syntax`` takes a list of strings that MUST include the
             ``{ranges}`` placeholder (to be replaced by the maybe-joined
