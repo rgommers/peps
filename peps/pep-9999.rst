@@ -1,16 +1,16 @@
 PEP: 9999
-Title: A package dependency name mapping mechanism
+Title: An external dependency registry and name mapping mechanism
 Author: Pradyun Gedam <pradyunsg@gmail.com>,
         Ralf Gommers <ralf.gommers@gmail.com>,
         Michał Górny <mgorny@quansight.com>,
-        Jaime Rodríguez-Guerra <jrodriguez@quansight.com>,
+        Jaime Rodríguez-Guerra <jaime.rogue@gmail.com>,
         Michael Sarahan <msarahan@gmail.com>
 Discussions-To:
 Status: Draft
 Type: Standards Track
 Topic: Packaging
-Created: 22-Aug-2025
-Post-History: 22-Aug-2025,
+Created: 03-Sep-2025
+Post-History: 03-Sep-2025,
 Resolution:
 
 
@@ -18,14 +18,14 @@ Abstract
 ========
 
 This PEP specifies a name mapping mechanism that allows packaging tools to map
-external dependency identifiers (as introduced in :doc:`pep-0725`) to their
+external dependency identifiers (as introduced in :pep:`725`) to their
 counterparts in other package repositories.
 
 Motivation
 ==========
 
 Packages on PyPI often require build-time and runtime dependencies that are not
-present on PyPI. :doc:`pep-0725` introduced metadata to express
+present on PyPI. :pep:`725` introduced metadata to express
 such dependencies. Using concrete external dependency metadata for
 a Python package requires mapping the given dependency identifiers to the specifiers
 used in other ecosystems, which would allow to:
@@ -1102,7 +1102,7 @@ Maintainers of Python projects
 
 A package maintainer's responsibility is to decide the DepURL that best
 represents the external dependency that their package needs. This is covered
-in :doc:`pep-0725`; the interactive mappings browser demo located at
+in :pep:`725`; the interactive mappings browser demo located at
 `external-metadata-mappings.streamlit.app <https://external-metadata-mappings.streamlit.app/>`__
 may come handy. The central registry documentation may include examples and
 frequently asked questions to guide newcomers with their decisions.
@@ -1267,6 +1267,8 @@ once the central registry has matured with significant adoption.
 Open Issues
 ===========
 
+None at this time.
+
 References
 ==========
 
@@ -1282,9 +1284,9 @@ In contrast with the ecosystem mappings, the central registry and the list of kn
 ecosystems need to be maintained by a central authority. The authors propose to:
 
 - Host the ``external-metadata-mappings`` and ``pyproject-external`` repositories under the PyPA_
-  GitHub organization (or equivalent as per :doc:`pep-0772`).
+  GitHub organization (or equivalent as per :pep:`772`).
 - Create a maintainers team for these two repositories, seeded with the authors of this PEP and
-  regulated as per :doc:`pep-0772`.
+  regulated as per :pep:`772`.
 
 Appendix B: Virtual versioning proposal
 =======================================
