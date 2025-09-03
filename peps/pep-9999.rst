@@ -1,5 +1,5 @@
 PEP: 9999
-Title: A package dependency name mapping mechanism
+Title: An external dependency registry and name mapping mechanism
 Author: Pradyun Gedam <pradyunsg@gmail.com>,
         Ralf Gommers <ralf.gommers@gmail.com>,
         Michał Górny <mgorny@quansight.com>,
