@@ -3,7 +3,7 @@ Title: A package dependency name mapping mechanism
 Author: Pradyun Gedam <pradyunsg@gmail.com>,
         Ralf Gommers <ralf.gommers@gmail.com>,
         Michał Górny <mgorny@quansight.com>,
-        Jaime Rodríguez-Guerra <jrodriguez@quansight.com>,
+        Jaime Rodríguez-Guerra <jaime.rogue@gmail.com>,
         Michael Sarahan <msarahan@gmail.com>
 Discussions-To:
 Status: Draft
