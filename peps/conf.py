@@ -24,7 +24,6 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.githubpages",
-    "sphinxcontrib.mermaid",
 ]
 
 # The file extensions of source files. Sphinx uses these suffixes as sources.
