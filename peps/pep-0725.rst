@@ -6,6 +6,7 @@ Author: Pradyun Gedam <pradyunsg@gmail.com>,
 Discussions-To: https://discuss.python.org/t/31888
 Status: Draft
 Type: Standards Track
+Requires: 804
 Topic: Packaging
 Created: 17-Aug-2023
 Post-History: `18-Aug-2023 <https://discuss.python.org/t/31888>`__
@@ -89,7 +90,7 @@ This PEP is not trying to specify how the external dependencies should be used,
 nor a mechanism to implement a name mapping from names of individual packages
 that are canonical for Python projects published on PyPI to those of other
 packaging ecosystems. Canonical names and a name mapping mechanism are addressed
-in :pep:`700`.
+in :pep:`804`.
 
 
 Rationale
@@ -238,7 +239,7 @@ is situation-dependent. This PEP recommends using ``dep:generic`` when the
 package name is unambiguous and well-known (e.g., ``dep:generic/git`` or
 ``dep:generic/openblas``), and using the VCS as the type otherwise. Which name
 is chosen as canonical for any given package, as well as the process to make
-and record such choices, is the topic of :pep:`700`.
+and record such choices, is the topic of :pep:`804`.
 
 Virtual package specification
 ''''''''''''''''''''''''''''''
@@ -249,7 +250,7 @@ is being discussed for revision 1.1.
 
 In the meantime, we propose adding a new *type* to our ``dep:`` derivative, the ``virtual``
 type, which can take two *namespaces* (extensible through the process given in
-:pep:`700`):
+:pep:`804`):
 
 - ``interface``: for components such as BLAS or MPI.
 - ``compiler``: for compiled languages like C or Rust.
@@ -301,7 +302,7 @@ Some examples:
 
 The versioning scheme for particular virtual packages, in case that isn't
 unambiguously defined by an upstream project or standard, will be defined in
-the Central Registry (see :pep:`700`).
+the Central Registry (see :pep:`804`).
 
 Environment markers
 '''''''''''''''''''
@@ -346,7 +347,7 @@ then if a distro has split off the headers for ``libffi`` into a
 
 For defining what canonical package names are and how package splits are
 handled in practice when tools attempt to use ``[external]`` for installation
-purposes, we refer to :pep:`700`.
+purposes, we refer to :pep:`804`.
 
 Python development headers
 ''''''''''''''''''''''''''
@@ -474,10 +475,10 @@ and virtual ``type``'s, and have these requirements:
 
 - ``type`` (required): MUST be either a `PURL`_ ``type``, or ``virtual``.
 - ``namespace`` (optional): MUST be a `PURL`_ ``namespace``, or a namespace in
-  the DepURL central registry (see :pep:`700`).
+  the DepURL central registry (see :pep:`804`).
 - ``name`` (required): MUST be a name that parses as a valid `PURL`_ ``name``.
   Tools MAY warn or error if a name is not present in the DepURL central
-  registry (see :pep:`700`).
+  registry (see :pep:`804`).
 - ``version`` (optional): MUST be a regular `version specifier`_ (PEP 440
   semantics) as a single version or version range, with the restriction that
   only the following operators may be used: ``>=``, ``>``, ``<``, ``<=``,
@@ -939,7 +940,7 @@ it. The authors believe that specific support for this scenario is not
 necessary (or at least, too complex to justify such support); a dependency
 provider for external dependencies can treat PyPI as one possible source for
 obtaining the package. An example mapping for this use case is proposed in
-:pep:`700` (FIXME).
+:pep:`804`.
 
 Using library and header names as external dependencies
 -------------------------------------------------------
@@ -978,10 +979,10 @@ and relying on specific build systems for the name resolution is in general not
 a good idea.
 
 The authors prefer static identifiers that can be mapped explicitly via well
-known metadata (e.g. as proposed in :pep:`700`).
+known metadata (e.g., as proposed in :pep:`804`).
 
 Ecosystems that do implement these indirections can use them to support the
-infrastructure designed to generate the mappings proposed in :pep:`700`.
+infrastructure designed to generate the mappings proposed in :pep:`804`.
 
 Adding a ``host-requires`` key under ``[build-system]``
 -------------------------------------------------------
