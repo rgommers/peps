@@ -405,29 +405,30 @@ The reasons being:
     ``meson-python`` returned no results for ``External-Requires``.
   - The field is not included in the `PyPI JSON API responses`_.
 
-Effect of vendoring shared libraries on wheel metadata
-''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Effect of vendoring dependencies on wheel metadata
+''''''''''''''''''''''''''''''''''''''''''''''''''
 
 A wheel may vendor its external dependencies. This happens in particular when
 distributing wheels on PyPI or other Python package indexes -- and tools like
-auditwheel_, delvewheel_ and delocate_ automate this process. As a result, a
-``Requires-External-Dep`` entry in an sdist may disappear from a wheel built from
-that sdist with a tool like ``cibuildwheel``. It is also possible that a
-``Requires-External-Dep`` entry remains in a wheel, either unchanged or with
-narrower constraints. ``auditwheel`` does not vendor certain allow-listed
-dependencies, such as OpenGL, by default. In addition, ``auditwheel`` and
-``delvewheel`` allow a user to manually exclude dependencies via a
-``--exclude`` or ``--no-dll`` command-line flag. This is used to avoid
-vendoring large shared libraries, for example those from CUDA.
+auditwheel_, delvewheel_ and delocate_ automate this process for dynamically
+linked shared libraries. Note that the requirements on making wheels
+redistributable through vendoring shared libraries does not change with this
+PEP, and that that vendoring process for shared libraries does not affect Core
+Metadata content at all because ``build-requires`` and ``build-host-requires``
+do not have corresponding Core Metadata fields.
 
+The only case requiring a closer look is when a pure runtime dependency, i.e.
+listed in ``external.dependencies``, gets vendored into wheels. Note, there are
+no commonly used tools that do this - it could be achieved with custom
+scripting though. When this is done, a ``Requires-External-Dep`` entry in an
+sdist may be removed from the METADATA file in a wheel built from that sdist.
 ``Requires-External-Dep`` entries generated from external dependencies in
 ``pyproject.toml`` can therefore differ between an sdist and its corresponding
-wheel(s) depending on the build/distribution process.
+wheel(s) on a public index server, depending on the build/distribution process.
+Note that this does not imply that the field must then be marked as ``Dynamic``,
+since ``Dynamic`` only applies to wheels built from an sdist by a build
+backend (see the note on prebuilt wheels in `the Dynamic specification`_).
 
-Note that this does not imply that the field must be marked as Dynamic, since
-this distinction only applies to wheels built from an sdist by a build backend.
-In particular, wheels built from other wheels do not need to satisfy this
-constraint.
 
 Dependency groups
 -----------------
@@ -1112,3 +1113,4 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _elfdeps: https://github.com/python-wheel-build/elfdeps/
 .. _Read the Docs: https://docs.readthedocs.com/platform/stable/
 .. _FastAPI Cloud: https://fastapicloud.work/
+.. _the Dynamic specification: https://packaging.python.org/en/latest/specifications/core-metadata/#dynamic-multiple-use
