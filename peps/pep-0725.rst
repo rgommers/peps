@@ -302,7 +302,9 @@ Some examples:
 
 The versioning scheme for particular virtual packages, in case that isn't
 unambiguously defined by an upstream project or standard, will be defined in
-the Central Registry (see :pep:`804`).
+the Central Registry (see :pep:`804`) if it is possible to do so (i.e., the
+concrete implementations of the virtual package are able to share the same
+versioning scheme).
 
 Environment markers
 '''''''''''''''''''
