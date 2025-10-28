@@ -20,15 +20,15 @@ runtime dependencies in a ``pyproject.toml`` file for packaging-related tools
 to consume.
 
 This PEP proposes to add an ``[external]`` table to ``pyproject.toml`` with
-seven keys. "build-requires", "host-requires" and "dependencies"
+seven keys. "build-requires", "build-host-requires" and "dependencies"
 are for specifying three types of *required* dependencies:
 
 1. ``build-requires``, build tools to run on the build machine
-2. ``host-requires``, build dependencies needed for the host machine but also needed at build time.
+2. ``build-host-requires``, build dependencies needed for the host machine but also needed at build time.
 3. ``dependencies``, needed at runtime on the host machine but not needed at build time.
 
 These three keys also have their *optional* ``external`` counterparts (``optional-build-requires``,
-``optional-host-requires``, ``optional-dependencies``), which have the same role that
+``optional-build-host-requires``, ``optional-dependencies``), which have the same role that
 ``project.optional-dependencies`` plays for ``project.dependencies``. Finally,
 ``dependency-groups`` offers the same functionality as :pep:`735` but for external
 dependencies.
@@ -169,7 +169,7 @@ this PEP.
 Finally, note that while "dependency" is the term most widely used for packages
 needed at build time, the existing key in ``pyproject.toml`` for PyPI
 build-time dependencies is ``build-requires``. Hence this PEP uses the keys
-``build-requires`` and ``host-requires`` under ``[external]`` for consistency.
+``build-requires`` and ``build-host-requires`` under ``[external]`` for consistency.
 
 Build and host dependencies
 '''''''''''''''''''''''''''
@@ -196,7 +196,7 @@ like crossenv_. When host dependencies imply a runtime dependency, that runtime
 dependency also does not have to be declared, just like for build dependencies.
 
 When host dependencies are declared and a tool which is executing an action
-unrelated to cross-compiling, it may decide to merge the ``host-requires`` list
+unrelated to cross-compiling, it may decide to merge the ``build-host-requires`` list
 into ``build-requires`` - whether this is useful is context-dependent.
 
 Specifying external dependencies
@@ -386,7 +386,7 @@ Two new Core Metadata fields are proposed:
 
 Since the Core Metadata specification does not contain fields for any metadata in
 ``pyproject.toml``'s ``[build-system]`` table, the ``build-requires``
-and ``host-requires`` content do not need to be reflected in existing core
+and ``build-host-requires`` content do not need to be reflected in existing core
 metadata fields.
 
 Additionally, this PEP also proposes to deprecate the ``Requires-External`` field.
@@ -567,21 +567,21 @@ For ``optional-build-requires``, it is a table where each key specifies an
 extra set of build requirements and whose value is an array of strings. The
 strings of the arrays MUST be valid external dependency specifiers.
 
-``host-requires``/``optional-host-requires``
-''''''''''''''''''''''''''''''''''''''''''''
+``build-host-requires``/``optional-build-host-requires``
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-- Format: Array of external dependency specifiers (``host-requires``) and a
+- Format: Array of external dependency specifiers (``build-host-requires``) and a
   table with values of arrays of external dependency specifiers
-  (``optional-host-requires``) -
+  (``optional-build-host-requires``) -
   `Core metadata`_: N/A
 
 The (optional) external host requirements needed to build the project.
 
-For ``host-requires``, it is a key whose value is an array of strings. Each
+For ``build-host-requires``, it is a key whose value is an array of strings. Each
 string represents a host requirement of the project and MUST be formatted as
 a valid external dependency specifier.
 
-For ``optional-host-requires``, it is a table where each key specifies an
+For ``optional-build-host-requires``, it is a table where each key specifies an
 extra set of host requirements and whose value is an array of strings. The
 strings of the arrays MUST be valid external dependency specifiers.
 
@@ -641,7 +641,7 @@ cryptography 39.0
       "dep:virtual/compiler/rust",
       "dep:generic/pkg-config",
     ]
-    host-requires = [
+    build-host-requires = [
       "dep:generic/openssl",
       "dep:generic/libffi",
     ]
@@ -663,7 +663,7 @@ SciPy 1.10
       "dep:generic/ninja",
       "dep:generic/pkg-config",
     ]
-    host-requires = [
+    build-host-requires = [
       "dep:virtual/interface/blas",
       "dep:virtual/interface/lapack@>=3.7.1",
     ]
@@ -681,12 +681,12 @@ Pillow 10.1.0
     build-requires = [
       "dep:virtual/compiler/c",
     ]
-    host-requires = [
+    build-host-requires = [
       "dep:generic/libjpeg",
       "dep:generic/zlib",
     ]
 
-    [external.optional-host-requires]
+    [external.optional-build-host-requires]
     extra = [
       "dep:generic/lcms2",
       "dep:generic/freetype",
@@ -893,7 +893,7 @@ Given a ``pyproject.toml`` with this ``[external]`` table:
     "dep:virtual/compiler/rust",
     "dep:generic/pkg-config",
   ]
-  host-requires = [
+  build-host-requires = [
     "dep:generic/openssl",
     "dep:generic/libffi",
   ]
@@ -996,17 +996,17 @@ known metadata (e.g., as proposed in :pep:`804`).
 Ecosystems that do implement these indirections can use them to support the
 infrastructure designed to generate the mappings proposed in :pep:`804`.
 
-Adding a ``host-requires`` key under ``[build-system]``
--------------------------------------------------------
+Adding a ``build-host-requires`` key under ``[build-system]``
+-------------------------------------------------------------
 
-Adding ``host-requires`` for host dependencies that are on PyPI in order to
+Adding ``build-host-requires`` for host dependencies that are on PyPI in order to
 better support name mapping to other packaging systems with support for
 cross-compiling seems useful in principle, for the same reasons as this PEP
-adds a ``host-requires`` under the ``[external]`` table. However, it isn't
+adds a ``build-host-requires`` under the ``[external]`` table. However, it isn't
 necessary to include in this PEP, and hence the authors prefer to keep the
 scope of this PEP limited - a future PEP on cross compilation may want to
 tackle this. `This issue <https://github.com/rgommers/peps/issues/6>`__
-contains more arguments in favor and against adding ``host-requires`` under
+contains more arguments in favor and against adding ``build-host-requires`` under
 ``[build-system]`` as part of this PEP.
 
 Reusing the ``Requires-External`` field in Core Metadata
