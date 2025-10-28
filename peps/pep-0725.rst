@@ -88,6 +88,13 @@ users. Missing external dependencies on the end user's system are the most
 likely cause of build failures. If installers can show the required external
 dependencies as part of their error message, this may save users a lot of time.
 
+Improvement to building packages with external dependencies from source may be
+particularly relevant to platforms which must rely on cross-compilation like
+Android and iOS. PyPI now supports those platforms, and rolling out support for
+packages with native dependencies will be significantly easier to handle if a
+standardized workflow/tool to cross-build them using the ``[external]``
+metadata can be implemented.
+
 At the moment, information on external dependencies is only captured in
 installation documentation of individual packages. It is hard to maintain for
 package authors and tends to go out of date. It's also hard for users and
