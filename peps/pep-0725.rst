@@ -68,6 +68,14 @@ and more reliable. In addition, the authors envision other types of tools
 making use of this information, e.g., dependency analysis tools like Repology_,
 Dependabot_ and libraries.io_.
 
+Cloud services and products that allow their users to install or build Python
+packages, and which therefore need the system dependencies of those Python
+packages, will also benefit from this metadata. Two examples of such products
+are `Read the Docs`_ and `FastAPI Cloud`_. The former currently uses custom
+``build.*`` config file settings, and the latter is in development and its team
+has indicated an interest in using the design in this PEP in lieu of inventing
+its own custom scheme.
+
 Software bill of materials (SBOM) generation tools may also be able to use this
 information, e.g. for flagging that external dependencies listed in
 ``pyproject.toml`` but not contained in wheel metadata are likely vendored
@@ -1100,3 +1108,5 @@ CC0-1.0-Universal license, whichever is more permissive.
 .. _poetry-external-dependencies: https://pypi.org/project/poetry-external-dependencies/
 .. _PyO3/maturin@5b0e4808: https://github.com/PyO3/maturin/commit/5b0e4808bb8852fe796cd2848932a35fbb14de8b
 .. _elfdeps: https://github.com/python-wheel-build/elfdeps/
+.. _Read the Docs: https://docs.readthedocs.com/platform/stable/
+.. _FastAPI Cloud: https://fastapicloud.work/
