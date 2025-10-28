@@ -503,6 +503,8 @@ External dependency specifiers MUST contain a DepURL, and MAY contain
 environment markers with the same syntax as used in regular `dependency
 specifiers`_ (as originally specified in :pep:`508`).
 
+Public index servers MAY disallow the use of DepURLs that are not present
+in the :pep:`804` Central Registry in uploaded distributions.
 
 Changes in Core Metadata
 ------------------------
