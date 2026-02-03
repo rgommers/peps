@@ -768,6 +768,16 @@ environment markers`_ can be used to define dependencies specific to a
 subset of variants.
 
 
+Intended design for installers
+------------------------------
+
+.. figure:: pep-0817/conceptual_diagram_installers.svg
+    :alt:
+       A flowchart of the extra steps installers can take to support
+       installing wheel variants.
+
+
+
 Modified wheel filename
 -----------------------
 
